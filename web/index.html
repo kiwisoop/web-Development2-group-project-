@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>축구 선수 추적 미니맵</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .container {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .section {
+      flex-shrink: 0;
+    }
+
+    video {
+      width: 720px;
+      background: black;
+      border-radius: 8px;
+    }
+
+    .field-wrap {
+      width: 520px;
+    }
+
+    .field {
+      position: relative;
+      width: 520px;
+      height: 330px;
+      background: #217a36;
+      border: 4px solid white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .half-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: white;
+      transform: translateX(-50%);
+    }
+
+    .center-circle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 80px;
+      height: 80px;
+      border: 2px solid white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .center-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .penalty {
+      position: absolute;
+      top: 80px;
+      width: 70px;
+      height: 170px;
+      border: 2px solid white;
+    }
+
+    .left-penalty {
+      left: 0;
+      border-left: none;
+    }
+
+    .right-penalty {
+      right: 0;
+      border-right: none;
+    }
+
+    .goal-box {
+      position: absolute;
+      top: 125px;
+      width: 30px;
+      height: 80px;
+      border: 2px solid white;
+    }
+
+    .left-goal-box {
+      left: 0;
+      border-left: none;
+    }
+
+    .right-goal-box {
+      right: 0;
+      border-right: none;
+    }
+
+    .player {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: black;
+      color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform: translate(-50%, -50%);
+      transition: left 0.08s linear, top 0.08s linear;
+      z-index: 10;
+    }
+
+    .info {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #ddd;
+      line-height: 1.6;
+    }
+
+    pre {
+      background: #222;
+      padding: 12px;
+      border-radius: 8px;
+      max-height: 220px;
+      overflow: auto;
+      font-size: 12px;
+      color: #ddd;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #9be59b;
+      font-size: 14px;
+    }
+
+    .warning {
+      color: #ffcc66;
+    }
+  </style>
+</head>
+<body>
+  <h1>축구 선수 추적 미니맵</h1>
+
+  <div class="container">
+    <div class="section">
+      <h2>추적 영상</h2>
+
+      <video id="video" controls preload="metadata">
+        <source src="../outputs/custom_clip_01_tracked_web.mp4" type="video/mp4">
+        브라우저가 video 태그를 지원하지 않습니다.
+      </video>
+
+      <div class="status" id="videoStatus">
+        영상 로딩 대기 중...
+      </div>
+    </div>
+
+    <div class="section field-wrap">
+      <h2>2D 경기장</h2>
+
+      <div id="field" class="field">
+        <div class="half-line"></div>
+        <div class="center-circle"></div>
+        <div class="center-dot"></div>
+        <div class="penalty left-penalty"></div>
+        <div class="penalty right-penalty"></div>
+        <div class="goal-box left-goal-box"></div>
+        <div class="goal-box right-goal-box"></div>
+      </div>
+
+      <div class="info">
+        현재 시간: <span id="time">0.00</span>초<br>
+        현재 프레임: <span id="frame">0</span><br>
+        감지 선수 수: <span id="count">0</span>
+      </div>
+
+      <h3>현재 선수 데이터</h3>
+      <pre id="debug">tracking json loading...</pre>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const field = document.getElementById("field");
+    const timeText = document.getElementById("time");
+    const frameText = document.getElementById("frame");
+    const countText = document.getElementById("count");
+    const debug = document.getElementById("debug");
+    const videoStatus = document.getElementById("videoStatus");
+
+    let trackingData = null;
+    let playerElements = {};
+    let animationRunning = false;
+
+    async function loadTrackingData() {
+      try {
+        const res = await fetch("../outputs/custom_clip_01_tracking.json");
+
+        if (!res.ok) {
+          throw new Error("tracking json load failed: " + res.status);
+        }
+
+        trackingData = await res.json();
+        debug.textContent = "tracking json loaded";
+        console.log("trackingData", trackingData);
+      } catch (error) {
+        debug.textContent = "JSON 로드 실패: " + error.message;
+        console.error(error);
+      }
+    }
+
+    function findNearestFrame(currentTime) {
+      if (!trackingData || !trackingData.frames) return null;
+
+      const fps = trackingData.fps || 15;
+      const frameIndex = Math.round(currentTime * fps);
+
+      let frame = trackingData.frames.find(f => f.frame === frameIndex);
+
+      if (!frame) {
+        let nearest = null;
+        let minDiff = Infinity;
+
+        for (const f of trackingData.frames) {
+          const diff = Math.abs(f.frame - frameIndex);
+          if (diff < minDiff) {
+            minDiff = diff;
+            nearest = f;
+          }
+        }
+
+        frame = nearest;
+      }
+
+      return frame;
+    }
+
+    function createPlayerElement(id) {
+      const el = document.createElement("div");
+      el.className = "player";
+      el.textContent = id.replace("P", "");
+      field.appendChild(el);
+      playerElements[id] = el;
+      return el;
+    }
+
+    function updateMiniMap() {
+      if (!trackingData) return;
+
+      const currentTime = video.currentTime || 0;
+      const frame = findNearestFrame(currentTime);
+
+      timeText.textContent = currentTime.toFixed(2);
+
+      if (!frame) {
+        debug.textContent = "현재 시간에 해당하는 프레임 없음";
+        return;
+      }
+
+      frameText.textContent = frame.frame;
+
+      const players = frame.players || [];
+      countText.textContent = players.length;
+
+      const activeIds = new Set();
+
+      for (const player of players) {
+        const id = player.displayId;
+        activeIds.add(id);
+
+        const el = playerElements[id] || createPlayerElement(id);
+
+        const [x, y] = player.fieldPosition;
+
+        el.style.left = `${x}%`;
+        el.style.top = `${y}%`;
+        el.style.display = "flex";
+      }
+
+      for (const id of Object.keys(playerElements)) {
+        if (!activeIds.has(id)) {
+          playerElements[id].style.display = "none";
+        }
+      }
+
+      debug.textContent = JSON.stringify(players, null, 2);
+    }
+
+    function animationLoop() {
+      updateMiniMap();
+
+      if (!video.paused && !video.ended) {
+        requestAnimationFrame(animationLoop);
+      } else {
+        animationRunning = false;
+      }
+    }
+
+    video.addEventListener("loadedmetadata", () => {
+      videoStatus.textContent = `영상 로드 완료: ${video.duration.toFixed(2)}초`;
+    });
+
+    video.addEventListener("error", () => {
+      videoStatus.innerHTML = `<span class="warning">영상 로드 실패. custom_clip_01_tracked_web.mp4가 있는지 확인하세요.</span>`;
+    });
+
+    video.addEventListener("play", () => {
+      if (!animationRunning) {
+        animationRunning = true;
+        requestAnimationFrame(animationLoop);
+      }
+    });
+
+    video.addEventListener("pause", () => {
+      updateMiniMap();
+    });
+
+    video.addEventListener("seeked", () => {
+      updateMiniMap();
+    });
+
+    video.addEventListener("timeupdate", () => {
+      updateMiniMap();
+    });
+
+    loadTrackingData();
+  </script>
+</body>
+</html>

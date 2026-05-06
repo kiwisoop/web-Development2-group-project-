@@ -1,0 +1,202 @@
+﻿{
+  "frame_index": -1,
+  "file_name": "q6c_Hxjgn4B_154398.jpg",
+  "id": "62fc56c511084a33db038db8",
+  "lines": [
+    {
+      "line_index": 0,
+      "line_type": "side line #1",
+      "coordinates": [
+        [
+          1241.909930676345,
+          411.9597393887016
+        ],
+        [
+          0.892433892386207,
+          457.3338233767735
+        ]
+      ],
+      "inclusive": false
+    },
+    {
+      "line_index": 1,
+      "line_type": "end line #2",
+      "coordinates": [
+        [
+          1242.3212832168083,
+          412.12751154870136
+        ],
+        [
+          1919.0632203108944,
+          613.1666115211437
+        ]
+      ],
+      "inclusive": false
+    },
+    {
+      "line_index": 2,
+      "line_type": "center line",
+      "coordinates": [
+        [
+          375.3317242195842,
+          445.0270106277761
+        ],
+        [
+          399.39874388765634,
+          956.0214464184194
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 3,
+      "line_type": "center circle",
+      "coordinates": [
+        [
+          379.4717609578878,
+          531.8677443343049
+        ],
+        [
+          384.46163640796493,
+          640.1561808899874
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 4,
+      "line_type": "penalty area #2-1",
+      "coordinates": [
+        [
+          1064.992117633672,
+          459.2172212470052
+        ],
+        [
+          1521.141420255779,
+          658.8275652396013
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 5,
+      "line_type": "penalty area #2-2",
+      "coordinates": [
+        [
+          1354.6903114417937,
+          446.7913109276224
+        ],
+        [
+          1065.0084807851379,
+          459.01154497677373
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 6,
+      "line_type": "penalty area #2-3",
+      "coordinates": [
+        [
+          1919.0360866800468,
+          630.917941610604
+        ],
+        [
+          1521.7097744768603,
+          658.9141439394475
+        ]
+      ],
+      "inclusive": false
+    },
+    {
+      "line_index": 7,
+      "line_type": "goal penalty#2-2",
+      "coordinates": [
+        [
+          1470.030563957167,
+          480.2374158366192
+        ],
+        [
+          1152.9037451701251,
+          495.564127465617
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 8,
+      "line_type": "goal penalty#2-1",
+      "coordinates": [
+        [
+          1165.4603004104324,
+          502.0260482454625
+        ],
+        [
+          1319.7288718531056,
+          569.1454752924551
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 9,
+      "line_type": "goal penalty#2-3",
+      "coordinates": [
+        [
+          1734.5631411976813,
+          558.7707350033035
+        ],
+        [
+          1350.2061603721827,
+          582.2032238316835
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 10,
+      "line_type": "goal area #2-1",
+      "coordinates": [
+        [
+          1369.4760099129523,
+          485.6547995462337
+        ],
+        [
+          1609.410909942155,
+          565.8279362026865
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 11,
+      "line_type": "goal area #2-2",
+      "coordinates": [
+        [
+          1470.1061647452404,
+          480.1723780955398
+        ],
+        [
+          1369.6707082714104,
+          485.54108721553996
+        ]
+      ],
+      "inclusive": true
+    },
+    {
+      "line_index": 12,
+      "line_type": "goal area #2-3",
+      "coordinates": [
+        [
+          1734.5739116770649,
+          558.6841563034579
+        ],
+        [
+          1609.9738789235435,
+          565.8171657233031
+        ]
+      ],
+      "inclusive": true
+    }
+  ]
+}

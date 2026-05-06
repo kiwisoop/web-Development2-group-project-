@@ -1,0 +1,494 @@
+{
+  "s3": {
+    "inplay": [
+      { "start": 0, "end": 29.966666666666665 },
+      { "start": 29.966666666666665, "end": 50 },
+      { "start": 50, "end": 64.56666666666666 },
+      { "start": 64.56666666666666, "end": 113.83333333333333 },
+      { "start": 113.86666666666666, "end": 145.4 },
+      { "start": 145.4, "end": 158.36666666666667 },
+      { "start": 158.36666666666667, "end": 164.2 },
+      { "start": 164.2, "end": 171.93333333333334 },
+      { "start": 171.93333333333334, "end": 202.16666666666666 },
+      { "start": 202.2, "end": 214.43333333333334 },
+      { "start": 214.43333333333334, "end": 216.16666666666666 },
+      { "start": 216.2, "end": 231.43333333333334 },
+      { "start": 231.43333333333334, "end": 233.2 },
+      { "start": 233.2, "end": 273.2 },
+      { "start": 273.23333333333335, "end": 318.3666666666667 },
+      { "start": 318.3666666666667, "end": 322.96666666666664 },
+      { "start": 322.96666666666664, "end": 335.43333333333334 },
+      { "start": 335.43333333333334, "end": 335.93333333333334 },
+      { "start": 335.93333333333334, "end": 344.3666666666667 },
+      { "start": 344.3666666666667, "end": 369.43333333333334 },
+      { "start": 369.43333333333334, "end": 373.6666666666667 },
+      { "start": 373.6666666666667, "end": 383.43333333333334 },
+      { "start": 383.43333333333334, "end": 409.6 },
+      { "start": 409.6, "end": 420.1333333333333 },
+      { "start": 420.1333333333333, "end": 449.46666666666664 },
+      { "start": 449.46666666666664, "end": 459 },
+      { "start": 459, "end": 529.0666666666667 },
+      { "start": 529.0666666666667, "end": 544.5666666666667 },
+      { "start": 544.5666666666667, "end": 547.3 },
+      { "start": 547.3333333333334, "end": 580.3666666666667 },
+      { "start": 580.3666666666667, "end": 581.5666666666667 },
+      { "start": 581.5666666666667, "end": 602.8333333333334 },
+      { "start": 602.8333333333334, "end": 623.8666666666667 },
+      { "start": 623.8666666666667, "end": 624.3333333333334 },
+      { "start": 624.3333333333334, "end": 628.0333333333333 },
+      { "start": 628.0333333333333, "end": 641.5 },
+      { "start": 641.5, "end": 686.4 },
+      { "start": 686.4333333333333, "end": 706.3 },
+      { "start": 706.3333333333334, "end": 715.4333333333333 },
+      { "start": 715.4333333333333, "end": 717.2666666666667 },
+      { "start": 717.3, "end": 721.0333333333333 },
+      { "start": 721.0666666666667, "end": 722.9666666666667 },
+      { "start": 722.9666666666667, "end": 729.5 }
+    ],
+    "match_info": {
+      "video_meta_sports_type": "00",
+      "league_info": "하나원큐K리그1",
+      "match_date": "2021-02-26T15:00:00.000Z",
+      "team_1": "전북",
+      "team_2": "서울",
+      "match_result": "전북_승",
+      "tot_play_time": 100671
+    },
+    "player_info": [
+      {
+        "back_number": "31",
+        "name": "송범근",
+        "position": "GK",
+        "height": "194",
+        "weight": "88",
+        "birth": "1997-10-14T15:00:00.000Z",
+        "starter": true,
+        "play_time": 3746,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "32",
+        "name": "이주용",
+        "position": "DF",
+        "height": "180",
+        "weight": "78",
+        "birth": "1992-09-25T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "92",
+        "name": "김민혁",
+        "position": "DF",
+        "height": "187",
+        "weight": "73",
+        "birth": "1992-02-26T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "26",
+        "name": "홍정호",
+        "position": "DF",
+        "height": "186",
+        "weight": "77",
+        "birth": "1989-08-11T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "2",
+        "name": "이용",
+        "position": "DF",
+        "height": "189",
+        "weight": "74",
+        "birth": "1986-12-23T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "22",
+        "name": "이성윤",
+        "position": "MF",
+        "height": "184",
+        "weight": "75",
+        "birth": "2000-10-30T15:00:00.000Z",
+        "starter": true,
+        "play_time": 1164,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "4",
+        "name": "최영준",
+        "position": "MF",
+        "height": "181",
+        "weight": "76",
+        "birth": "1991-12-14T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "29",
+        "name": "류재문",
+        "position": "MF",
+        "height": "184",
+        "weight": "72",
+        "birth": "1993-11-07T15:00:00.000Z",
+        "starter": true,
+        "play_time": 2977,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "7",
+        "name": "한교원",
+        "position": "MF",
+        "height": "182",
+        "weight": "73",
+        "birth": "1990-06-14T15:00:00.000Z",
+        "starter": true,
+        "play_time": 3746,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "13",
+        "name": "김보경",
+        "position": "MF",
+        "height": "176",
+        "weight": "72",
+        "birth": "1989-10-05T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "9",
+        "name": "구스타보",
+        "position": "FW",
+        "height": "189",
+        "weight": "83",
+        "birth": "1994-03-28T15:00:00.000Z",
+        "starter": true,
+        "play_time": 2977,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "23",
+        "name": "김정훈",
+        "position": "GK",
+        "height": "188",
+        "weight": "80",
+        "birth": "2001-04-19T15:00:00.000Z",
+        "starter": false,
+        "play_time": 631,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "25",
+        "name": "최철순",
+        "position": "DF",
+        "height": "175",
+        "weight": "68",
+        "birth": "1987-02-07T15:00:00.000Z",
+        "starter": false,
+        "play_time": 631,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "24",
+        "name": "김승대",
+        "position": "FW",
+        "height": "175",
+        "weight": "64",
+        "birth": "1991-03-31T15:00:00.000Z",
+        "starter": false,
+        "play_time": 3212,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "11",
+        "name": "바로우",
+        "position": "MF",
+        "height": "177",
+        "weight": "60",
+        "birth": "1992-10-12T15:00:00.000Z",
+        "starter": false,
+        "play_time": 1400,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "10",
+        "name": "일류첸코",
+        "position": "FW",
+        "height": "187",
+        "weight": "82",
+        "birth": "1990-08-12T15:00:00.000Z",
+        "starter": false,
+        "play_time": 1400,
+        "team_name": "전북"
+      },
+      {
+        "back_number": "21",
+        "name": "양한빈",
+        "position": "GK",
+        "height": "195",
+        "weight": "90",
+        "birth": "1991-08-29T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "27",
+        "name": "고광민",
+        "position": "DF",
+        "height": "175",
+        "weight": "67",
+        "birth": "1988-09-20T14:00:00.000Z",
+        "starter": true,
+        "play_time": 4238,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "40",
+        "name": "김원균",
+        "position": "DF",
+        "height": "186",
+        "weight": "76",
+        "birth": "1992-04-30T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "2",
+        "name": "황현수",
+        "position": "DF",
+        "height": "183",
+        "weight": "80",
+        "birth": "1995-07-21T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "23",
+        "name": "윤종규",
+        "position": "DF",
+        "height": "173",
+        "weight": "64",
+        "birth": "1998-03-19T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "5",
+        "name": "오스마르",
+        "position": "MF",
+        "height": "192",
+        "weight": "83",
+        "birth": "1988-06-04T14:00:00.000Z",
+        "starter": true,
+        "play_time": 3768,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "8",
+        "name": "기성용",
+        "position": "MF",
+        "height": "186",
+        "weight": "75",
+        "birth": "1989-01-23T15:00:00.000Z",
+        "starter": true,
+        "play_time": 1862,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "26",
+        "name": "팔로세비치",
+        "position": "MF",
+        "height": "180",
+        "weight": "70",
+        "birth": "1993-08-21T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "7",
+        "name": "나상호",
+        "position": "FW",
+        "height": "173",
+        "weight": "70",
+        "birth": "1996-08-11T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4238,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "11",
+        "name": "조영욱",
+        "position": "FW",
+        "height": "181",
+        "weight": "73",
+        "birth": "1999-02-04T15:00:00.000Z",
+        "starter": true,
+        "play_time": 3768,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "10",
+        "name": "박주영",
+        "position": "FW",
+        "height": "182",
+        "weight": "75",
+        "birth": "1985-07-09T15:00:00.000Z",
+        "starter": true,
+        "play_time": 4377,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "15",
+        "name": "홍준호",
+        "position": "DF",
+        "height": "190",
+        "weight": "77",
+        "birth": "1993-10-10T15:00:00.000Z",
+        "starter": false,
+        "play_time": 139,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "17",
+        "name": "김진야",
+        "position": "DF",
+        "height": "174",
+        "weight": "66",
+        "birth": "1998-06-29T15:00:00.000Z",
+        "starter": false,
+        "play_time": 139,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "16",
+        "name": "한찬희",
+        "position": "MF",
+        "height": "181",
+        "weight": "75",
+        "birth": "1997-03-16T15:00:00.000Z",
+        "starter": false,
+        "play_time": 2515,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "22",
+        "name": "박정빈",
+        "position": "FW",
+        "height": "175",
+        "weight": "73",
+        "birth": "1994-02-21T15:00:00.000Z",
+        "starter": false,
+        "play_time": 609,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "19",
+        "name": "정한민",
+        "position": "FW",
+        "height": "183",
+        "weight": "76",
+        "birth": "2001-01-07T15:00:00.000Z",
+        "starter": false,
+        "play_time": 609,
+        "team_name": "서울"
+      },
+      {
+        "back_number": "",
+        "name": "김종혁",
+        "position": "",
+        "height": "",
+        "weight": "",
+        "birth": null,
+        "starter": false,
+        "play_time": 4378,
+        "team_name": "심판"
+      }
+    ],
+    "sub_info": [
+      {
+        "time": "00:03:14",
+        "team": "전북",
+        "subOut": "22.이성윤",
+        "subIn": "24.김승대"
+      },
+      {
+        "time": "00:05:10",
+        "team": "서울",
+        "subOut": "8.기성용",
+        "subIn": "16.한찬희"
+      },
+      {
+        "time": "00:08:16",
+        "team": "전북",
+        "subOut": "9.구스타보",
+        "subIn": "10.일류첸코"
+      },
+      {
+        "time": "00:08:16",
+        "team": "전북",
+        "subOut": "29.류재문",
+        "subIn": "11.바로우"
+      },
+      {
+        "time": "00:10:24",
+        "team": "전북",
+        "subOut": "31.송범근",
+        "subIn": "23.김정훈"
+      },
+      {
+        "time": "00:10:24",
+        "team": "전북",
+        "subOut": "7.한교원",
+        "subIn": "25.최철순"
+      },
+      {
+        "time": "00:10:28",
+        "team": "서울",
+        "subOut": "11.조영욱",
+        "subIn": "19.정한민"
+      },
+      {
+        "time": "00:10:28",
+        "team": "서울",
+        "subOut": "5.오스마르",
+        "subIn": "22.박정빈"
+      },
+      {
+        "time": "00:11:46",
+        "team": "서울",
+        "subOut": "27.고광민",
+        "subIn": "15.홍준호"
+      },
+      {
+        "time": "00:11:46",
+        "team": "서울",
+        "subOut": "7.나상호",
+        "subIn": "17.김진야"
+      }
+    ]
+  },
+  "match_data": {
+    "league_info": "K1",
+    "match_date": "2021-02-26 15:00:00.000000",
+    "team_1": "전북",
+    "team_2": "서울",
+    "stadium": "전북",
+    "weather": "맑음",
+    "temperatures": 13
+  }
+}
