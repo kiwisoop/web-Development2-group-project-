@@ -140,3 +140,137 @@ table.stats th, table.stats td { border-bottom: 1px solid #232833; padding: 8px;
   color: #ff8a8a;
 }
 .btn.ghost-danger:hover { background: rgba(176, 58, 58, 0.15); }
+
+/* Schedule page */
+.sched-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.sched-toolbar select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #2c3340;
+  background: #0f1115;
+  color: #fff;
+  font-size: 14px;
+}
+
+.month-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+.month-tab {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #161a22;
+  border: 1px solid #232833;
+  color: #cbd1da;
+  font-size: 13px;
+  cursor: pointer;
+}
+.month-tab:hover { background: #1d2230; }
+.month-tab.active {
+  background: #2a5cff;
+  border-color: #2a5cff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.team-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: #131722;
+  border: 1px solid #232833;
+  border-radius: 8px;
+}
+.team-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1d2230;
+  border: 1px solid #2c3340;
+  color: #cbd1da;
+  font-size: 12px;
+  cursor: pointer;
+}
+.team-chip:hover { background: #262d3e; }
+.team-chip.active {
+  background: #2a5cff;
+  border-color: #2a5cff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.date-group { margin-bottom: 18px; }
+.date-group .date-title {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+  color: #cbd1da;
+  background: #131722;
+  border-left: 3px solid #2a5cff;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.sched-row {
+  display: grid;
+  grid-template-columns: 72px 1fr auto 1fr 100px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #232833;
+  border-radius: 8px;
+  background: #131722;
+  margin-bottom: 6px;
+}
+.sched-row .time { color: #aab1c0; font-size: 13px; }
+.sched-row .side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.sched-row .side.away { justify-content: flex-end; text-align: right; }
+.sched-row .side.home { justify-content: flex-start; text-align: left; }
+.sched-row .team-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sched-row .center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 110px;
+}
+.sched-row .vs-score { font-size: 18px; font-weight: 800; color: #fff; }
+.sched-row .vs-score .dim { color: #6b7280; font-weight: 700; }
+.sched-row .venue { color: #8a93a3; font-size: 12px; grid-column: 2 / 5; margin-top: -2px; }
+
+.team-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: inline-block;
+  background: #0f1115;
+  border-radius: 4px;
+}
+
+@media (max-width: 720px) {
+  .sched-row {
+    grid-template-columns: 60px 1fr auto 1fr;
+  }
+  .sched-row .detail-btn { grid-column: 1 / -1; justify-self: stretch; }
+  .sched-row .venue { grid-column: 1 / -1; }
+}
