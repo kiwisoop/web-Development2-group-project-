@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { fetchMlbGameDetail } from '../api/mlb'
 import BaseballScoreboard from '../components/BaseballScoreboard'
 import BaseballEventTimeline from '../components/BaseballEventTimeline'
+import BaseballSummaryCompareCard from '../components/BaseballSummaryCompareCard'
 
 export default function BaseballDetailPage() {
   const { gamePk } = useParams()
@@ -73,6 +74,8 @@ export default function BaseballDetailPage() {
 
           <h3 style={{ margin: '20px 0 8px' }}>Event Timeline</h3>
           <BaseballEventTimeline events={detail.events} />
+
+          <BaseballSummaryCompareCard gamePk={gamePk} />
         </>
       )}
     </div>

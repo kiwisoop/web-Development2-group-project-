@@ -4,15 +4,18 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/mlb")
 public class MlbController {
 
     private final MlbService service;
+    private final BaseballSummaryService summaryService;
 
-    public MlbController(MlbService service) {
+    public MlbController(MlbService service, BaseballSummaryService summaryService) {
         this.service = service;
+        this.summaryService = summaryService;
     }
 
     // GET /api/mlb/schedule?date=YYYY-MM-DD  (date defaults to today)
@@ -26,5 +29,23 @@ public class MlbController {
     @GetMapping("/game/{gamePk}")
     public MlbGameDetail gameDetail(@PathVariable long gamePk) {
         return service.getGameDetail(gamePk);
+    }
+
+    // GET /api/mlb/game/{gamePk}/summary/mock
+    @GetMapping("/game/{gamePk}/summary/mock")
+    public BaseballSummaryResponse mockSummary(@PathVariable long gamePk) {
+        return summaryService.buildMockSummary(gamePk);
+    }
+
+    // GET /api/mlb/game/{gamePk}/summary/gemini
+    @GetMapping("/game/{gamePk}/summary/gemini")
+    public BaseballSummaryResponse geminiSummary(@PathVariable long gamePk) {
+        return summaryService.buildGeminiSummary(gamePk);
+    }
+
+    // GET /api/mlb/game/{gamePk}/summary/compare
+    @GetMapping("/game/{gamePk}/summary/compare")
+    public Map<String, BaseballSummaryResponse> compareSummary(@PathVariable long gamePk) {
+        return summaryService.buildCompare(gamePk);
     }
 }
