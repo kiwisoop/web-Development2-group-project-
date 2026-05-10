@@ -1,0 +1,191 @@
+You are helping build our Web Programming 2 team project.
+
+Project: Sports Analysis & Summary Website
+
+Goal:
+Build a web service that provides sports match lists, match details, stats, event timelines, AI match summaries, and favorite team features.
+
+Important:
+Use a real-service-like architecture with React + Spring Boot.
+Do not use Thymeleaf.
+Spring Boot should work as a REST API server.
+React should handle the user interface.
+
+Backend stack:
+- Java 17
+- Spring Boot 3.5.14
+- Spring Web
+- Spring Data JPA
+- Lombok
+- Validation
+- H2 Database
+- MySQL Driver
+
+Frontend stack:
+- React
+- Vite
+- JavaScript
+- CSS
+- fetch or axios
+
+Project structure:
+sports-analysis/
+  backend/
+  frontend/
+
+Team rule:
+Do not split work by backend/frontend/database.
+We have 4 members, and each member owns one sport module.
+Each member must implement the full feature flow for their sport: UI, API connection, data flow, and AI summary.
+
+Sport modules:
+- SOCCER
+- VOLLEYBALL
+- BASKETBALL
+- ESPORTS
+
+Each sport module must include:
+- match list page
+- match detail page
+- stats
+- event timeline
+- mock AI summary
+- favorite team feature
+- sample data
+- API connection
+
+Backend package:
+com.team3.sportsanalysis
+
+Backend structure:
+src/main/java/com/team3/sportsanalysis
+  common
+  user
+  sport
+  match
+  analysis
+  favorite
+
+Frontend structure:
+src/
+  api
+  components
+  pages
+  routes
+  styles
+
+Main entities:
+User(id, username, password, email, nickname)
+Team(id, sportType, name, leagueName, logoUrl)
+Match(id, sportType, leagueName, matchDate, homeTeam, awayTeam, homeScore, awayScore, venue, status, basicSummary)
+MatchStat(id, matchId, teamName, statName, statValue)
+MatchEvent(id, matchId, eventTime, teamName, playerName, eventType, description)
+MatchAnalysis(id, matchId, summaryText, tacticalAnalysis, keyPoint)
+FavoriteTeam(id, userId, sportType, teamName)
+
+Required APIs:
+GET /api/sports
+GET /api/matches?sportType=SOCCER
+GET /api/matches/{id}
+GET /api/matches/{id}/stats
+GET /api/matches/{id}/events
+GET /api/matches/{id}/analysis
+POST /api/matches/{id}/analysis
+POST /api/favorites/teams
+GET /api/favorites/teams
+DELETE /api/favorites/teams/{id}
+POST /api/auth/register
+POST /api/auth/login
+
+Frontend pages:
+- HomePage
+- LoginPage
+- RegisterPage
+- SoccerPage
+- VolleyballPage
+- BasketballPage
+- EsportsPage
+- MatchDetailPage
+- FavoriteTeamsPage
+
+HomePage:
+- service introduction
+- sport cards
+- recent matches
+- AI summary feature intro
+- favorite team feature intro
+
+Sport pages:
+- match list
+- league name
+- match date
+- home team vs away team
+- score
+- match status
+- detail button
+
+MatchDetailPage:
+- match basic info
+- score
+- stats table
+- event timeline
+- AI summary card
+- tactical analysis
+- favorite team button
+
+AI summary:
+Do not use a real LLM API yet.
+Implement mock AI summary first.
+Generate natural language summaries from match info, stats, and events.
+Create an AnalysisGenerator interface so real LLM APIs can be added later.
+
+Sample data:
+Add at least 3 matches for each sport:
+- soccer
+- volleyball
+- basketball
+- esports
+
+Each match must include:
+- basic match info
+- home team
+- away team
+- score
+- status
+- stats
+- events
+- basic summary
+
+First milestone:
+- React home page
+- sport tabs
+- match list
+- match detail
+- Spring Boot APIs
+- H2 sample data
+- mock AI summary
+- basic favorite team feature
+- README
+
+Rules:
+- Do not add Spring Security for now.
+- Use simple login/register first.
+- Connect React and Spring Boot through REST APIs.
+- Add CORS config.
+- Use sportType to separate sports.
+- Avoid excessive duplicate code.
+- Reuse common components and APIs.
+- Add useful comments for beginners.
+- Do not delete existing files unless necessary.
+
+Work style:
+1. Analyze the current file structure first.
+2. Briefly list required files.
+3. Keep explanations short.
+4. Focus on implementable code.
+5. After implementation, only summarize changed files and run commands.
+
+Final explanation goal:
+Our team does not divide work by backend/frontend/database.
+Instead, we divide work by sports: soccer, volleyball, basketball, and esports.
+Each member implements the full feature flow for their sport, including UI, API connection, data flow, and AI summary.

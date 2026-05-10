@@ -1,0 +1,17 @@
+Update README.md for our current project.
+
+Include:
+- project introduction
+- purpose
+- tech stack
+- team development rule: split by sports, not backend/frontend/database
+- current folder structure
+- backend run command
+- frontend run command
+- test URLs
+- implemented features
+- API list
+- sample login account
+- future plan: BASEBALL module with MLB API, live score, fan chat, strike zone, hit-risk analysis
+
+Keep it clear and presentation-ready.
