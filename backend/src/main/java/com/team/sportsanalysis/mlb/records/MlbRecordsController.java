@@ -48,4 +48,10 @@ public class MlbRecordsController {
             @RequestParam(required = false, defaultValue = "10") Integer limit) {
         return service.buildDashboard(resolveSeason(season), limit);
     }
+
+    // GET /api/mlb/records/team-stats?season=YYYY
+    @GetMapping("/team-stats")
+    public MlbTeamStatsDashboard teamStats(@RequestParam(required = false) Integer season) {
+        return service.buildTeamStatsDashboard(resolveSeason(season));
+    }
 }

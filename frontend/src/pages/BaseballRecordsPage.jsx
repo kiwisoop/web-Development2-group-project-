@@ -1,6 +1,37 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchMlbRecordsDashboard } from '../api/mlb'
+import { fetchMlbRecordsDashboard, fetchMlbTeamStats } from '../api/mlb'
+import MlbTeamStatsTable from '../components/MlbTeamStatsTable'
+
+const BATTING_COLS = [
+  { key: 'avg', label: 'AVG' },
+  { key: 'runs', label: 'R' },
+  { key: 'hits', label: 'H' },
+  { key: 'homeRuns', label: 'HR' },
+  { key: 'doubles', label: '2B' },
+  { key: 'triples', label: '3B' },
+  { key: 'stolenBases', label: 'SB' },
+  { key: 'baseOnBalls', label: 'BB' },
+  { key: 'strikeOuts', label: 'SO' },
+  { key: 'obp', label: 'OBP' },
+  { key: 'slg', label: 'SLG' },
+  { key: 'ops', label: 'OPS' },
+]
+const PITCHING_COLS = [
+  { key: 'era', label: 'ERA', defaultDesc: false },
+  { key: 'wins', label: 'W' },
+  { key: 'losses', label: 'L', defaultDesc: false },
+  { key: 'inningsPitched', label: 'IP' },
+  { key: 'hitsAllowed', label: 'H' },
+  { key: 'homeRunsAllowed', label: 'HR' },
+  { key: 'walksAllowed', label: 'BB' },
+  { key: 'strikeOuts', label: 'SO' },
+  { key: 'whip', label: 'WHIP', defaultDesc: false },
+]
+const FIELDING_COLS = [
+  { key: 'errors', label: 'E', defaultDesc: false },
+  { key: 'fieldingPercentage', label: 'FPCT' },
+]
 
 const TABS = [
   { key: 'standings', label: 'Team Standings' },
@@ -89,9 +120,7 @@ function StandingsTable({ standings }) {
 }
 
 function TeamRecordCards({ cards }) {
-  if (!cards || cards.length === 0) {
-    return <div className="notice">No team record cards available.</div>
-  }
+  if (!cards || cards.length === 0) return null
   return (
     <div className="record-cards">
       {cards.map((c, i) => (
@@ -102,6 +131,50 @@ function TeamRecordCards({ cards }) {
         </div>
       ))}
     </div>
+  )
+}
+
+function TeamRecordsTab({ cards, teamStats, loading, err }) {
+  return (
+    <>
+      <TeamRecordCards cards={cards} />
+
+      {err && <p style={{ color: 'salmon' }}>Error: {err}</p>}
+      {loading && !teamStats && <p className="muted">Loading team stats...</p>}
+
+      {teamStats && (
+        <>
+          <section className="team-stats-section">
+            <h3>Team Batting</h3>
+            <MlbTeamStatsTable
+              rows={teamStats.batting}
+              columns={BATTING_COLS}
+              highlightCols={['avg', 'homeRuns', 'ops']}
+            />
+          </section>
+
+          <section className="team-stats-section">
+            <h3>Team Pitching</h3>
+            <MlbTeamStatsTable
+              rows={teamStats.pitching}
+              columns={PITCHING_COLS}
+              highlightCols={['era', 'wins', 'whip']}
+            />
+          </section>
+
+          {teamStats.fielding && teamStats.fielding.length > 0 && (
+            <section className="team-stats-section">
+              <h3>Team Fielding</h3>
+              <MlbTeamStatsTable
+                rows={teamStats.fielding}
+                columns={FIELDING_COLS}
+                highlightCols={['fieldingPercentage']}
+              />
+            </section>
+          )}
+        </>
+      )}
+    </>
   )
 }
 
@@ -143,8 +216,12 @@ export default function BaseballRecordsPage() {
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState('')
 
+  const [teamStats, setTeamStats] = useState(null)
+  const [teamStatsLoading, setTeamStatsLoading] = useState(false)
+  const [teamStatsErr, setTeamStatsErr] = useState('')
+
   const load = async (s = season) => {
-    setLoading(true); setErr('')
+    setLoading(true); setErr(''); setTeamStats(null); setTeamStatsErr('')
     try {
       const d = await fetchMlbRecordsDashboard(s, 10)
       setData(d)
@@ -159,6 +236,21 @@ export default function BaseballRecordsPage() {
     load(season)
     // eslint-disable-next-line
   }, [season])
+
+  // Lazy-load team stats only when the Team Records tab is opened (per season).
+  useEffect(() => {
+    if (tab !== 'team' || teamStats || teamStatsLoading) return
+    let cancelled = false
+    setTeamStatsLoading(true); setTeamStatsErr('')
+    fetchMlbTeamStats(season)
+      .then(d => { if (!cancelled) setTeamStats(d) })
+      .catch(e => {
+        if (!cancelled) setTeamStatsErr(e?.response?.data?.message || e.message || 'Failed to fetch team stats')
+      })
+      .finally(() => { if (!cancelled) setTeamStatsLoading(false) })
+    return () => { cancelled = true }
+    // eslint-disable-next-line
+  }, [tab, season])
 
   return (
     <div>
@@ -199,7 +291,14 @@ export default function BaseballRecordsPage() {
       {data && (
         <>
           {tab === 'standings' && <StandingsTable standings={data.standings} />}
-          {tab === 'team' && <TeamRecordCards cards={data.teamRecordCards} />}
+          {tab === 'team' && (
+            <TeamRecordsTab
+              cards={data.teamRecordCards}
+              teamStats={teamStats}
+              loading={teamStatsLoading}
+              err={teamStatsErr}
+            />
+          )}
           {tab === 'hitting' && <LeaderGrid groups={data.hittingLeaders} />}
           {tab === 'pitching' && <LeaderGrid groups={data.pitchingLeaders} />}
         </>

@@ -274,3 +274,164 @@ table.stats th, table.stats td { border-bottom: 1px solid #232833; padding: 8px;
   .sched-row .detail-btn { grid-column: 1 / -1; justify-self: stretch; }
   .sched-row .venue { grid-column: 1 / -1; }
 }
+
+/* Records dashboard */
+.tab-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  border-bottom: 1px solid #232833;
+  padding-bottom: 6px;
+}
+.tab-btn {
+  padding: 8px 14px;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #cbd1da;
+  font-size: 14px;
+  cursor: pointer;
+}
+.tab-btn:hover { background: #1d2230; }
+.tab-btn.active {
+  background: #161a22;
+  border-color: #232833;
+  border-bottom-color: #161a22;
+  color: #fff;
+  font-weight: 600;
+}
+
+.standings-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.standings-table th, .standings-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #232833;
+  text-align: right;
+}
+.standings-table th:first-child,
+.standings-table td:first-child,
+.standings-table th:nth-child(2),
+.standings-table td:nth-child(2) { text-align: left; }
+.standings-table th {
+  color: #8a93a3;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-size: 12px;
+  background: #131722;
+}
+.standings-table tbody tr:hover { background: #1a1f2b; }
+.standings-table .division-row td {
+  background: #0e1118;
+  color: #6aa6ff;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-size: 12px;
+  text-align: left;
+}
+
+.leader-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.leader-card { padding: 14px; }
+.leader-card h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #cbd1da;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.leader-list { list-style: none; padding: 0; margin: 0; }
+.leader-list li {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #232833;
+  font-size: 14px;
+}
+.leader-list li:last-child { border-bottom: 0; }
+.leader-list .rank { color: #8a93a3; font-weight: 700; text-align: right; }
+.leader-list .player { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leader-list .player .team { color: #8a93a3; font-size: 12px; margin-left: 6px; }
+.leader-list .value { color: #fff; font-weight: 700; }
+
+.record-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.record-card {
+  padding: 14px;
+  background: linear-gradient(180deg, #1a2030 0%, #131722 100%);
+  border: 1px solid #232833;
+  border-radius: 10px;
+}
+.record-card .label {
+  color: #8a93a3;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.record-card .value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+}
+.record-card .team-name {
+  margin-top: 4px;
+  color: #cbd1da;
+  font-size: 13px;
+}
+
+/* Team stats tables (batting / pitching / fielding) */
+.team-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.team-stats-table th, .team-stats-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #232833;
+  text-align: right;
+  white-space: nowrap;
+}
+.team-stats-table th:first-child,
+.team-stats-table td:first-child { text-align: right; width: 44px; }
+.team-stats-table th:nth-child(2),
+.team-stats-table td:nth-child(2) { text-align: left; }
+.team-stats-table thead th {
+  color: #8a93a3;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-size: 11px;
+  background: #131722;
+  cursor: pointer;
+  user-select: none;
+}
+.team-stats-table thead th.sortable:hover { color: #fff; }
+.team-stats-table thead th .sort-indicator {
+  display: inline-block;
+  margin-left: 4px;
+  color: #6aa6ff;
+  font-size: 10px;
+}
+.team-stats-table tbody tr:hover { background: #1a1f2b; }
+.team-stats-table tbody td.highlight { color: #fff; font-weight: 700; }
+.team-stats-table .team-cell { display: flex; align-items: center; gap: 8px; }
+.team-stats-table .team-cell .team-logo { width: 22px; height: 22px; }
+
+.team-stats-section { margin-bottom: 22px; }
+.team-stats-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #cbd1da;
+  letter-spacing: 0.3px;
+}
+.team-stats-scroll { overflow-x: auto; border: 1px solid #232833; border-radius: 8px; }

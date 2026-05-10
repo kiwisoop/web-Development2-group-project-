@@ -214,6 +214,108 @@ public class MlbRecordsService {
         return result;
     }
 
+    private static final List<String> BATTING_FIELDS = List.of(
+            "avg", "runs", "hits", "homeRuns", "doubles", "triples",
+            "stolenBases", "baseOnBalls", "strikeOuts", "obp", "slg", "ops"
+    );
+    private static final List<String> PITCHING_FIELDS = List.of(
+            "era", "wins", "losses", "inningsPitched",
+            "hits", "homeRuns", "baseOnBalls", "strikeOuts", "whip"
+    );
+    private static final List<String> FIELDING_FIELDS = List.of(
+            "errors", "fielding"
+    );
+
+    // Aliases for cleaner frontend keys (MLB API uses some shared names like "hits" across groups).
+    private static final Map<String, String> PITCHING_ALIAS = Map.of(
+            "hits", "hitsAllowed",
+            "homeRuns", "homeRunsAllowed",
+            "baseOnBalls", "walksAllowed"
+    );
+    private static final Map<String, String> FIELDING_ALIAS = Map.of(
+            "fielding", "fieldingPercentage"
+    );
+
+    public List<MlbTeamStatRow> getTeamStats(String group, int season) {
+        String json;
+        try {
+            json = client.fetchTeamStatsJson(group, season);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+        return parseTeamStats(json, group);
+    }
+
+    public MlbTeamStatsDashboard buildTeamStatsDashboard(int season) {
+        return MlbTeamStatsDashboard.builder()
+                .season(season)
+                .batting(getTeamStats("hitting", season))
+                .pitching(getTeamStats("pitching", season))
+                .fielding(getTeamStats("fielding", season))
+                .build();
+    }
+
+    private List<MlbTeamStatRow> parseTeamStats(String json, String group) {
+        List<MlbTeamStatRow> result = new ArrayList<>();
+        if (json == null || json.isBlank()) return result;
+        try {
+            JsonNode root = mapper.readTree(json);
+            JsonNode statsArr = root.path("stats");
+            if (!statsArr.isArray() || statsArr.size() == 0) return result;
+
+            JsonNode splits = statsArr.get(0).path("splits");
+            if (!splits.isArray()) return result;
+
+            List<String> fields;
+            Map<String, String> alias;
+            switch (group) {
+                case "pitching":
+                    fields = PITCHING_FIELDS;
+                    alias = PITCHING_ALIAS;
+                    break;
+                case "fielding":
+                    fields = FIELDING_FIELDS;
+                    alias = FIELDING_ALIAS;
+                    break;
+                default:
+                    fields = BATTING_FIELDS;
+                    alias = Map.of();
+            }
+
+            int rank = 0;
+            for (JsonNode split : splits) {
+                rank++;
+                JsonNode team = split.path("team");
+                JsonNode stat = split.path("stat");
+
+                Map<String, Object> values = new LinkedHashMap<>();
+                for (String f : fields) {
+                    JsonNode v = stat.path(f);
+                    String outKey = alias.getOrDefault(f, f);
+                    values.put(outKey, jsonValue(v));
+                }
+
+                result.add(MlbTeamStatRow.builder()
+                        .rank(rank)
+                        .teamId(optLong(team.path("id")))
+                        .teamName(team.path("name").asText(null))
+                        .stats(values)
+                        .build());
+            }
+        } catch (Exception e) {
+            // fall through with whatever we managed to parse
+        }
+        return result;
+    }
+
+    private static Object jsonValue(JsonNode n) {
+        if (n == null || n.isMissingNode() || n.isNull()) return null;
+        if (n.isInt() || n.isLong() || n.isShort()) return n.asLong();
+        if (n.isDouble() || n.isFloat()) return n.asDouble();
+        if (n.isBoolean()) return n.asBoolean();
+        return n.asText(null);
+    }
+
     public MlbRecordsDashboard buildDashboard(int season, int limit) {
         List<MlbStandingTeam> standings = getStandings(season);
         return MlbRecordsDashboard.builder()

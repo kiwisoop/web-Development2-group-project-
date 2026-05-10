@@ -31,3 +31,6 @@ export const fetchMlbPitchingLeaders = (season, limit = 10) =>
 
 export const fetchMlbRecordsDashboard = (season, limit = 10) =>
   api.get('/mlb/records/dashboard', { params: { season, limit } }).then(r => r.data)
+
+export const fetchMlbTeamStats = (season) =>
+  api.get('/mlb/records/team-stats', { params: { season } }).then(r => r.data)

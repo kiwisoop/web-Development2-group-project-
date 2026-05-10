@@ -62,6 +62,16 @@ public class MlbClient {
         return rest.getForObject(url, String.class);
     }
 
+    public String fetchTeamStatsJson(String group, int season) {
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/teams/stats")
+                .queryParam("stats", "season")
+                .queryParam("season", season)
+                .queryParam("group", group)
+                .queryParam("sportIds", 1)
+                .toUriString();
+        return rest.getForObject(url, String.class);
+    }
+
     public String fetchStatLeadersJson(String statGroup, String leaderCategory, int season, int limit) {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/stats/leaders")
                 .queryParam("leaderCategories", leaderCategory)
