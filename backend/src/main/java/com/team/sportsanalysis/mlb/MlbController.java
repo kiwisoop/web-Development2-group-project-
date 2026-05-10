@@ -21,4 +21,10 @@ public class MlbController {
         String d = (date == null || date.isBlank()) ? LocalDate.now().toString() : date;
         return service.getSchedule(d);
     }
+
+    // GET /api/mlb/game/{gamePk}
+    @GetMapping("/game/{gamePk}")
+    public MlbGameDetail gameDetail(@PathVariable long gamePk) {
+        return service.getGameDetail(gamePk);
+    }
 }

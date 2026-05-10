@@ -33,4 +33,11 @@ public class MlbClient {
                 .toUriString();
         return rest.getForObject(url, String.class);
     }
+
+    // The live feed lives under /api/v1.1, not /api/v1, so build from the host.
+    public String fetchLiveFeedJson(long gamePk) {
+        String host = baseUrl.replaceFirst("/api/v\\d+(\\.\\d+)?$", "");
+        String url = host + "/api/v1.1/game/" + gamePk + "/feed/live";
+        return rest.getForObject(url, String.class);
+    }
 }

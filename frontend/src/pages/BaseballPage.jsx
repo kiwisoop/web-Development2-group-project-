@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { fetchMlbSchedule } from '../api/mlb'
 
 // Today's date in YYYY-MM-DD (local).
@@ -64,8 +65,11 @@ export default function BaseballPage() {
                 #{g.gamePk} • {time} • {g.venue || 'TBD'} • {g.status || ''}
               </div>
             </div>
-            <div className="score">
-              {g.awayScore ?? '-'} : {g.homeScore ?? '-'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="score">
+                {g.awayScore ?? '-'} : {g.homeScore ?? '-'}
+              </div>
+              <Link to={`/baseball/${g.gamePk}`} className="btn">Detail</Link>
             </div>
           </div>
         )

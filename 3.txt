@@ -1,0 +1,5 @@
+Read and analyze the current BASEBALL implementation first.
+Do not modify files yet.
+Check the backend mlb package, BaseballPage, routes, NavBar, and HomePage.
+Briefly explain what exists and what needs to be added for step 2.
+Keep it short.
