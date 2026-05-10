@@ -7,6 +7,7 @@ import SoccerPage from '../pages/SoccerPage'
 import VolleyballPage from '../pages/VolleyballPage'
 import BasketballPage from '../pages/BasketballPage'
 import EsportsPage from '../pages/EsportsPage'
+import BaseballPage from '../pages/BaseballPage'
 import MatchDetailPage from '../pages/MatchDetailPage'
 import FavoriteTeamsPage from '../pages/FavoriteTeamsPage'
 
@@ -23,6 +24,7 @@ export default function AppRouter() {
           <Route path="/volleyball" element={<VolleyballPage />} />
           <Route path="/basketball" element={<BasketballPage />} />
           <Route path="/esports" element={<EsportsPage />} />
+          <Route path="/baseball" element={<BaseballPage />} />
           <Route path="/matches/:id" element={<MatchDetailPage />} />
           <Route path="/favorites" element={<FavoriteTeamsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

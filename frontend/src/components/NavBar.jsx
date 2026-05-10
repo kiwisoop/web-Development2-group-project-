@@ -10,6 +10,7 @@ export default function NavBar() {
       <NavLink to="/volleyball">Volleyball</NavLink>
       <NavLink to="/basketball">Basketball</NavLink>
       <NavLink to="/esports">Esports</NavLink>
+      <NavLink to="/baseball">Baseball</NavLink>
       <NavLink to="/favorites">Favorites</NavLink>
       <span className="spacer" />
       {user ? (

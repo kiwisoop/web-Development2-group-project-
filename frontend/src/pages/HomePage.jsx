@@ -8,6 +8,7 @@ const SPORTS = [
   { key: 'VOLLEYBALL', label: 'Volleyball', path: '/volleyball' },
   { key: 'BASKETBALL', label: 'Basketball', path: '/basketball' },
   { key: 'ESPORTS', label: 'Esports', path: '/esports' },
+  { key: 'BASEBALL', label: 'Baseball (MLB)', path: '/baseball' },
 ]
 
 export default function HomePage() {
