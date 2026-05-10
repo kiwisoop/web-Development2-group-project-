@@ -129,7 +129,11 @@ export default function BaseballPage() {
 
   return (
     <div>
-      <h2 style={{ marginBottom: 4 }}>Baseball (MLB) — Monthly Schedule</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 4 }}>
+        <h2 style={{ margin: 0 }}>Baseball (MLB) — Monthly Schedule</h2>
+        <span className="spacer" style={{ flex: 1 }} />
+        <Link to="/baseball/records" className="btn primary">Records & Stats</Link>
+      </div>
       <p className="muted" style={{ marginTop: 0 }}>
         Browse a full month of MLB games. Click a row to open the game detail.
       </p>

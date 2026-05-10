@@ -9,6 +9,7 @@ import BasketballPage from '../pages/BasketballPage'
 import EsportsPage from '../pages/EsportsPage'
 import BaseballPage from '../pages/BaseballPage'
 import BaseballDetailPage from '../pages/BaseballDetailPage'
+import BaseballRecordsPage from '../pages/BaseballRecordsPage'
 import MatchDetailPage from '../pages/MatchDetailPage'
 import FavoriteTeamsPage from '../pages/FavoriteTeamsPage'
 
@@ -26,6 +27,7 @@ export default function AppRouter() {
           <Route path="/basketball" element={<BasketballPage />} />
           <Route path="/esports" element={<EsportsPage />} />
           <Route path="/baseball" element={<BaseballPage />} />
+          <Route path="/baseball/records" element={<BaseballRecordsPage />} />
           <Route path="/baseball/:gamePk" element={<BaseballDetailPage />} />
           <Route path="/matches/:id" element={<MatchDetailPage />} />
           <Route path="/favorites" element={<FavoriteTeamsPage />} />

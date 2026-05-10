@@ -25,6 +25,20 @@ public class MlbController {
         return service.getSchedule(d);
     }
 
+    // GET /api/mlb/schedule/month?year=YYYY&month=MM
+    @GetMapping("/schedule/month")
+    public List<MlbGame> monthSchedule(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        LocalDate now = LocalDate.now();
+        int y = (year == null) ? now.getYear() : year;
+        int m = (month == null) ? now.getMonthValue() : month;
+        if (m < 1 || m > 12) {
+            throw new IllegalArgumentException("month must be between 1 and 12");
+        }
+        return service.getMonthSchedule(y, m);
+    }
+
     // GET /api/mlb/game/{gamePk}
     @GetMapping("/game/{gamePk}")
     public MlbGameDetail gameDetail(@PathVariable long gamePk) {

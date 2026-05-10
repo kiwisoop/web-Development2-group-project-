@@ -9,6 +9,8 @@ public class MlbGame {
     private String gameDate;
     private String homeTeam;
     private String awayTeam;
+    private Long homeTeamId;
+    private Long awayTeamId;
     private Integer homeScore;
     private Integer awayScore;
     private String venue;

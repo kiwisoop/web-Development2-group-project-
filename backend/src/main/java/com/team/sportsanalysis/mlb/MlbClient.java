@@ -34,10 +34,42 @@ public class MlbClient {
         return rest.getForObject(url, String.class);
     }
 
+    public String fetchScheduleRangeJson(String startDate, String endDate) {
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/schedule")
+                .queryParam("sportId", 1)
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate)
+                .queryParam("hydrate", "team,linescore")
+                .toUriString();
+        return rest.getForObject(url, String.class);
+    }
+
     // The live feed lives under /api/v1.1, not /api/v1, so build from the host.
     public String fetchLiveFeedJson(long gamePk) {
         String host = baseUrl.replaceFirst("/api/v\\d+(\\.\\d+)?$", "");
         String url = host + "/api/v1.1/game/" + gamePk + "/feed/live";
+        return rest.getForObject(url, String.class);
+    }
+
+    public String fetchStandingsJson(int season) {
+        // 103 = AL, 104 = NL
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/standings")
+                .queryParam("leagueId", "103,104")
+                .queryParam("season", season)
+                .queryParam("standingsTypes", "regularSeason")
+                .queryParam("hydrate", "team,league,division")
+                .toUriString();
+        return rest.getForObject(url, String.class);
+    }
+
+    public String fetchStatLeadersJson(String statGroup, String leaderCategory, int season, int limit) {
+        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/stats/leaders")
+                .queryParam("leaderCategories", leaderCategory)
+                .queryParam("statGroup", statGroup)
+                .queryParam("season", season)
+                .queryParam("sportId", 1)
+                .queryParam("limit", limit)
+                .toUriString();
         return rest.getForObject(url, String.class);
     }
 }

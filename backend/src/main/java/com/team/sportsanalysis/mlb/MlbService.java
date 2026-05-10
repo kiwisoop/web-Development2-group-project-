@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,18 @@ public class MlbService {
 
     public List<MlbGame> getSchedule(String date) {
         String json = client.fetchScheduleJson(date);
+        return parseSchedule(json);
+    }
+
+    public List<MlbGame> getMonthSchedule(int year, int month) {
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
+        String json = client.fetchScheduleRangeJson(start.toString(), end.toString());
+        return parseSchedule(json);
+    }
+
+    private List<MlbGame> parseSchedule(String json) {
         List<MlbGame> result = new ArrayList<>();
         if (json == null || json.isBlank()) return result;
 
@@ -37,6 +51,8 @@ public class MlbService {
                             .gameDate(g.path("gameDate").asText(null))
                             .homeTeam(home.path("team").path("name").asText(null))
                             .awayTeam(away.path("team").path("name").asText(null))
+                            .homeTeamId(optLong(home.path("team").path("id")))
+                            .awayTeamId(optLong(away.path("team").path("id")))
                             .homeScore(home.has("score") ? home.get("score").asInt() : null)
                             .awayScore(away.has("score") ? away.get("score").asInt() : null)
                             .venue(g.path("venue").path("name").asText(null))
@@ -48,6 +64,15 @@ public class MlbService {
             throw new RuntimeException("Failed to parse MLB schedule: " + e.getMessage(), e);
         }
         return result;
+    }
+
+    private Long optLong(JsonNode n) {
+        if (n == null || n.isMissingNode() || n.isNull()) return null;
+        if (n.isNumber()) return n.asLong();
+        if (n.isTextual()) {
+            try { return Long.parseLong(n.asText()); } catch (Exception ignored) { return null; }
+        }
+        return null;
     }
 
     public MlbGameDetail getGameDetail(long gamePk) {
