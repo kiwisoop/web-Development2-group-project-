@@ -1,0 +1,50 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #0f1115; color: #e6e8eb; }
+a { color: #6aa6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+.navbar { display: flex; gap: 16px; align-items: center; padding: 12px 24px; background: #161a22; border-bottom: 1px solid #232833; }
+.navbar .brand { font-weight: 700; font-size: 18px; color: #fff; }
+.navbar .spacer { flex: 1; }
+.navbar a { color: #cbd1da; }
+.navbar a.active { color: #fff; font-weight: 600; }
+
+.grid { display: grid; gap: 16px; }
+.grid.cards-3 { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+.card { background: #161a22; border: 1px solid #232833; border-radius: 10px; padding: 16px; }
+.card h3 { margin: 0 0 8px; }
+.muted { color: #8a93a3; font-size: 13px; }
+
+.btn { display: inline-block; padding: 8px 14px; border-radius: 6px; border: 1px solid #2c3340;
+       background: #1d2230; color: #e6e8eb; cursor: pointer; font-size: 14px; }
+.btn:hover { background: #262d3e; }
+.btn.primary { background: #2a5cff; border-color: #2a5cff; color: #fff; }
+.btn.danger  { background: #b03a3a; border-color: #b03a3a; color: #fff; }
+
+.match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;
+             border: 1px solid #232833; border-radius: 8px; background: #131722; margin-bottom: 8px; }
+.match-row .teams { font-weight: 600; }
+.match-row .meta { color: #8a93a3; font-size: 13px; }
+
+.score { font-size: 22px; font-weight: 700; }
+
+table.stats { width: 100%; border-collapse: collapse; }
+table.stats th, table.stats td { border-bottom: 1px solid #232833; padding: 8px; text-align: left; }
+
+.timeline { list-style: none; padding-left: 0; }
+.timeline li { padding: 8px 0; border-bottom: 1px dashed #232833; }
+.timeline .t { color: #8a93a3; margin-right: 8px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tabs a { padding: 8px 12px; border-radius: 6px; background: #161a22; border: 1px solid #232833; }
+.tabs a.active { background: #2a5cff; color: #fff; border-color: #2a5cff; }
+
+.form { max-width: 360px; display: grid; gap: 10px; }
+.form input { padding: 10px; border-radius: 6px; border: 1px solid #2c3340; background: #0f1115; color: #fff; }
+
+.hero { padding: 32px 0 24px; }
+.hero h1 { font-size: 32px; margin: 0 0 8px; }
+.hero p { color: #aab1c0; }
