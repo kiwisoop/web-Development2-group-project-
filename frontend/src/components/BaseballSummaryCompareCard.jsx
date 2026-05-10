@@ -5,52 +5,79 @@ import {
   fetchMlbSummaryCompare,
 } from '../api/mlb'
 
-const MODE_LABEL = {
-  MOCK: 'MOCK · 규칙 기반 요약',
-  GEMINI: 'GEMINI · 외부 AI API 요약',
+const PANELS = {
+  MOCK: {
+    title: 'MOCK',
+    subtitle: 'Rule-based summary (template)',
+    badgeColor: '#7dd3fc',
+  },
+  GEMINI: {
+    title: 'GEMINI',
+    subtitle: 'External AI API summary (Gemini 2.5 Flash)',
+    badgeColor: '#fbbf24',
+  },
 }
 
-function SummaryPanel({ title, badgeColor, data, loading }) {
+function Section({ label, value }) {
   return (
-    <div className="card" style={{ padding: 14, minHeight: 180, flex: 1, minWidth: 280 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+    <div className="ai-section">
+      <div className="ai-label">{label}</div>
+      <div className="ai-body">{value || '-'}</div>
+    </div>
+  )
+}
+
+function SummaryPanel({ kind, data, loading }) {
+  const meta = PANELS[kind]
+  return (
+    <div
+      className="card"
+      style={{
+        padding: 18,
+        minHeight: 220,
+        flex: 1,
+        minWidth: 300,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+      }}
+    >
+      <div>
         <span
           style={{
-            background: badgeColor,
+            background: meta.badgeColor,
             color: '#0b0d11',
-            padding: '2px 8px',
+            padding: '3px 10px',
             borderRadius: 4,
             fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: 0.5,
+            fontWeight: 800,
+            letterSpacing: 0.6,
           }}
         >
-          {title}
+          {meta.title}
         </span>
+        <div className="muted" style={{ marginTop: 6, fontSize: 12 }}>
+          {meta.subtitle}
+        </div>
       </div>
 
-      {loading && <p className="muted">생성 중...</p>}
+      {loading && <p className="muted" style={{ margin: 0 }}>Generating...</p>}
 
-      {!loading && !data && <p className="muted">아직 생성되지 않았습니다.</p>}
+      {!loading && !data && (
+        <p className="muted" style={{ margin: 0 }}>Not generated yet.</p>
+      )}
 
       {!loading && data && data.errorMessage && (
-        <p style={{ color: 'salmon', whiteSpace: 'pre-wrap' }}>오류: {data.errorMessage}</p>
+        <p style={{ color: 'salmon', whiteSpace: 'pre-wrap', margin: 0 }}>
+          Error: {data.errorMessage}
+        </p>
       )}
 
       {!loading && data && !data.errorMessage && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div>
-            <div className="meta" style={{ marginBottom: 4 }}>요약</div>
-            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{data.summaryText || '-'}</div>
-          </div>
-          <div>
-            <div className="meta" style={{ marginBottom: 4 }}>전술 분석</div>
-            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{data.tacticalAnalysis || '-'}</div>
-          </div>
-          <div>
-            <div className="meta" style={{ marginBottom: 4 }}>핵심 포인트</div>
-            <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{data.keyPoint || '-'}</div>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Section label="Summary" value={data.summaryText} />
+          <Section label="Tactical Analysis" value={data.tacticalAnalysis} />
+          <Section label="Key Point" value={data.keyPoint} />
         </div>
       )}
     </div>
@@ -72,7 +99,7 @@ export default function BaseballSummaryCompareCard({ gamePk }) {
       const data = await fetchMlbMockSummary(gamePk)
       setMock(data)
     } catch (e) {
-      setErr(e?.response?.data?.message || e.message || 'Mock 요약 실패')
+      setErr(e?.response?.data?.message || e.message || 'Mock summary failed')
     } finally {
       setLoadingMock(false)
     }
@@ -85,7 +112,7 @@ export default function BaseballSummaryCompareCard({ gamePk }) {
       const data = await fetchMlbGeminiSummary(gamePk)
       setGemini(data)
     } catch (e) {
-      setErr(e?.response?.data?.message || e.message || 'Gemini 요약 실패')
+      setErr(e?.response?.data?.message || e.message || 'Gemini summary failed')
     } finally {
       setLoadingGemini(false)
     }
@@ -100,7 +127,7 @@ export default function BaseballSummaryCompareCard({ gamePk }) {
       setMock(data?.mock || null)
       setGemini(data?.gemini || null)
     } catch (e) {
-      setErr(e?.response?.data?.message || e.message || '비교 요약 실패')
+      setErr(e?.response?.data?.message || e.message || 'Compare summary failed')
     } finally {
       setLoadingCompare(false)
       setLoadingMock(false)
@@ -109,53 +136,32 @@ export default function BaseballSummaryCompareCard({ gamePk }) {
   }
 
   return (
-    <div className="card" style={{ padding: 14, marginTop: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-        <h3 style={{ margin: 0 }}>AI 경기 요약 비교</h3>
+    <div className="card" style={{ padding: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+        <h3 style={{ margin: 0 }}>AI Game Summary Comparison</h3>
         <span className="spacer" style={{ flex: 1 }} />
-        <button
-          className="btn"
-          onClick={runMock}
-          disabled={loadingMock || loadingCompare}
-        >
-          {loadingMock && !loadingCompare ? 'Mock 생성 중...' : 'Generate Mock Summary'}
+        <button className="btn" onClick={runMock} disabled={loadingMock || loadingCompare}>
+          {loadingMock && !loadingCompare ? 'Generating Mock...' : 'Generate Mock Summary'}
         </button>
-        <button
-          className="btn"
-          onClick={runGemini}
-          disabled={loadingGemini || loadingCompare}
-        >
-          {loadingGemini && !loadingCompare ? 'Gemini 생성 중...' : 'Generate Gemini Summary'}
+        <button className="btn" onClick={runGemini} disabled={loadingGemini || loadingCompare}>
+          {loadingGemini && !loadingCompare ? 'Generating Gemini...' : 'Generate Gemini Summary'}
         </button>
-        <button
-          className="btn primary"
-          onClick={runCompare}
-          disabled={loadingCompare}
-        >
-          {loadingCompare ? '비교 중...' : 'Compare Both'}
+        <button className="btn primary" onClick={runCompare} disabled={loadingCompare}>
+          {loadingCompare ? 'Comparing...' : 'Compare Both'}
         </button>
       </div>
 
-      <div className="meta" style={{ marginBottom: 10 }}>
-        MOCK은 규칙 기반(코드로 작성된 템플릿) 요약이고, GEMINI는 외부 AI API(Gemini 2.5 Flash)를 호출한 요약입니다.
-        Gemini 사용을 위해서는 백엔드 환경 변수 <code>GEMINI_API_KEY</code>가 필요합니다.
+      <div className="meta" style={{ marginBottom: 16, lineHeight: 1.7 }}>
+        <strong>MOCK</strong> is a rule-based summary built from a code template.
+        <strong> GEMINI</strong> calls an external AI API (Gemini 2.5 Flash) for the summary.
+        Gemini requires backend env <code>GEMINI_API_KEY</code> to be set.
       </div>
 
-      {err && <p style={{ color: 'salmon' }}>오류: {err}</p>}
+      {err && <p style={{ color: 'salmon' }}>Error: {err}</p>}
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <SummaryPanel
-          title={MODE_LABEL.MOCK}
-          badgeColor="#7dd3fc"
-          data={mock}
-          loading={loadingMock}
-        />
-        <SummaryPanel
-          title={MODE_LABEL.GEMINI}
-          badgeColor="#fbbf24"
-          data={gemini}
-          loading={loadingGemini}
-        />
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <SummaryPanel kind="MOCK" data={mock} loading={loadingMock} />
+        <SummaryPanel kind="GEMINI" data={gemini} loading={loadingGemini} />
       </div>
     </div>
   )

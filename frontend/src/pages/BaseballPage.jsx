@@ -10,6 +10,20 @@ const today = () => {
   return `${d.getFullYear()}-${m}-${day}`
 }
 
+function statusBadge(status) {
+  const s = (status || '').toLowerCase()
+  if (s.includes('final') || s.includes('completed') || s.includes('game over')) {
+    return { label: 'Final', cls: 'final' }
+  }
+  if (s.includes('in progress') || s.includes('live') || s.includes('manager challenge')) {
+    return { label: 'Live', cls: 'live' }
+  }
+  if (s.includes('pre-game') || s.includes('warmup') || s.includes('pre game')) {
+    return { label: 'Pre-Game', cls: 'pre' }
+  }
+  return { label: 'Scheduled', cls: 'scheduled' }
+}
+
 export default function BaseballPage() {
   const [date, setDate] = useState(today())
   const [games, setGames] = useState([])
@@ -32,12 +46,24 @@ export default function BaseballPage() {
 
   return (
     <div>
-      <h2>Baseball (MLB)</h2>
-      <p className="muted">Live schedule pulled from the MLB Stats API via our Spring Boot backend.</p>
+      <h2 style={{ marginBottom: 4 }}>Baseball (MLB)</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        Live schedule pulled from the MLB Stats API via our Spring Boot backend.
+      </p>
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '12px 0' }}>
-        <label className="muted">Date:</label>
+      <div
+        className="card"
+        style={{
+          display: 'flex',
+          gap: 10,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          margin: '12px 0 16px',
+        }}
+      >
+        <label className="muted" htmlFor="bb-date">Date</label>
         <input
+          id="bb-date"
           type="date"
           value={date}
           onChange={e => setDate(e.target.value)}
@@ -47,33 +73,51 @@ export default function BaseballPage() {
           {loading ? 'Loading...' : 'Fetch MLB Games'}
         </button>
         <button className="btn" onClick={load} disabled={loading} title="Manual refresh">Refresh</button>
+        <span className="spacer" style={{ flex: 1 }} />
+        {loaded && !loading && (
+          <span className="muted">{games.length} game{games.length === 1 ? '' : 's'} on {date}</span>
+        )}
       </div>
 
       {err && <p style={{ color: 'salmon' }}>Error: {err}</p>}
 
       {loaded && !loading && games.length === 0 && (
-        <p className="muted">No MLB games found for {date}.</p>
+        <div className="notice" style={{ textAlign: 'center', padding: 24 }}>
+          No MLB games found for <strong>{date}</strong>. Try another date.
+        </div>
       )}
 
-      {games.map(g => {
-        const time = g.gameDate ? new Date(g.gameDate).toLocaleString() : ''
-        return (
-          <div key={g.gamePk} className="match-row">
-            <div>
-              <div className="teams">{g.awayTeam} @ {g.homeTeam}</div>
-              <div className="meta">
-                #{g.gamePk} • {time} • {g.venue || 'TBD'} • {g.status || ''}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {games.map(g => {
+          const time = g.gameDate ? new Date(g.gameDate).toLocaleString() : ''
+          const badge = statusBadge(g.status)
+          return (
+            <div key={g.gamePk} className="match-row" style={{ padding: '14px 16px' }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <div className="teams">{g.awayTeam} @ {g.homeTeam}</div>
+                  <span className={`status-badge sm ${badge.cls}`}>{badge.label}</span>
+                </div>
+                <div className="meta" style={{ marginTop: 6 }}>
+                  #{g.gamePk} • {time} • {g.venue || 'TBD'}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginLeft: 12 }}>
+                <div className="score" style={{ minWidth: 80, textAlign: 'right' }}>
+                  {g.awayScore ?? '-'} : {g.homeScore ?? '-'}
+                </div>
+                <Link
+                  to={`/baseball/${g.gamePk}`}
+                  className="btn primary"
+                  style={{ minWidth: 88, textAlign: 'center' }}
+                >
+                  Detail
+                </Link>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div className="score">
-                {g.awayScore ?? '-'} : {g.homeScore ?? '-'}
-              </div>
-              <Link to={`/baseball/${g.gamePk}`} className="btn">Detail</Link>
-            </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }
