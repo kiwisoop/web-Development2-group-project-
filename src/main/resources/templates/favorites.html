@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('관심 팀')}"></head>
+<body>
+<header th:replace="~{fragments/nav :: nav}"></header>
+<main class="container">
+    <div class="page-head">
+        <p class="eyebrow">Favorites</p>
+        <h1 class="page-title">관심 팀</h1>
+        <p class="page-desc">내가 등록한 팀을 관리하고 관련 경기를 빠르게 확인하세요.</p>
+    </div>
+
+    <section class="card table-card">
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                <tr><th>팀</th><th>종목</th><th>리그</th><th>국가</th><th>등록일</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="f : ${favorites}">
+                    <td><strong th:text="${f.team?.teamName} ?: ${f.teamName}">팀</strong></td>
+                    <td th:text="${f.sportType}">SPORT</td>
+                    <td th:text="${f.team?.league?.leagueName}">League</td>
+                    <td th:text="${f.team?.country}">KR</td>
+                    <td th:text="${f.createdAt}">2026-05-12</td>
+                    <td>
+                        <form th:action="@{/favorites/remove}" method="post" style="display:inline">
+                            <input type="hidden" name="favoriteId" th:value="${f.id}">
+                            <button class="btn btn-danger" type="submit">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${favorites == null or #lists.isEmpty(favorites)}">
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <div class="empty-icon">☆</div>
+                            아직 즐겨찾기에 등록된 팀이 없습니다.<br>
+                            <a class="btn btn-secondary" th:href="@{/matches}" style="margin-top:10px">경기 보러가기</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

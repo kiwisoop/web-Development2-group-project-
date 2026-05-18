@@ -1,0 +1,41 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '../hooks/useAuth';
+import Layout from '../components/Layout';
+import ProtectedRoute from './ProtectedRoute';
+import AdminRoute from './AdminRoute';
+import HomePage from '../pages/HomePage';
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
+import MatchListPage from '../pages/MatchListPage';
+import MatchDetailPage from '../pages/MatchDetailPage';
+import FavoritesPage from '../pages/FavoritesPage';
+import SportsPage from '../pages/SportsPage';
+import RankingsPage from '../pages/RankingsPage';
+import AdminDashboardPage from '../pages/AdminDashboardPage';
+import AdminApiTestPage from '../pages/AdminApiTestPage';
+import ErrorPage from '../pages/ErrorPage';
+
+export default function AppRouter() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="matches" element={<MatchListPage />} />
+            <Route path="matches/:matchId" element={<MatchDetailPage />} />
+            <Route path="favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+            <Route path="sports/:sportType" element={<SportsPage />} />
+            <Route path="rankings" element={<Navigate to="/rankings/soccer" replace />} />
+            <Route path="rankings/:sportType" element={<RankingsPage />} />
+            <Route path="admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+            <Route path="admin/api-test" element={<AdminRoute><AdminApiTestPage /></AdminRoute>} />
+            <Route path="*" element={<ErrorPage />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('경기 목록')}"></head>
+<body>
+<header th:replace="~{fragments/nav :: nav}"></header>
+<main class="container">
+    <div class="page-head">
+        <p class="eyebrow">Matches</p>
+        <h1 class="page-title">경기 목록</h1>
+        <p class="page-desc">종목, 리그, 팀, 날짜, 상태, 키워드로 경기를 빠르게 찾아보세요.</p>
+    </div>
+
+    <form class="card filter-bar" th:action="@{/matches}" th:object="${condition}" method="get">
+        <div class="form-group">
+            <label class="form-label">종목</label>
+            <select class="select" th:field="*{sportType}">
+                <option value="">전체</option>
+                <option th:each="s : ${sports}" th:value="${s}" th:text="${s}">SOCCER</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">날짜</label>
+            <input class="input" type="date" th:field="*{date}">
+        </div>
+        <div class="form-group">
+            <label class="form-label">연도</label>
+            <input class="input" type="number" th:field="*{year}" min="1900" max="2100" placeholder="2026">
+        </div>
+        <div class="form-group">
+            <label class="form-label">월</label>
+            <input class="input" type="number" th:field="*{month}" min="1" max="12" placeholder="5">
+        </div>
+        <div class="form-group">
+            <label class="form-label">상태</label>
+            <select class="select" th:field="*{status}">
+                <option value="">전체</option>
+                <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}">LIVE</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">리그</label>
+            <select class="select" th:field="*{leagueId}">
+                <option value="">전체</option>
+                <option th:each="l : ${leagues}" th:value="${l.id}" th:text="${l.leagueName}">League</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">팀</label>
+            <select class="select" th:field="*{teamId}">
+                <option value="">전체</option>
+                <option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.teamName}">Team</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">검색</label>
+            <input class="input" type="text" th:field="*{keyword}" placeholder="팀/리그/경기장">
+        </div>
+        <div class="form-group">
+            <label class="form-label">정렬</label>
+            <select class="select" th:field="*{sort}">
+                <option value="latest">최신순</option>
+                <option value="oldest">오래된순</option>
+                <option value="liveFirst">LIVE 우선</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">개수</label>
+            <select class="select" th:field="*{size}">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        <input type="hidden" name="page" value="0">
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">검색</button>
+            <a class="btn btn-outline" th:href="@{/matches}">초기화</a>
+        </div>
+    </form>
+
+    <section class="section">
+        <div class="card table-card">
+            <div class="table-scroll">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>종목</th><th>리그</th><th>경기일</th><th>경기</th><th>스코어</th><th>상태</th><th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${matches}">
+                        <td th:text="${m.sportType}">SOCCER</td>
+                        <td th:text="${m.league?.leagueName}">K League</td>
+                        <td th:text="${m.matchDate}">2026-05-12</td>
+                        <td>
+                            <strong>
+                                <span th:text="${m.homeTeam?.teamName}">Home</span>
+                                vs
+                                <span th:text="${m.awayTeam?.teamName}">Away</span>
+                            </strong>
+                        </td>
+                        <td>
+                            <a th:href="@{|/matches/${m.id}|}">
+                                <span th:text="${m.homeScore} ?: '-'">-</span> :
+                                <span th:text="${m.awayScore} ?: '-'">-</span>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="' status-' + ${#strings.toLowerCase(m.status)}"
+                                  th:text="${m.status}">LIVE</span>
+                        </td>
+                        <td><a class="btn btn-secondary" th:href="@{|/matches/${m.id}|}">상세</a></td>
+                    </tr>
+                    <tr th:if="${matches == null or #lists.isEmpty(matches)}">
+                        <td colspan="7" class="empty-state">검색 결과가 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <span class="page-chip" style="min-width:auto; padding:0 14px; background:transparent; border:0">
+                페이지 <strong th:text="${matchesPage.number + 1}">1</strong> /
+                <span th:text="${matchesPage.totalPages == 0 ? 1 : matchesPage.totalPages}">1</span>
+                (총 <span th:text="${matchesPage.totalElements}">0</span>건)
+            </span>
+
+            <form th:action="@{/matches}" method="get" style="display:inline">
+                <input type="hidden" name="sportType" th:value="${condition.sportType}">
+                <input type="hidden" name="date"      th:value="${condition.date}">
+                <input type="hidden" name="year"      th:value="${condition.year}">
+                <input type="hidden" name="month"     th:value="${condition.month}">
+                <input type="hidden" name="status"    th:value="${condition.status}">
+                <input type="hidden" name="leagueId"  th:value="${condition.leagueId}">
+                <input type="hidden" name="teamId"    th:value="${condition.teamId}">
+                <input type="hidden" name="keyword"   th:value="${condition.keyword}">
+                <input type="hidden" name="sort"      th:value="${condition.sort}">
+                <input type="hidden" name="size"      th:value="${condition.size}">
+                <input type="hidden" name="page"      th:value="${matchesPage.number - 1}">
+                <button class="btn btn-outline" type="submit" th:disabled="${!matchesPage.hasPrevious()}">‹ 이전</button>
+            </form>
+
+            <form th:action="@{/matches}" method="get" style="display:inline">
+                <input type="hidden" name="sportType" th:value="${condition.sportType}">
+                <input type="hidden" name="date"      th:value="${condition.date}">
+                <input type="hidden" name="year"      th:value="${condition.year}">
+                <input type="hidden" name="month"     th:value="${condition.month}">
+                <input type="hidden" name="status"    th:value="${condition.status}">
+                <input type="hidden" name="leagueId"  th:value="${condition.leagueId}">
+                <input type="hidden" name="teamId"    th:value="${condition.teamId}">
+                <input type="hidden" name="keyword"   th:value="${condition.keyword}">
+                <input type="hidden" name="sort"      th:value="${condition.sort}">
+                <input type="hidden" name="size"      th:value="${condition.size}">
+                <input type="hidden" name="page"      th:value="${matchesPage.number + 1}">
+                <button class="btn btn-outline" type="submit" th:disabled="${!matchesPage.hasNext()}">다음 ›</button>
+            </form>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

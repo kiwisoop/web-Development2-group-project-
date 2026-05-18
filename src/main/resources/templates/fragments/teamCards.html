@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="cards(teams, favoriteTeamIds, loginUserId)" class="grid grid-3">
+    <article class="card sport-card" th:each="t : ${teams}">
+        <div class="team-logo" th:text="${t.shortName != null ? #strings.substring(t.shortName,0,1) : '?'}">T</div>
+        <div>
+            <h3 th:text="${t.teamName}">Team</h3>
+            <p>
+                <span th:text="${t.shortName}">SHORT</span>
+                · <span th:text="${t.league?.leagueName}">League</span>
+                <span th:if="${t.country}"> · <span th:text="${t.country}">KR</span></span>
+            </p>
+            <div style="margin-top:12px">
+                <span th:if="${loginUserId != null}">
+                    <span class="status-badge status-done"
+                          th:if="${favoriteTeamIds != null and #lists.contains(favoriteTeamIds, t.id)}">관심 팀</span>
+                    <form th:unless="${favoriteTeamIds != null and #lists.contains(favoriteTeamIds, t.id)}"
+                          th:action="@{/favorites/add}" method="post" style="display:inline">
+                        <input type="hidden" name="teamId" th:value="${t.id}">
+                        <button class="btn btn-secondary" type="submit">관심 팀 추가</button>
+                    </form>
+                </span>
+                <a class="btn btn-outline" th:if="${loginUserId == null}" th:href="@{/login}">로그인 후 추가</a>
+            </div>
+        </div>
+    </article>
+</div>
+</body>
+</html>
