@@ -5,6 +5,8 @@ import com.sport.web_sport.sports.dto.response.MatchDetailFullResponse;
 import com.sport.web_sport.sports.dto.response.MatchEventResponse;
 import com.sport.web_sport.sports.dto.response.MatchResponse;
 import com.sport.web_sport.sports.dto.response.MatchStatResponse;
+import com.sport.web_sport.common.type.SportType;
+import com.sport.web_sport.sports.dto.response.MatchSectionsResponse;
 import com.sport.web_sport.sports.dto.response.PageResponse;
 import com.sport.web_sport.sports.entity.Match;
 import com.sport.web_sport.sports.service.MatchService;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -54,5 +57,12 @@ public class MatchApiController {
     @GetMapping("/{id}/detail-full")
     public MatchDetailFullResponse detailFull(@PathVariable Long id, HttpSession session) {
         return matchService.findDetailFull(id, session);
+    }
+
+    @GetMapping("/sections")
+    public MatchSectionsResponse sections(
+            @RequestParam(required = false) SportType sportType,
+            @RequestParam(required = false) String leagueName) {
+        return matchService.findMatchSections(sportType, leagueName);
     }
 }

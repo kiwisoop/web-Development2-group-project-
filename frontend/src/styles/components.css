@@ -1676,3 +1676,95 @@
   color: var(--primary);
   line-height: 1;
 }
+
+/* ===== Match Carousel ===== */
+.match-section-block {
+  margin-bottom: 2rem;
+}
+
+.match-section-block-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 0.75rem;
+}
+
+.match-carousel-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.match-carousel {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.match-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.match-carousel-arrow {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--color-text);
+  transition: background 0.15s, opacity 0.15s;
+  padding: 0;
+}
+
+.match-carousel-arrow:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.match-carousel-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel-empty {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+/* ===== Compact Match Card ===== */
+.match-card-compact {
+  width: 220px;
+  flex-shrink: 0;
+  padding: 0.875rem;
+}
+
+.match-card-compact .team-name {
+  max-width: 70px;
+  font-size: 0.8rem;
+}
+
+.match-card-compact .score {
+  font-size: 1rem;
+}
+
+.match-card-compact .match-meta {
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}

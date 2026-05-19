@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAdminDashboard } from '../api/adminApi';
+import { syncMlbSchedule } from '../api/mlbApi';
 import AdminStatCard from '../components/AdminStatCard';
 
 const SPORT_LABELS = { SOCCER: '축구', BASEBALL: '야구', ESPORTS: 'e스포츠' };
@@ -14,6 +15,25 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [syncStartDate, setSyncStartDate] = useState('2024-04-01');
+  const [syncEndDate, setSyncEndDate] = useState('2024-04-07');
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+  const [syncError, setSyncError] = useState(null);
+
+  const handleMlbSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    setSyncError(null);
+    try {
+      const res = await syncMlbSchedule(syncStartDate, syncEndDate);
+      setSyncResult(res.data.data);
+    } catch (err) {
+      setSyncError(err.response?.data?.message || 'MLB 동기화 실패');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -139,6 +159,49 @@ export default function AdminDashboardPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="admin-section">
+        <h2 className="admin-section-title">MLB 경기 데이터 동기화</h2>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span>시작일</span>
+            <input
+              type="date"
+              value={syncStartDate}
+              onChange={e => setSyncStartDate(e.target.value)}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span>종료일</span>
+            <input
+              type="date"
+              value={syncEndDate}
+              onChange={e => setSyncEndDate(e.target.value)}
+            />
+          </label>
+          <button onClick={handleMlbSync} disabled={syncing}>
+            {syncing ? '동기화 중...' : 'MLB 일정 가져오기'}
+          </button>
+        </div>
+        {syncResult && (
+          <>
+            <ul className="count-list">
+              <li className="count-list-item"><span>가져온 경기</span><span className="count-badge">{syncResult.fetchedGames}</span></li>
+              <li className="count-list-item"><span>신규 생성</span><span className="count-badge">{syncResult.createdMatches}</span></li>
+              <li className="count-list-item"><span>업데이트</span><span className="count-badge">{syncResult.updatedMatches}</span></li>
+              <li className="count-list-item"><span>신규 팀</span><span className="count-badge">{syncResult.createdTeams}</span></li>
+              <li className="count-list-item"><span>건너뜀</span><span className="count-badge">{syncResult.skippedGames}</span></li>
+            </ul>
+            <a
+              href={`/matches?sportType=BASEBALL&year=${syncStartDate.substring(0, 4)}&month=${parseInt(syncStartDate.substring(5, 7), 10)}`}
+              style={{ display: 'inline-block', marginTop: '0.5rem' }}
+            >
+              동기화된 MLB 경기 보기
+            </a>
+          </>
+        )}
+        {syncError && <div className="error-text">{syncError}</div>}
       </section>
     </div>
   );

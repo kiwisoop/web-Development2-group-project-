@@ -19,13 +19,16 @@ function formatDate(dateStr) {
   });
 }
 
-export default function MatchCard({ match }) {
+export default function MatchCard({ match, compact }) {
   const navigate = useNavigate();
   const hasScore = match.homeScore !== null && match.homeScore !== undefined
     && match.awayScore !== null && match.awayScore !== undefined;
 
   return (
-    <div className="match-card card" onClick={() => navigate(`/matches/${match.id}`)}>
+    <div
+      className={`match-card card${compact ? ' match-card-compact' : ''}`}
+      onClick={() => navigate(`/matches/${match.id}`)}
+    >
       <div className="match-card-header">
         <span className="sport-tag">{SPORT_LABELS[match.sportType] || match.sportType}</span>
         <StatusBadge status={match.status} />

@@ -5,9 +5,12 @@ import com.sport.web_sport.analysis.service.AnalysisService;
 import com.sport.web_sport.common.error.BusinessException;
 import com.sport.web_sport.common.type.AnalysisProvider;
 import com.sport.web_sport.common.type.AnalysisStatus;
+import com.sport.web_sport.common.type.MatchStatus;
+import com.sport.web_sport.common.type.SportType;
 import com.sport.web_sport.favorite.service.FavoriteTeamService;
 import com.sport.web_sport.sports.dto.MatchSearchCondition;
 import com.sport.web_sport.sports.dto.response.AnalysisResponse;
+import com.sport.web_sport.sports.dto.response.MatchSectionsResponse;
 import com.sport.web_sport.sports.dto.response.LeagueResponse;
 import com.sport.web_sport.sports.dto.response.MatchDetailFullResponse;
 import com.sport.web_sport.sports.dto.response.MatchEventResponse;
@@ -133,6 +136,28 @@ public class MatchService {
                 condition.getSportType(), condition.getStatus(),
                 condition.getLeagueId(), condition.getTeamId(),
                 start, end, keyword, pageable);
+    }
+
+    public MatchSectionsResponse findMatchSections(SportType sportType, String leagueName) {
+        Pageable top6 = PageRequest.of(0, 6);
+
+        List<MatchResponse> live = matchRepository
+                .findTopByStatusDesc(sportType, leagueName, MatchStatus.LIVE, top6)
+                .stream().map(MatchResponse::from).toList();
+
+        List<MatchResponse> recent = matchRepository
+                .findTopByStatusDesc(sportType, leagueName, MatchStatus.FINAL, top6)
+                .stream().map(MatchResponse::from).toList();
+
+        List<MatchResponse> upcoming = matchRepository
+                .findTopByStatusAsc(sportType, leagueName, MatchStatus.SCHEDULED, top6)
+                .stream().map(MatchResponse::from).toList();
+
+        return MatchSectionsResponse.builder()
+                .liveMatches(live)
+                .recentFinishedMatches(recent)
+                .upcomingMatches(upcoming)
+                .build();
     }
 
     public List<Match> findMatchesByFavoriteTeams(HttpSession session) {

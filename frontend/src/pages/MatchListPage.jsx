@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getMatches } from '../api/matchApi';
 import MatchCard from '../components/MatchCard';
+import MatchSections from '../components/MatchSections';
 import LoadingState from '../components/LoadingState';
 import EmptyState from '../components/EmptyState';
 import ErrorBox from '../components/ErrorBox';
@@ -111,6 +112,14 @@ export default function MatchListPage() {
         <h1 className="page-title">경기 목록</h1>
         <p className="page-desc">종목, 상태, 키워드로 경기를 빠르게 찾아보세요.</p>
       </div>
+
+      <section className="admin-section" style={{ marginBottom: '2rem' }}>
+        <h2 className="admin-section-title">전체 경기 현황</h2>
+        <MatchSections
+          sportType={form.sportType || undefined}
+          leagueName={form.sportType === 'BASEBALL' ? 'MLB' : undefined}
+        />
+      </section>
 
       <form className="filter-bar card" onSubmit={handleSearch}>
         <div className="filter-group">

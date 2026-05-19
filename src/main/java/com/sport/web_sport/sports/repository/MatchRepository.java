@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findBySportType(SportType sportType);
@@ -20,6 +21,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findTop10ByOrderByMatchDateDesc();
     long countByStatus(MatchStatus status);
     long countBySportType(SportType sportType);
+    Optional<Match> findByExternalId(String externalId);
 
     @Query("select m from Match m join fetch m.homeTeam join fetch m.awayTeam order by m.matchDate desc")
     List<Match> findTop10WithTeams(Pageable pageable);
@@ -133,4 +135,34 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             """)
     List<Match> findBySportTypeAndStatusWithTeams(@Param("sportType") SportType sportType,
                                                   @Param("status") MatchStatus status);
+
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
+            join fetch m.league
+            where (:sportType is null or m.sportType = :sportType)
+              and (:leagueName is null or m.league.leagueName = :leagueName)
+              and m.status = :status
+            order by m.matchDate desc
+            """)
+    List<Match> findTopByStatusDesc(@Param("sportType") SportType sportType,
+                                    @Param("leagueName") String leagueName,
+                                    @Param("status") MatchStatus status,
+                                    Pageable pageable);
+
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
+            join fetch m.league
+            where (:sportType is null or m.sportType = :sportType)
+              and (:leagueName is null or m.league.leagueName = :leagueName)
+              and m.status = :status
+            order by m.matchDate asc
+            """)
+    List<Match> findTopByStatusAsc(@Param("sportType") SportType sportType,
+                                   @Param("leagueName") String leagueName,
+                                   @Param("status") MatchStatus status,
+                                   Pageable pageable);
 }
