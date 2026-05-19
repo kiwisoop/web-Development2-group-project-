@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import ScoreTicker from '../components/ScoreTicker';
+import FeaturedMatches from '../components/FeaturedMatches';
 
 const sports = [
   { id: 'soccer', name: '축구', emoji: '⚽', desc: '전 세계 축구 경기 일정과 결과를 확인하세요.' },
@@ -20,6 +22,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <ScoreTicker />
+
       <section className="sports-section">
         <h2 className="section-title">종목 선택</h2>
         <div className="sport-cards">
@@ -32,6 +36,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <FeaturedMatches />
     </div>
   );
 }

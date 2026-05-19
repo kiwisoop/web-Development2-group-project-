@@ -1,0 +1,190 @@
+.score-ticker {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.75rem 3rem;
+  margin-bottom: 2rem;
+}
+
+.ticker-track {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.ticker-track::-webkit-scrollbar {
+  display: none;
+}
+
+.ticker-card {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-right: 1px solid var(--color-border);
+  transition: background-color 0.15s;
+}
+
+.ticker-card:last-child {
+  border-right: none;
+}
+
+.ticker-card:hover {
+  background: var(--color-bg);
+}
+
+.ticker-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+}
+
+.ticker-status {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.ticker-status--final {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.ticker-status--live {
+  background: #fee2e2;
+  color: #dc2626;
+  animation: tickerLivePulse 1.5s ease-in-out infinite;
+}
+
+.ticker-status--scheduled {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+@keyframes tickerLivePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+.ticker-league {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticker-team-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ticker-team-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ticker-home-badge {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.ticker-team-score {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.ticker-team-score--lost {
+  color: #93c5fd;
+}
+
+.ticker-scheduled-time {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-align: right;
+  font-weight: 600;
+}
+
+.ticker-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background-color 0.15s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticker-arrow--left {
+  left: 0.6rem;
+}
+
+.ticker-arrow--right {
+  right: 0.6rem;
+}
+
+.ticker-arrow:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-50%) scale(1.05);
+}
+
+@media (max-width: 640px) {
+  .score-ticker {
+    padding: 0.5rem;
+  }
+
+  .ticker-card {
+    flex: 0 0 180px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .ticker-team-name {
+    font-size: 0.8rem;
+  }
+
+  .ticker-team-score {
+    font-size: 0.95rem;
+  }
+
+  .ticker-arrow {
+    display: none;
+  }
+}
