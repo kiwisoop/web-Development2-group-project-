@@ -133,4 +133,29 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             """)
     List<Match> findBySportTypeAndStatusWithTeams(@Param("sportType") SportType sportType,
                                                   @Param("status") MatchStatus status);
+
+    /** 추천팀: 해당 팀의 다음 예정(SCHEDULED) 경기를 이른 순으로. PageRequest.of(0,1) 로 1건 사용. */
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam ht
+            join fetch m.awayTeam at
+            where (ht.id = :teamId or at.id = :teamId)
+              and m.status = com.sport.web_sport.common.type.MatchStatus.SCHEDULED
+              and m.matchDate >= :now
+            order by m.matchDate asc
+            """)
+    List<Match> findUpcomingByTeamId(@Param("teamId") Long teamId,
+                                     @Param("now") LocalDateTime now,
+                                     Pageable pageable);
+
+    /** 추천팀: 해당 팀의 최근 종료(FINAL) 경기를 최신순으로. 최근 폼 계산에 사용. */
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam ht
+            join fetch m.awayTeam at
+            where (ht.id = :teamId or at.id = :teamId)
+              and m.status = com.sport.web_sport.common.type.MatchStatus.FINAL
+            order by m.matchDate desc
+            """)
+    List<Match> findRecentFinishedByTeamId(@Param("teamId") Long teamId, Pageable pageable);
 }
