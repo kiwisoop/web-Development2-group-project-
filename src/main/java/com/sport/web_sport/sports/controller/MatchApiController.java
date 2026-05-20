@@ -1,6 +1,7 @@
 package com.sport.web_sport.sports.controller;
 
 import com.sport.web_sport.baseball.dto.response.MlbGameDetailResponse;
+import com.sport.web_sport.baseball.dto.response.MlbPitchZoneResponse;
 import com.sport.web_sport.baseball.dto.response.MlbPlayByPlayResponse;
 import com.sport.web_sport.baseball.service.MlbGameDetailService;
 import com.sport.web_sport.sports.dto.MatchSearchCondition;
@@ -80,6 +81,12 @@ public class MatchApiController {
     @GetMapping("/{id}/mlb-play-by-play")
     public ResponseEntity<MlbPlayByPlayResponse> mlbPlayByPlay(@PathVariable Long id) {
         MlbPlayByPlayResponse response = mlbGameDetailService.getPlayByPlay(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/mlb-pitch-zone")
+    public ResponseEntity<MlbPitchZoneResponse> mlbPitchZone(@PathVariable Long id) {
+        MlbPitchZoneResponse response = mlbGameDetailService.getPitchZone(id);
         return ResponseEntity.ok(response);
     }
 }

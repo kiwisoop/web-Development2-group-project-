@@ -111,6 +111,81 @@ public class MlbSyncController {
         return ApiResponse.ok(result);
     }
 
+    @GetMapping("/test-pitches/{gamePk}")
+    public ApiResponse<Map<String, Object>> testPitches(
+            @PathVariable long gamePk,
+            HttpSession session) {
+        authService.requireAdmin(session);
+
+        JsonNode feed = mlbApiService.fetchGameFeedLive(gamePk);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("gamePk", gamePk);
+
+        if (feed == null) {
+            result.put("error", "feed/live returned null");
+            return ApiResponse.ok(result);
+        }
+
+        JsonNode allPlays = feed.path("liveData").path("plays").path("allPlays");
+        int totalPlays = allPlays.isArray() ? allPlays.size() : 0;
+        int totalPitches = 0;
+        int pitchesWithCoords = 0;
+        List<Map<String, Object>> samples = new ArrayList<>();
+
+        if (allPlays.isArray()) {
+            for (JsonNode play : allPlays) {
+                int inning = play.path("about").path("inning").asInt();
+                String halfInning = play.path("about").path("halfInning").asText();
+                String batterName = play.path("matchup").path("batter").path("fullName").asText();
+                String pitcherName = play.path("matchup").path("pitcher").path("fullName").asText();
+
+                for (JsonNode event : play.path("playEvents")) {
+                    if (!"pitch".equals(event.path("type").asText())) continue;
+                    totalPitches++;
+
+                    JsonNode pd = event.path("pitchData");
+                    JsonNode coords = pd.path("coordinates");
+                    JsonNode details = event.path("details");
+
+                    boolean hasCoords = !coords.isMissingNode() && !coords.isEmpty()
+                            && (coords.has("pX") || coords.has("x"));
+                    if (hasCoords) pitchesWithCoords++;
+
+                    if (hasCoords && samples.size() < 50) {
+                        Map<String, Object> s = new LinkedHashMap<>();
+                        s.put("inning", inning);
+                        s.put("halfInning", halfInning);
+                        s.put("batterName", batterName);
+                        s.put("pitcherName", pitcherName);
+                        s.put("pitchType", details.path("type").path("description").asText(null));
+                        s.put("pitchDescription", details.path("description").asText(null));
+                        s.put("callDescription", details.path("call").path("description").asText(null));
+                        s.put("isBall", details.path("isBall").asBoolean(false));
+                        s.put("isStrike", details.path("isStrike").asBoolean(false));
+                        s.put("isInPlay", details.path("isInPlay").asBoolean(false));
+                        s.put("zone", pd.has("zone") ? pd.path("zone").asInt() : null);
+                        s.put("strikeZoneTop", pd.has("strikeZoneTop") ? pd.path("strikeZoneTop").asDouble() : null);
+                        s.put("strikeZoneBottom", pd.has("strikeZoneBottom") ? pd.path("strikeZoneBottom").asDouble() : null);
+                        s.put("coordinatesPresent", true);
+                        s.put("x", coords.has("x") ? coords.path("x").asDouble() : null);
+                        s.put("y", coords.has("y") ? coords.path("y").asDouble() : null);
+                        s.put("plateX", coords.has("pX") ? coords.path("pX").asDouble() : null);
+                        s.put("plateZ", coords.has("pZ") ? coords.path("pZ").asDouble() : null);
+                        s.put("startSpeed", pd.has("startSpeed") ? pd.path("startSpeed").asDouble() : null);
+                        s.put("endSpeed", pd.has("endSpeed") ? pd.path("endSpeed").asDouble() : null);
+                        samples.add(s);
+                    }
+                }
+            }
+        }
+
+        result.put("totalPlays", totalPlays);
+        result.put("totalPitches", totalPitches);
+        result.put("pitchesWithCoordinates", pitchesWithCoords);
+        result.put("samplePitches", samples);
+        return ApiResponse.ok(result);
+    }
+
     private Map<String, Object> rhe(JsonNode node) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("runs", node.path("runs").asInt());

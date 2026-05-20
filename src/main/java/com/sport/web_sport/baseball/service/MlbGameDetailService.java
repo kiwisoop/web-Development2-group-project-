@@ -251,6 +251,86 @@ public class MlbGameDetailService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public MlbPitchZoneResponse getPitchZone(Long matchId) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found: " + matchId));
+
+        if (match.getSportType() != SportType.BASEBALL
+                || match.getExternalId() == null
+                || !match.getExternalId().startsWith("MLB-")) {
+            return MlbPitchZoneResponse.builder()
+                    .matchId(matchId)
+                    .gamePk(0)
+                    .pitches(List.of())
+                    .totalPitches(0)
+                    .build();
+        }
+
+        long gamePk = Long.parseLong(match.getExternalId().substring(4));
+        JsonNode feed = mlbApiService.fetchGameFeedLive(gamePk);
+
+        List<MlbPitchPointResponse> pitches = new ArrayList<>();
+        if (feed != null) {
+            JsonNode allPlays = feed.path("liveData").path("plays").path("allPlays");
+            if (allPlays.isArray()) {
+                for (JsonNode play : allPlays) {
+                    JsonNode about = play.path("about");
+                    int inning = about.path("inning").asInt(0);
+                    String halfInning = about.path("halfInning").asText("");
+                    String batterName = play.path("matchup").path("batter").path("fullName").asText("");
+                    String pitcherName = play.path("matchup").path("pitcher").path("fullName").asText("");
+
+                    JsonNode playEvents = play.path("playEvents");
+                    if (!playEvents.isArray()) continue;
+                    for (JsonNode event : playEvents) {
+                        if (!"pitch".equals(event.path("type").asText())) continue;
+
+                        JsonNode pd = event.path("pitchData");
+                        JsonNode coords = pd.path("coordinates");
+                        JsonNode details = event.path("details");
+
+                        if (coords.isMissingNode() || !coords.has("pX") || !coords.has("pZ")) continue;
+                        JsonNode pxNode = coords.path("pX");
+                        JsonNode pzNode = coords.path("pZ");
+                        if (pxNode.isNull() || pzNode.isNull()) continue;
+
+                        pitches.add(MlbPitchPointResponse.builder()
+                                .inning(inning)
+                                .halfInning(halfInning)
+                                .batterName(batterName)
+                                .pitcherName(pitcherName)
+                                .pitchType(details.path("type").path("description").asText(null))
+                                .pitchDescription(details.path("description").asText(null))
+                                .callDescription(details.path("call").path("description").asText(null))
+                                .isBall(details.path("isBall").asBoolean(false))
+                                .isStrike(details.path("isStrike").asBoolean(false))
+                                .isInPlay(details.path("isInPlay").asBoolean(false))
+                                .zone(pd.has("zone") && !pd.path("zone").isNull() ? pd.path("zone").asInt() : null)
+                                .plateX(pxNode.asDouble())
+                                .plateZ(pzNode.asDouble())
+                                .strikeZoneTop(pd.has("strikeZoneTop") && !pd.path("strikeZoneTop").isNull()
+                                        ? pd.path("strikeZoneTop").asDouble() : null)
+                                .strikeZoneBottom(pd.has("strikeZoneBottom") && !pd.path("strikeZoneBottom").isNull()
+                                        ? pd.path("strikeZoneBottom").asDouble() : null)
+                                .startSpeed(pd.has("startSpeed") && !pd.path("startSpeed").isNull()
+                                        ? pd.path("startSpeed").asDouble() : null)
+                                .endSpeed(pd.has("endSpeed") && !pd.path("endSpeed").isNull()
+                                        ? pd.path("endSpeed").asDouble() : null)
+                                .build());
+                    }
+                }
+            }
+        }
+
+        return MlbPitchZoneResponse.builder()
+                .matchId(matchId)
+                .gamePk(gamePk)
+                .pitches(pitches)
+                .totalPitches(pitches.size())
+                .build();
+    }
+
     private String statStr(JsonNode node, String field) {
         JsonNode val = node.path(field);
         if (val.isMissingNode() || val.isNull()) return "-";

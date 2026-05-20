@@ -17,12 +17,13 @@ import EmptyState from '../components/EmptyState';
 import ErrorBox from '../components/ErrorBox';
 import { getMlbGameDetail } from '../api/mlbApi';
 import MlbPlayByPlay from '../components/MlbPlayByPlay';
+import MlbStrikeZoneChart from '../components/MlbStrikeZoneChart';
 import TabBar from '../components/TabBar';
 import MlbLinescoreTable from '../components/MlbLinescoreTable';
 import MlbLineupTable from '../components/MlbLineupTable';
 import MlbBoxscoreTable from '../components/MlbBoxscoreTable';
 
-const MLB_TABS = ['경기정보', '라인업', '기록', '중계', '채팅'];
+const MLB_TABS = ['경기정보', '라인업', '기록', '중계', '존 차트', '채팅'];
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -326,6 +327,10 @@ export default function MatchDetailPage() {
 
             {activeTab === '중계' && (
               <MlbPlayByPlay matchId={matchId} isLive={match.status === 'LIVE'} />
+            )}
+
+            {activeTab === '존 차트' && (
+              <MlbStrikeZoneChart matchId={matchId} />
             )}
 
             {activeTab === '채팅' && (

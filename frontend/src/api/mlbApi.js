@@ -8,3 +8,6 @@ export const getMlbGameDetail = (matchId, signal) =>
 
 export const getMlbPlayByPlay = (matchId, signal) =>
   axiosInstance.get(`/matches/${matchId}/mlb-play-by-play`, { signal });
+
+export const getMlbPitchZone = (matchId, signal) =>
+  axiosInstance.get(`/matches/${matchId}/mlb-pitch-zone`, { signal });
