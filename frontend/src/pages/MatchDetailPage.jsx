@@ -15,6 +15,8 @@ import ChatBox from '../components/ChatBox';
 import LoadingState from '../components/LoadingState';
 import EmptyState from '../components/EmptyState';
 import ErrorBox from '../components/ErrorBox';
+import { getMlbGameDetail } from '../api/mlbApi';
+import MlbDetailSection from '../components/MlbDetailSection';
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -34,6 +36,10 @@ export default function MatchDetailPage() {
 
   const [prediction, setPrediction] = useState(null);
   const [predictionVoting, setPredictionVoting] = useState(false);
+
+  const [mlbDetail, setMlbDetail] = useState(null);
+  const [mlbDetailLoading, setMlbDetailLoading] = useState(false);
+  const [mlbDetailError, setMlbDetailError] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -77,6 +83,26 @@ export default function MatchDetailPage() {
       });
     return () => controller.abort();
   }, [matchId, isLoggedIn]);
+
+  useEffect(() => {
+    if (!data) return;
+    const match = data.match;
+    if (match.sportType !== 'BASEBALL' || match.league?.leagueName !== 'MLB') return;
+
+    const controller = new AbortController();
+    setMlbDetailLoading(true);
+    setMlbDetailError(null);
+    getMlbGameDetail(matchId, controller.signal)
+      .then(res => setMlbDetail(res.data))
+      .catch(err => {
+        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
+        setMlbDetailError('MLB 상세 데이터를 불러오지 못했습니다.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMlbDetailLoading(false);
+      });
+    return () => controller.abort();
+  }, [matchId, data]);
 
   const handleToggleFavorite = async (teamId) => {
     if (!isLoggedIn) {
@@ -164,6 +190,14 @@ export default function MatchDetailPage() {
       <Link to="/matches" className="back-link">← 경기 목록으로</Link>
 
       <Scoreboard match={match} />
+
+      {data.match.sportType === 'BASEBALL' && data.match.league?.leagueName === 'MLB' && (
+        <div className="detail-section">
+          {mlbDetailLoading && <div className="card" style={{ padding: '1rem', color: 'var(--color-text-muted)' }}>MLB 데이터 불러오는 중...</div>}
+          {mlbDetailError && <div className="card" style={{ padding: '1rem', color: 'var(--color-error)' }}>{mlbDetailError}</div>}
+          {!mlbDetailLoading && !mlbDetailError && <MlbDetailSection detail={mlbDetail} />}
+        </div>
+      )}
 
       {match.status === 'SCHEDULED' && (
         <div className="status-notice card">경기 시작 전입니다.</div>

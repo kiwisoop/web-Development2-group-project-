@@ -1,5 +1,7 @@
 package com.sport.web_sport.sports.controller;
 
+import com.sport.web_sport.baseball.dto.response.MlbGameDetailResponse;
+import com.sport.web_sport.baseball.service.MlbGameDetailService;
 import com.sport.web_sport.sports.dto.MatchSearchCondition;
 import com.sport.web_sport.sports.dto.response.MatchDetailFullResponse;
 import com.sport.web_sport.sports.dto.response.MatchEventResponse;
@@ -10,6 +12,7 @@ import com.sport.web_sport.sports.dto.response.MatchSectionsResponse;
 import com.sport.web_sport.sports.dto.response.PageResponse;
 import com.sport.web_sport.sports.entity.Match;
 import com.sport.web_sport.sports.service.MatchService;
+import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +31,7 @@ import java.util.List;
 public class MatchApiController {
 
     private final MatchService matchService;
+    private final MlbGameDetailService mlbGameDetailService;
 
     @GetMapping
     public PageResponse<MatchResponse> list(@ModelAttribute MatchSearchCondition condition) {
@@ -64,5 +68,11 @@ public class MatchApiController {
             @RequestParam(required = false) SportType sportType,
             @RequestParam(required = false) String leagueName) {
         return matchService.findMatchSections(sportType, leagueName);
+    }
+
+    @GetMapping("/{id}/mlb-detail")
+    public ResponseEntity<MlbGameDetailResponse> mlbDetail(@PathVariable Long id) {
+        MlbGameDetailResponse response = mlbGameDetailService.getDetail(id);
+        return ResponseEntity.ok(response);
     }
 }

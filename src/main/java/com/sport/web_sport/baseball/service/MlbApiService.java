@@ -12,6 +12,8 @@ public class MlbApiService {
 
     private static final String MLB_SCHEDULE_URL =
             "https://statsapi.mlb.com/api/v1/schedule";
+    private static final String MLB_GAME_URL = "https://statsapi.mlb.com/api/v1/game";
+    private static final String MLB_GAME_V11_URL = "https://statsapi.mlb.com/api/v1.1/game";
 
     private final RestClient restClient;
 
@@ -45,5 +47,26 @@ public class MlbApiService {
             }
         }
         return games;
+    }
+
+    public JsonNode fetchGameFeedLive(long gamePk) {
+        return restClient.get()
+                .uri(MLB_GAME_V11_URL + "/" + gamePk + "/feed/live")
+                .retrieve()
+                .body(JsonNode.class);
+    }
+
+    public JsonNode fetchGameBoxscore(long gamePk) {
+        return restClient.get()
+                .uri(MLB_GAME_URL + "/" + gamePk + "/boxscore")
+                .retrieve()
+                .body(JsonNode.class);
+    }
+
+    public JsonNode fetchGameLinescore(long gamePk) {
+        return restClient.get()
+                .uri(MLB_GAME_URL + "/" + gamePk + "/linescore")
+                .retrieve()
+                .body(JsonNode.class);
     }
 }

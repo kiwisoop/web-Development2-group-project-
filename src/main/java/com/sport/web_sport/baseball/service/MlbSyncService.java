@@ -59,14 +59,19 @@ public class MlbSyncService {
                 JsonNode homeNode = game.path("teams").path("home");
                 JsonNode awayNode = game.path("teams").path("away");
 
+                long homeTeamId = homeNode.path("team").path("id").asLong();
+                long awayTeamId = awayNode.path("team").path("id").asLong();
+
                 Team homeTeam = getOrCreateTeam(
                         homeNode.path("team").path("name").asText(),
                         homeNode.path("team").path("abbreviation").asText(),
+                        homeTeamId,
                         mlbLeague, createdTeams
                 );
                 Team awayTeam = getOrCreateTeam(
                         awayNode.path("team").path("name").asText(),
                         awayNode.path("team").path("abbreviation").asText(),
+                        awayTeamId,
                         mlbLeague, createdTeams
                 );
 
@@ -133,16 +138,29 @@ public class MlbSyncService {
                         .build()));
     }
 
-    private Team getOrCreateTeam(String teamName, String abbreviation, League league, int[] newCount) {
+    private Team getOrCreateTeam(String teamName, String abbreviation,
+                                  long teamId, League league, int[] newCount) {
         Optional<Team> existing = teamRepository.findBySportTypeAndTeamName(SportType.BASEBALL, teamName);
-        if (existing.isPresent()) return existing.get();
+        if (existing.isPresent()) {
+            Team t = existing.get();
+            if (t.getLogoUrl() == null) {
+                t.setLogoUrl(buildMlbTeamLogoUrl(teamId));
+                teamRepository.save(t);
+            }
+            return t;
+        }
         newCount[0]++;
         return teamRepository.save(Team.builder()
                 .sportType(SportType.BASEBALL)
                 .league(league)
                 .teamName(teamName)
                 .shortName(abbreviation)
+                .logoUrl(buildMlbTeamLogoUrl(teamId))
                 .build());
+    }
+
+    private String buildMlbTeamLogoUrl(long teamId) {
+        return "https://midfield.mlbstatic.com/v1/team/" + teamId + "/spots/96";
     }
 
     private MatchStatus mapStatus(String detailedState) {
