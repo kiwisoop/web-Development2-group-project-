@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import ScoreTicker from '../components/ScoreTicker';
+import RecommendedTeamSection from '../components/RecommendedTeamSection';
 import FeaturedMatches from '../components/FeaturedMatches';
 
 const sports = [
@@ -23,6 +24,8 @@ export default function HomePage() {
       </section>
 
       <ScoreTicker />
+
+      <RecommendedTeamSection />
 
       <section className="sports-section">
         <h2 className="section-title">종목 선택</h2>
