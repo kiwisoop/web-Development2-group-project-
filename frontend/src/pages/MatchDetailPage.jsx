@@ -17,6 +17,7 @@ import EmptyState from '../components/EmptyState';
 import ErrorBox from '../components/ErrorBox';
 import { getMlbGameDetail } from '../api/mlbApi';
 import MlbDetailSection from '../components/MlbDetailSection';
+import MlbPlayByPlay from '../components/MlbPlayByPlay';
 
 export default function MatchDetailPage() {
   const { matchId } = useParams();
@@ -197,6 +198,12 @@ export default function MatchDetailPage() {
           {mlbDetailError && <div className="card" style={{ padding: '1rem', color: 'var(--color-error)' }}>{mlbDetailError}</div>}
           {!mlbDetailLoading && !mlbDetailError && <MlbDetailSection detail={mlbDetail} />}
         </div>
+      )}
+      {data.match.sportType === 'BASEBALL' && data.match.league?.leagueName === 'MLB' && (
+        <MlbPlayByPlay
+          matchId={matchId}
+          isLive={match.status === 'LIVE'}
+        />
       )}
 
       {match.status === 'SCHEDULED' && (

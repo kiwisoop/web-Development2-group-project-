@@ -5,3 +5,6 @@ export const syncMlbSchedule = (startDate, endDate) =>
 
 export const getMlbGameDetail = (matchId, signal) =>
   axiosInstance.get(`/matches/${matchId}/mlb-detail`, { signal });
+
+export const getMlbPlayByPlay = (matchId, signal) =>
+  axiosInstance.get(`/matches/${matchId}/mlb-play-by-play`, { signal });

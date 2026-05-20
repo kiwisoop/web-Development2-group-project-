@@ -199,6 +199,58 @@ public class MlbGameDetailService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public MlbPlayByPlayResponse getPlayByPlay(Long matchId) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found: " + matchId));
+
+        if (match.getSportType() != SportType.BASEBALL
+                || match.getExternalId() == null
+                || !match.getExternalId().startsWith("MLB-")) {
+            return MlbPlayByPlayResponse.builder()
+                    .matchId(matchId)
+                    .gamePk(0)
+                    .plays(List.of())
+                    .build();
+        }
+
+        long gamePk = Long.parseLong(match.getExternalId().substring(4));
+        JsonNode feed = mlbApiService.fetchGameFeedLive(gamePk);
+
+        List<MlbPlayEventResponse> plays = new ArrayList<>();
+        if (feed != null) {
+            JsonNode allPlays = feed.path("liveData").path("plays").path("allPlays");
+            if (allPlays.isArray()) {
+                for (JsonNode play : allPlays) {
+                    JsonNode about   = play.path("about");
+                    JsonNode matchup = play.path("matchup");
+                    JsonNode result  = play.path("result");
+                    JsonNode count   = play.path("count");
+                    plays.add(MlbPlayEventResponse.builder()
+                            .inning(about.path("inning").asInt(0))
+                            .halfInning(about.path("halfInning").asText(""))
+                            .batterName(matchup.path("batter").path("fullName").asText(""))
+                            .pitcherName(matchup.path("pitcher").path("fullName").asText(""))
+                            .event(result.path("event").asText(""))
+                            .description(result.path("description").asText(""))
+                            .rbi(result.path("rbi").asInt(0))
+                            .awayScore(result.path("awayScore").asInt(0))
+                            .homeScore(result.path("homeScore").asInt(0))
+                            .balls(count.path("balls").asInt(0))
+                            .strikes(count.path("strikes").asInt(0))
+                            .outs(count.path("outs").asInt(0))
+                            .build());
+                }
+            }
+        }
+
+        return MlbPlayByPlayResponse.builder()
+                .matchId(matchId)
+                .gamePk(gamePk)
+                .plays(plays)
+                .build();
+    }
+
     private String statStr(JsonNode node, String field) {
         JsonNode val = node.path(field);
         if (val.isMissingNode() || val.isNull()) return "-";
