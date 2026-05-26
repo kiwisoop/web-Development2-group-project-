@@ -401,7 +401,8 @@
 }
 
 /* ===== Match List Page ===== */
-.match-list-page {
+.match-list-page,
+.sports-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
