@@ -9,5 +9,7 @@ import java.util.List;
 public interface LeagueRepository extends JpaRepository<League, Long> {
     List<League> findBySportType(SportType sportType);
 
+
     java.util.Optional<League> findByLeagueNameAndSeason(String leagueName, String season);
+
 }

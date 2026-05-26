@@ -153,6 +153,7 @@ function EsportsRankingsView() {
 }
 
 // ─── 메인 페이지 ──────────────────────────────────────────────────────────────
+
 export default function RankingsPage() {
   const { sportType } = useParams();
   const navigate = useNavigate();
@@ -168,6 +169,10 @@ export default function RankingsPage() {
       setLoading(false);
       return;
     }
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
@@ -182,6 +187,8 @@ export default function RankingsPage() {
       });
     return () => controller.abort();
   }, [current.apiKey, current.key]);
+
+  }, [current.apiKey]);
 
   return (
     <div className="rankings-page">
@@ -198,6 +205,7 @@ export default function RankingsPage() {
         ))}
       </div>
 
+
       {current.key === 'esports' ? (
         <EsportsRankingsView />
       ) : (
@@ -209,6 +217,8 @@ export default function RankingsPage() {
           )}
         </>
       )}
+     
     </div>
+      
   );
 }

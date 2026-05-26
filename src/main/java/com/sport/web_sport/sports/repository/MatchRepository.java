@@ -134,6 +134,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findBySportTypeAndStatusWithTeams(@Param("sportType") SportType sportType,
                                                   @Param("status") MatchStatus status);
 
+
     @Query("""
             select m from Match m
             join fetch m.homeTeam
@@ -143,4 +144,5 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             order by m.matchDate desc
             """)
     List<Match> findBySportTypeWithTeams(@Param("sportType") SportType sportType);
+
 }

@@ -31,5 +31,7 @@ public class Player {
 
     private String nickname;
 
+
     private String nationality;
+
 }
