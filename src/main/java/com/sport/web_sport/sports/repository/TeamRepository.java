@@ -1,0 +1,22 @@
+package com.sport.web_sport.sports.repository;
+
+import com.sport.web_sport.common.type.SportType;
+import com.sport.web_sport.sports.entity.Team;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface TeamRepository extends JpaRepository<Team, Long> {
+    List<Team> findBySportType(SportType sportType);
+    List<Team> findByLeagueId(Long leagueId);
+    Optional<Team> findBySportTypeAndTeamName(SportType sportType, String teamName);
+
+    @Query("select t from Team t join fetch t.league where t.sportType = :sportType order by t.teamName")
+    List<Team> findBySportTypeWithLeague(@Param("sportType") SportType sportType);
+
+    @Query("select t from Team t join fetch t.league where t.sportType = :sportType and t.league.leagueName = :leagueName order by t.teamName")
+    List<Team> findBySportTypeAndLeagueNameWithLeague(@Param("sportType") SportType sportType, @Param("leagueName") String leagueName);
+}
