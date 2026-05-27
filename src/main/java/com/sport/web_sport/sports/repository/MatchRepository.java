@@ -208,4 +208,15 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findRecentFinalByTeamBeforeDate(@Param("teamId") Long teamId,
                                                 @Param("before") LocalDateTime before,
                                                 Pageable pageable);
+
+    /** e스포츠/종목 페이지: 특정 종목의 모든 경기를 팀과 함께 최신순으로. */
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
+            left join fetch m.league
+            where m.sportType = :sportType
+            order by m.matchDate desc
+            """)
+    List<Match> findBySportTypeWithTeams(@Param("sportType") SportType sportType);
 }

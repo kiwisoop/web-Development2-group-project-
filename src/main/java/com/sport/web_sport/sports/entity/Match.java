@@ -49,4 +49,9 @@ public class Match {
 
     @Enumerated(EnumType.STRING)
     private MatchStatus status;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_team_id")
+    private Team winnerTeam;
 }

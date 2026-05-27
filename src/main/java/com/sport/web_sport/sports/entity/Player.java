@@ -30,4 +30,8 @@ public class Player {
     private String position;
 
     private String nickname;
+
+
+    private String nationality;
+
 }

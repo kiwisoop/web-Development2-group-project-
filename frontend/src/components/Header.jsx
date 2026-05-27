@@ -19,6 +19,10 @@ export default function Header() {
           <Link to="/matches">Matches</Link>
           <Link to="/rankings/soccer">Rankings</Link>
           <Link to="/sports/soccer">Sports</Link>
+
+          <Link to="/sports/esports">E스포츠</Link>
+
+
           <Link to="/favorites">Favorites</Link>
           {isAdmin && <Link to="/admin">Admin</Link>}
           {isAdmin && <Link to="/admin/api-test">API 테스트</Link>}
