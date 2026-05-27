@@ -1,88 +1,59 @@
-import { useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getMatchSections } from '../api/matchApi';
+import { SOCCER_MOCK, ESPORTS_MOCK } from '../data/otherSportsMatches';
 import './ScoreTicker.css';
 
 const STATUS_LABEL = {
   FINAL: '종료',
   LIVE: '진행중',
   SCHEDULED: '예정',
+  PRE_GAME: '예정',
+  CANCELED: '취소',
 };
 
 const STATUS_CLASS = {
   FINAL: 'ticker-status--final',
   LIVE: 'ticker-status--live',
   SCHEDULED: 'ticker-status--scheduled',
+  PRE_GAME: 'ticker-status--scheduled',
+  CANCELED: 'ticker-status--final',
 };
 
 const SPORT_LABEL = {
-  baseball: '야구',
-  soccer: '축구',
-  esports: 'E스포츠',
+  BASEBALL: '야구',
+  SOCCER: '축구',
+  ESPORTS: 'E스포츠',
 };
 
-const matches = [
-  {
-    id: 1,
-    sport: 'baseball',
-    league: 'KBO',
-    status: 'FINAL',
-    awayTeam: 'LG 트윈스',
-    homeTeam: '두산 베어스',
-    awayScore: 5,
-    homeScore: 3,
-  },
-  {
-    id: 2,
-    sport: 'baseball',
-    league: 'MLB',
-    status: 'FINAL',
-    awayTeam: 'LA 다저스',
-    homeTeam: '샌디에이고 파드리스',
-    awayScore: 4,
-    homeScore: 2,
-  },
-  {
-    id: 3,
-    sport: 'soccer',
-    league: 'EPL',
-    status: 'FINAL',
-    awayTeam: '토트넘',
-    homeTeam: '아스널',
-    awayScore: 2,
-    homeScore: 2,
-  },
-  {
-    id: 4,
-    sport: 'soccer',
-    league: 'La Liga',
-    status: 'FINAL',
-    awayTeam: '바르셀로나',
-    homeTeam: '레알 마드리드',
-    awayScore: 3,
-    homeScore: 1,
-  },
-  {
-    id: 5,
-    sport: 'esports',
-    league: 'LCK',
-    status: 'FINAL',
-    awayTeam: 'T1',
-    homeTeam: 'Gen.G',
-    awayScore: 2,
-    homeScore: 1,
-  },
-  {
-    id: 6,
-    sport: 'esports',
-    league: 'Worlds',
-    status: 'SCHEDULED',
-    awayTeam: 'Hanwha Life Esports',
-    homeTeam: 'G2 Esports',
-    scheduledTime: '19:00',
-  },
-];
+function formatTime(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
 
 export default function ScoreTicker() {
+  // 야구(BASEBALL)만 DB/API에서 가져오고, 축구·E스포츠는 기존 mock 표시 방식을 유지한다.
+  const [baseballMatches, setBaseballMatches] = useState([]);
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getMatchSections({ sportType: 'BASEBALL' }, controller.signal)
+      .then(res => {
+        const { liveMatches, recentFinishedMatches, upcomingMatches } = res.data;
+        const all = [...liveMatches, ...recentFinishedMatches, ...upcomingMatches];
+        // 응답에 다른 종목이 섞여 오더라도 야구만 사용한다.
+        setBaseballMatches(all.filter(m => m.sportType === 'BASEBALL'));
+      })
+      .catch(err => {
+        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
+      });
+    return () => controller.abort();
+  }, []);
+
+  // 야구는 API 데이터, 그 외 종목은 mock. 야구가 없으면 야구 카드만 빠진다(다른 종목은 그대로 표시).
+  const matches = [...baseballMatches, ...SOCCER_MOCK, ...ESPORTS_MOCK];
 
   const getStep = (el) => {
     const firstCard = el.querySelector('.ticker-card');
@@ -107,27 +78,44 @@ export default function ScoreTicker() {
     el.scrollTo({ left: nextLeft, behavior: 'smooth' });
   };
 
+  if (matches.length === 0) return null;
+
   return (
     <section className="score-ticker">
       <div className="ticker-track" ref={scrollRef}>
         {matches.map((m) => {
-          const hasScores = m.status !== 'SCHEDULED';
+          const hasScores = m.homeScore !== null && m.homeScore !== undefined
+            && m.awayScore !== null && m.awayScore !== undefined;
           const awayLost = hasScores && m.awayScore < m.homeScore;
           const homeLost = hasScores && m.homeScore < m.awayScore;
 
+          const goToDetail = () => navigate(`/matches/${m.id}`);
+
           return (
-            <article key={m.id} className="ticker-card">
+            <article
+              key={m.id}
+              className="ticker-card"
+              role="button"
+              tabIndex={0}
+              onClick={goToDetail}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  goToDetail();
+                }
+              }}
+            >
               <div className="ticker-card-top">
-                <span className={`ticker-status ${STATUS_CLASS[m.status]}`}>
-                  {STATUS_LABEL[m.status]}
+                <span className={`ticker-status ${STATUS_CLASS[m.status] || 'ticker-status--scheduled'}`}>
+                  {STATUS_LABEL[m.status] || m.status}
                 </span>
                 <span className="ticker-league">
-                  {SPORT_LABEL[m.sport]} · {m.league}
+                  {SPORT_LABEL[m.sportType]} · {m.league?.leagueName || ''}
                 </span>
               </div>
 
               <div className="ticker-team-row">
-                <span className="ticker-team-name">{m.awayTeam}</span>
+                <span className="ticker-team-name">{m.awayTeam?.teamName || '원정팀'}</span>
                 <span
                   className={`ticker-team-score${awayLost ? ' ticker-team-score--lost' : ''}`}
                 >
@@ -137,7 +125,7 @@ export default function ScoreTicker() {
 
               <div className="ticker-team-row">
                 <span className="ticker-team-name">
-                  {m.homeTeam}
+                  {m.homeTeam?.teamName || '홈팀'}
                   <span className="ticker-home-badge">홈</span>
                 </span>
                 <span
@@ -147,8 +135,8 @@ export default function ScoreTicker() {
                 </span>
               </div>
 
-              {m.status === 'SCHEDULED' && (
-                <div className="ticker-scheduled-time">{m.scheduledTime}</div>
+              {m.status === 'SCHEDULED' && m.matchDate && (
+                <div className="ticker-scheduled-time">{formatTime(m.matchDate)}</div>
               )}
             </article>
           );

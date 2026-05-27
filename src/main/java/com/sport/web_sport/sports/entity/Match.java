@@ -19,6 +19,9 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "external_id", unique = true)
+    private String externalId;
+
     @Enumerated(EnumType.STRING)
     private SportType sportType;
 

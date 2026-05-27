@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findBySportType(SportType sportType);
@@ -20,6 +21,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findTop10ByOrderByMatchDateDesc();
     long countByStatus(MatchStatus status);
     long countBySportType(SportType sportType);
+    Optional<Match> findByExternalId(String externalId);
 
     @Query("select m from Match m join fetch m.homeTeam join fetch m.awayTeam order by m.matchDate desc")
     List<Match> findTop10WithTeams(Pageable pageable);
@@ -134,6 +136,36 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findBySportTypeAndStatusWithTeams(@Param("sportType") SportType sportType,
                                                   @Param("status") MatchStatus status);
 
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
+            join fetch m.league
+            where (:sportType is null or m.sportType = :sportType)
+              and (:leagueName is null or m.league.leagueName = :leagueName)
+              and m.status = :status
+            order by m.matchDate desc
+            """)
+    List<Match> findTopByStatusDesc(@Param("sportType") SportType sportType,
+                                    @Param("leagueName") String leagueName,
+                                    @Param("status") MatchStatus status,
+                                    Pageable pageable);
+
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
+            join fetch m.league
+            where (:sportType is null or m.sportType = :sportType)
+              and (:leagueName is null or m.league.leagueName = :leagueName)
+              and m.status = :status
+            order by m.matchDate asc
+            """)
+    List<Match> findTopByStatusAsc(@Param("sportType") SportType sportType,
+                                   @Param("leagueName") String leagueName,
+                                   @Param("status") MatchStatus status,
+                                   Pageable pageable);
+
     /** 추천팀: 해당 팀의 다음 예정(SCHEDULED) 경기를 이른 순으로. PageRequest.of(0,1) 로 1건 사용. */
     @Query("""
             select m from Match m
@@ -158,4 +190,22 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             order by m.matchDate desc
             """)
     List<Match> findRecentFinishedByTeamId(@Param("teamId") Long teamId, Pageable pageable);
+
+    /**
+     * 주요 경기 분석용: 기준 경기 날짜(:before) 이전의 해당 팀 FINAL 경기를 최신순으로.
+     * - SCHEDULED 경기는 경기 날짜 이전의 FINAL 경기로 최근 폼을 계산한다.
+     * - FINAL 경기는 자기 자신(날짜가 :before 와 동일)이 제외되어 직전 흐름만 계산된다.
+     */
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam ht
+            join fetch m.awayTeam at
+            where (ht.id = :teamId or at.id = :teamId)
+              and m.status = com.sport.web_sport.common.type.MatchStatus.FINAL
+              and m.matchDate < :before
+            order by m.matchDate desc
+            """)
+    List<Match> findRecentFinalByTeamBeforeDate(@Param("teamId") Long teamId,
+                                                @Param("before") LocalDateTime before,
+                                                Pageable pageable);
 }

@@ -336,3 +336,27 @@
   border-color: var(--color-primary-dark);
   transform: translateY(-1px);
 }
+
+/* mock 경기(축구·E스포츠)는 상세 페이지가 없어 버튼을 비활성 표시한다. */
+.featured-analysis-btn--disabled {
+  background: var(--color-border, #d1d5db);
+  border-color: var(--color-border, #d1d5db);
+  color: #fff;
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* 야구 API 데이터가 없을 때의 빈 상태 카드 */
+.featured-card--empty {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 160px;
+}
+
+.featured-empty {
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.9rem;
+  margin: auto 0;
+}

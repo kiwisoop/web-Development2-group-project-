@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 const STATUS_LABEL = {
   READY: '분석 완료',
   IN_PROGRESS: '분석 중',
@@ -30,6 +32,13 @@ export default function RecommendedTeamCard({ team }) {
     riskFactor,
     alerts = [],
   } = team;
+
+  const navigate = useNavigate();
+  const matchId = team.matchId ?? nextMatch?.matchId;
+  const handleAnalysisClick = () => {
+    if (!matchId) return;
+    navigate(`/matches/${matchId}`);
+  };
 
   return (
     <article className="rec-card">
@@ -91,7 +100,12 @@ export default function RecommendedTeamCard({ team }) {
       )}
 
       <div className="rec-card-footer">
-        <button type="button" className="rec-analysis-btn">
+        <button
+          type="button"
+          className="rec-analysis-btn"
+          onClick={handleAnalysisClick}
+          disabled={!matchId}
+        >
           분석 보기
         </button>
       </div>

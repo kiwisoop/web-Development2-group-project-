@@ -28,6 +28,8 @@ public class RankingService {
         // Accumulator map: teamId → [wins, draws, losses, scoresFor, scoresAgainst, points]
         Map<Long, int[]> acc = new LinkedHashMap<>();
         Map<Long, Team> teamMap = new HashMap<>();
+        // teamId → 날짜별 승/무/패 (최근 5경기 폼 계산용)
+        Map<Long, List<DatedResult>> formMap = new HashMap<>();
 
         for (Team t : teams) {
             acc.put(t.getId(), new int[6]);
@@ -75,6 +77,12 @@ public class RankingService {
                     away[5]++;
                 }
             }
+
+            // 최근 폼용: 각 팀 관점의 결과를 경기 날짜와 함께 기록
+            formMap.computeIfAbsent(homeId, k -> new ArrayList<>())
+                    .add(new DatedResult(m.getMatchDate(), resultChar(hs, as)));
+            formMap.computeIfAbsent(awayId, k -> new ArrayList<>())
+                    .add(new DatedResult(m.getMatchDate(), resultChar(as, hs)));
         }
 
         List<RankingTeamResponse> list = new ArrayList<>();
@@ -96,6 +104,7 @@ public class RankingService {
                     .teamName(team.getTeamName())
                     .sportType(sportType)
                     .leagueName(leagueName)
+                    .logoUrl(team.getLogoUrl())
                     .gamesPlayed(gamesPlayed)
                     .wins(wins)
                     .draws(draws)
@@ -105,6 +114,7 @@ public class RankingService {
                     .scoresFor(scoresFor)
                     .scoresAgainst(scoresAgainst)
                     .scoreDifference(scoresFor - scoresAgainst)
+                    .recentForm(buildRecentForm(formMap.get(teamId)))
                     .build());
         }
 
@@ -137,4 +147,26 @@ public class RankingService {
         }
         return ranked;
     }
+
+    private String resultChar(int mine, int theirs) {
+        if (mine > theirs) return "승";
+        if (mine < theirs) return "패";
+        return "무";
+    }
+
+    /** 날짜순(과거→최근) 정렬 후 최근 5경기의 승/무/패만 반환. 데이터 없으면 빈 리스트. */
+    private List<String> buildRecentForm(List<DatedResult> results) {
+        if (results == null || results.isEmpty()) return List.of();
+        List<DatedResult> sorted = new ArrayList<>(results);
+        sorted.sort(Comparator.comparing(DatedResult::date,
+                Comparator.nullsFirst(Comparator.naturalOrder())));
+        int from = Math.max(0, sorted.size() - 5);
+        List<String> form = new ArrayList<>();
+        for (int i = from; i < sorted.size(); i++) {
+            form.add(sorted.get(i).result());
+        }
+        return form;
+    }
+
+    private record DatedResult(java.time.LocalDateTime date, String result) {}
 }

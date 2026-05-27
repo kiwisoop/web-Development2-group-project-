@@ -1,180 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getMatchSections } from '../api/matchApi';
+import { SOCCER_MOCK, ESPORTS_MOCK } from '../data/otherSportsMatches';
 import './FeaturedMatches.css';
 
 const STATUS_LABEL = {
   SCHEDULED: '예정',
   LIVE: '진행중',
   FINAL: '종료',
+  PRE_GAME: '예정',
+  CANCELED: '취소',
 };
 
 const STATUS_CLASS = {
   SCHEDULED: 'featured-status--scheduled',
   LIVE: 'featured-status--live',
   FINAL: 'featured-status--final',
+  PRE_GAME: 'featured-status--scheduled',
+  CANCELED: 'featured-status--final',
 };
 
-const matchAnalysisGroups = [
-  {
-    sportKey: 'baseball',
-    sportName: '야구',
-    matches: [
-      {
-        id: 'b1',
-        league: 'KBO',
-        status: 'SCHEDULED',
-        homeTeam: 'LG 트윈스',
-        awayTeam: '두산 베어스',
-        matchTime: '오늘 18:30',
-        mainAnalysisPoint: '선발 투수와 타선 컨디션 분석',
-        aiInsight:
-          '선발 투수 기록과 중심 타선의 최근 출루율을 함께 비교하기 좋은 경기입니다.',
-        homeRecentForm: ['승', '승', '패', '승', '승'],
-        awayRecentForm: ['패', '승', '패', '승', '패'],
-        keyMetrics: ['선발 ERA', '팀 타율', '최근 5경기 득점'],
-        analysisAvailable: true,
-      },
-      {
-        id: 'b2',
-        league: 'MLB',
-        status: 'FINAL',
-        homeTeam: 'LA 다저스',
-        awayTeam: '샌디에이고 파드리스',
-        matchTime: '오늘 10:40',
-        mainAnalysisPoint: '장타율과 불펜 안정성 비교',
-        aiInsight:
-          '양 팀의 후반 불펜 운영과 중심 타선의 장타 생산력이 승부를 갈랐습니다.',
-        homeRecentForm: ['승', '패', '승', '승', '승'],
-        awayRecentForm: ['패', '승', '패', '패', '승'],
-        keyMetrics: ['장타율', '불펜 ERA', '득점권 타율'],
-        analysisAvailable: true,
-      },
-      {
-        id: 'b3',
-        league: 'KBO',
-        status: 'SCHEDULED',
-        homeTeam: 'KIA 타이거즈',
-        awayTeam: '삼성 라이온즈',
-        matchTime: '오늘 19:00',
-        mainAnalysisPoint: '최근 타선 흐름과 수비 안정성',
-        aiInsight:
-          '최근 득점 흐름과 실책 수를 함께 보면 경기 주도권을 예측하기 좋은 경기입니다.',
-        homeRecentForm: ['승', '무', '승', '패', '승'],
-        awayRecentForm: ['패', '패', '승', '승', '패'],
-        keyMetrics: ['팀 OPS', '실책 수', '최근 5경기 득점'],
-        analysisAvailable: true,
-      },
-    ],
-  },
-  {
-    sportKey: 'football',
-    sportName: '축구',
-    matches: [
-      {
-        id: 'f1',
-        league: 'EPL',
-        status: 'SCHEDULED',
-        homeTeam: '토트넘',
-        awayTeam: '아스널',
-        matchTime: '오늘 21:00',
-        mainAnalysisPoint: '공격 전개와 득점 기대값 비교',
-        aiInsight:
-          '양 팀 모두 최근 득점 흐름이 좋아 공격 지표와 수비 전환 속도 비교가 중요한 경기입니다.',
-        homeRecentForm: ['승', '승', '무', '패', '승'],
-        awayRecentForm: ['승', '패', '승', '승', '무'],
-        keyMetrics: ['최근 5경기 득점', '유효 슈팅 비율', '점유율 흐름'],
-        analysisAvailable: true,
-      },
-      {
-        id: 'f2',
-        league: 'La Liga',
-        status: 'FINAL',
-        homeTeam: '바르셀로나',
-        awayTeam: '레알 마드리드',
-        matchTime: '어제 23:00',
-        mainAnalysisPoint: '점유율과 공격 효율 분석',
-        aiInsight:
-          '점유율 대비 슈팅 전환율과 결정력 차이를 비교하기 좋은 경기입니다.',
-        homeRecentForm: ['승', '승', '승', '무', '패'],
-        awayRecentForm: ['승', '패', '승', '승', '승'],
-        keyMetrics: ['점유율', '슈팅 전환율', '패스 성공률'],
-        analysisAvailable: true,
-      },
-      {
-        id: 'f3',
-        league: 'UCL',
-        status: 'SCHEDULED',
-        homeTeam: '맨체스터 시티',
-        awayTeam: 'PSG',
-        matchTime: '내일 04:00',
-        mainAnalysisPoint: '압박 강도와 전환 공격 비교',
-        aiInsight:
-          '중원 압박 이후 빠른 전환 공격이 승부의 핵심 포인트가 될 수 있습니다.',
-        homeRecentForm: ['승', '승', '승', '승', '무'],
-        awayRecentForm: ['패', '승', '승', '무', '승'],
-        keyMetrics: ['압박 성공률', '역습 횟수', '기대 득점'],
-        analysisAvailable: true,
-      },
-    ],
-  },
-  {
-    sportKey: 'esports',
-    sportName: 'E스포츠',
-    matches: [
-      {
-        id: 'e1',
-        league: 'Worlds',
-        status: 'SCHEDULED',
-        homeTeam: 'Hanwha Life Esports',
-        awayTeam: 'G2 Esports',
-        matchTime: '오늘 19:00',
-        mainAnalysisPoint: '메타 챔피언 활용과 후반 운영',
-        aiInsight:
-          '대회 메타 챔피언 숙련도와 후반 한타 집중력이 승부의 핵심이 될 매치업입니다.',
-        homeRecentForm: ['승', '승', '패', '승', '승'],
-        awayRecentForm: ['패', '승', '패', '승', '승'],
-        keyMetrics: ['평균 게임 시간', '바론 획득률', '한타 승률'],
-        analysisAvailable: true,
-      },
-      {
-        id: 'e2',
-        league: 'LCK',
-        status: 'LIVE',
-        homeTeam: 'T1',
-        awayTeam: 'Gen.G',
-        matchTime: '현재 진행중',
-        mainAnalysisPoint: '초반 주도권과 오브젝트 운영',
-        aiInsight:
-          '양 팀의 라인전 주도권과 드래곤, 전령 운영 차이를 분석하기 좋은 경기입니다.',
-        homeRecentForm: ['승', '승', '승', '패', '승'],
-        awayRecentForm: ['승', '패', '승', '승', '패'],
-        keyMetrics: ['15분 골드 차이', '첫 오브젝트 획득률', '교전 승률'],
-        analysisAvailable: true,
-      },
-      {
-        id: 'e3',
-        league: 'LCK',
-        status: 'SCHEDULED',
-        homeTeam: 'DK',
-        awayTeam: 'KT Rolster',
-        matchTime: '오늘 20:30',
-        mainAnalysisPoint: '정글 동선과 라인 주도권 분석',
-        aiInsight:
-          '초반 정글 개입과 라인 주도권 확보 여부가 경기 흐름을 크게 좌우할 수 있습니다.',
-        homeRecentForm: ['패', '승', '승', '패', '승'],
-        awayRecentForm: ['승', '패', '승', '승', '패'],
-        keyMetrics: ['첫 킬 획득률', '정글 관여율', '15분 포탑 골드'],
-        analysisAvailable: true,
-      },
-    ],
-  },
-];
+const SPORT_LABEL = { BASEBALL: '야구', SOCCER: '축구', ESPORTS: 'E스포츠' };
+const SPORT_ORDER = ['BASEBALL', 'SOCCER', 'ESPORTS'];
 
 const FORM_CLASS = {
   승: 'form-win',
   무: 'form-draw',
   패: 'form-loss',
 };
+
+function formatMatchTime(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = d - now;
+  const sameDay = d.toDateString() === now.toDateString();
+  const timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  if (sameDay) return `오늘 ${timeStr}`;
+  if (diffMs < 0) {
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return `어제 ${timeStr}`;
+  }
+  return d.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }) + ' ' + timeStr;
+}
+
+// 야구 카드에서 백엔드 분석값(폼·평균 득실점·연승/연패)이 실제로 채워졌는지 판별한다.
+// "최근 경기 데이터 부족"은 분석값이 없는 상태이므로 제외한다.
+function hasBaseballAnalysis(m) {
+  const hasForm = (m.homeRecentForm?.length > 0) || (m.awayRecentForm?.length > 0);
+  const hasMetrics = m.keyMetrics?.length > 0;
+  const hasPoint = !!m.mainAnalysisPoint && m.mainAnalysisPoint !== '최근 경기 데이터 부족';
+  return hasForm || hasMetrics || hasPoint;
+}
+
+// 야구 카드 노출 우선순위:
+// LIVE → 분석값 있는 SCHEDULED → 분석값 있는 FINAL → 나머지 SCHEDULED → 나머지 FINAL → 그 외
+function baseballPriority(m) {
+  if (m.status === 'LIVE') return 0;
+  const analyzed = hasBaseballAnalysis(m);
+  if (m.status === 'SCHEDULED') return analyzed ? 1 : 3;
+  if (m.status === 'FINAL') return analyzed ? 2 : 4;
+  return 5;
+}
 
 function FormRow({ teamName, results }) {
   return (
@@ -192,105 +80,148 @@ function FormRow({ teamName, results }) {
 }
 
 export default function FeaturedMatches() {
-  const [currentIndexes, setCurrentIndexes] = useState({
-    baseball: 0,
-    football: 0,
-    esports: 0,
-  });
+  // 야구(BASEBALL)만 DB/API에서 가져온다. 축구·E스포츠는 기존 mock 표시 방식을 유지한다.
+  const [baseballMatches, setBaseballMatches] = useState([]);
+  const [indexes, setIndexes] = useState({ BASEBALL: 0, SOCCER: 0, ESPORTS: 0 });
 
-  const handlePrev = (sportKey, total) => {
-    setCurrentIndexes((prev) => ({
-      ...prev,
-      [sportKey]: (prev[sportKey] - 1 + total) % total,
-    }));
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+    getMatchSections({ sportType: 'BASEBALL' }, controller.signal)
+      .then(res => {
+        const { liveMatches, recentFinishedMatches, upcomingMatches } = res.data;
+        const all = [...liveMatches, ...recentFinishedMatches, ...upcomingMatches];
+        // 응답에 다른 종목이 섞여 오더라도 야구만 사용한다.
+        const baseball = all.filter(m => m.sportType === 'BASEBALL');
+        // 분석값이 채워진 경기가 먼저 보이도록 우선순위로 정렬한 뒤 최대 5경기만 노출한다.
+        // (Array.prototype.sort는 안정 정렬이므로 동일 우선순위 내에서는 백엔드 정렬 순서를 유지한다.)
+        const ordered = baseball
+          .map((m, i) => ({ m, i }))
+          .sort((a, b) => baseballPriority(a.m) - baseballPriority(b.m) || a.i - b.i)
+          .map(x => x.m);
+        setBaseballMatches(ordered.slice(0, 5));
+      })
+      .catch(err => {
+        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
+      });
+    return () => controller.abort();
+  }, []);
 
-  const handleNext = (sportKey, total) => {
-    setCurrentIndexes((prev) => ({
-      ...prev,
-      [sportKey]: (prev[sportKey] + 1) % total,
-    }));
-  };
+  // 종목 순서·레이아웃은 기존과 동일하게 유지한다.
+  // 야구는 API 데이터(없으면 빈 배열 → 안내 문구), 축구·E스포츠는 mock.
+  const groups = SPORT_ORDER.map(k => ({
+    sportKey: k,
+    sportName: SPORT_LABEL[k],
+    matches: k === 'BASEBALL' ? baseballMatches : (k === 'SOCCER' ? SOCCER_MOCK : ESPORTS_MOCK),
+  }));
+
+  const prev = (sportKey, total) =>
+    setIndexes(p => ({ ...p, [sportKey]: (p[sportKey] - 1 + total) % total }));
+  const next = (sportKey, total) =>
+    setIndexes(p => ({ ...p, [sportKey]: (p[sportKey] + 1) % total }));
 
   return (
     <section className="featured-matches">
       <div className="featured-head">
         <h2 className="section-title">오늘의 주요 경기</h2>
-        <p className="featured-subtitle">
-          야구, 축구, E스포츠의 주요 경기를 한눈에 확인하세요.
-        </p>
+        <p className="featured-subtitle">야구, 축구, E스포츠의 주요 경기를 한눈에 확인하세요.</p>
       </div>
 
       <div className="featured-grid">
-        {matchAnalysisGroups.map(({ sportKey, sportName, matches }) => {
+        {groups.map(({ sportKey, sportName, matches }) => {
           const total = matches.length;
-          const idx = currentIndexes[sportKey] % total;
+
+          // 야구 API 데이터가 없을 때만 빈 상태로 안내한다. (mock인 축구·E스포츠는 항상 데이터가 있음)
+          if (total === 0) {
+            return (
+              <article key={sportKey} className="featured-card featured-card--empty">
+                <div className="featured-card-top">
+                  <span className="featured-sport">{sportName}</span>
+                </div>
+                <p className="featured-empty">표시할 {sportName} 경기가 없습니다.</p>
+              </article>
+            );
+          }
+
+          const idx = indexes[sportKey] ?? 0;
           const m = matches[idx];
+          const hasScores = m.homeScore !== null && m.homeScore !== undefined
+            && m.awayScore !== null && m.awayScore !== undefined;
+          const homeName = m.homeTeam?.teamName || '홈팀';
+          const awayName = m.awayTeam?.teamName || '원정팀';
+          const hasForm = m.homeRecentForm?.length > 0 || m.awayRecentForm?.length > 0;
+
           return (
             <article key={sportKey} className="featured-card">
               <div className="featured-card-top">
                 <span className="featured-sport">{sportName}</span>
                 <span className="featured-divider">·</span>
-                <span className="featured-league">{m.league}</span>
-                <span className={`featured-status ${STATUS_CLASS[m.status]}`}>
-                  {STATUS_LABEL[m.status]}
+                <span className="featured-league">{m.league?.leagueName || ''}</span>
+                <span className={`featured-status ${STATUS_CLASS[m.status] || 'featured-status--scheduled'}`}>
+                  {STATUS_LABEL[m.status] || m.status}
                 </span>
               </div>
 
               <div className="featured-teams">
-                <span className="featured-team">{m.homeTeam}</span>
-                <span className="featured-vs">vs</span>
-                <span className="featured-team">{m.awayTeam}</span>
+                <span className="featured-team">{homeName}</span>
+                {hasScores ? (
+                  <span className="featured-score-pair">
+                    <span className="featured-score">{m.homeScore}</span>
+                    <span className="featured-vs">:</span>
+                    <span className="featured-score">{m.awayScore}</span>
+                  </span>
+                ) : (
+                  <span className="featured-vs">vs</span>
+                )}
+                <span className="featured-team">{awayName}</span>
               </div>
 
-              <div className="featured-time">{m.matchTime}</div>
+              <div className="featured-time">{formatMatchTime(m.matchDate)}</div>
+              {m.venue && <div className="featured-venue">📍 {m.venue}</div>}
 
-              <div className="featured-analysis-point">{m.mainAnalysisPoint}</div>
-              <p className="featured-insight">{m.aiInsight}</p>
+              {/* 리치 분석 블록: 백엔드가 해당 필드를 제공할 때만 렌더 (없으면 생략). */}
+              {m.mainAnalysisPoint && (
+                <div className="featured-analysis-point">{m.mainAnalysisPoint}</div>
+              )}
+              {m.aiInsight && <p className="featured-insight">{m.aiInsight}</p>}
 
-              <div className="form-comparison">
-                <div className="form-comparison-title">최근 5경기</div>
-                <FormRow teamName={m.homeTeam} results={m.homeRecentForm} />
-                <FormRow teamName={m.awayTeam} results={m.awayRecentForm} />
-              </div>
+              {hasForm && (
+                <div className="form-comparison">
+                  <div className="form-comparison-title">최근 5경기</div>
+                  {m.homeRecentForm?.length > 0 && (
+                    <FormRow teamName={homeName} results={m.homeRecentForm} />
+                  )}
+                  {m.awayRecentForm?.length > 0 && (
+                    <FormRow teamName={awayName} results={m.awayRecentForm} />
+                  )}
+                </div>
+              )}
 
-              <ul className="featured-metrics">
-                {m.keyMetrics.map((metric) => (
-                  <li key={metric} className="featured-metric">
-                    {metric}
-                  </li>
-                ))}
-              </ul>
+              {m.keyMetrics?.length > 0 && (
+                <ul className="featured-metrics">
+                  {m.keyMetrics.map((metric) => (
+                    <li key={metric} className="featured-metric">{metric}</li>
+                  ))}
+                </ul>
+              )}
 
               <div className="featured-card-meta">
                 {m.analysisAvailable && (
                   <span className="featured-analysis-badge">분석 가능</span>
                 )}
-                <span className="match-counter">
-                  {idx + 1} / {total}
-                </span>
+                <span className="match-counter">{idx + 1} / {total}</span>
               </div>
 
               <div className="featured-card-actions">
-                <button
-                  type="button"
-                  className="match-nav-btn"
-                  onClick={() => handlePrev(sportKey, total)}
-                  aria-label={`이전 ${sportName} 경기 보기`}
-                >
-                  ←
-                </button>
-                <button type="button" className="featured-analysis-btn">
-                  분석 보기
-                </button>
-                <button
-                  type="button"
-                  className="match-nav-btn"
-                  onClick={() => handleNext(sportKey, total)}
-                  aria-label={`다음 ${sportName} 경기 보기`}
-                >
-                  →
-                </button>
+                <button type="button" className="match-nav-btn"
+                  onClick={() => prev(sportKey, total)} aria-label={`이전 ${sportName} 경기`}>←</button>
+                {/* mock 경기(축구·E스포츠)는 실제 상세 페이지가 없으므로 링크를 비활성화한다. */}
+                {m.isMock ? (
+                  <span className="featured-analysis-btn featured-analysis-btn--disabled" aria-disabled="true">경기 상세</span>
+                ) : (
+                  <Link to={`/matches/${m.id}`} className="featured-analysis-btn">경기 상세</Link>
+                )}
+                <button type="button" className="match-nav-btn"
+                  onClick={() => next(sportKey, total)} aria-label={`다음 ${sportName} 경기`}>→</button>
               </div>
             </article>
           );
@@ -298,13 +229,7 @@ export default function FeaturedMatches() {
       </div>
 
       <div className="featured-cta">
-        <Link
-          to="/matches"
-          className="btn btn-outline featured-view-all"
-          aria-label="전체 경기 보기"
-        >
-          전체 경기 보기
-        </Link>
+        <Link to="/matches" className="btn btn-outline featured-view-all">전체 경기 보기</Link>
       </div>
     </section>
   );

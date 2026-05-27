@@ -101,7 +101,7 @@ public class DataInitializer implements CommandLineRunner {
         Match m1 = saveMatch(SportType.BASEBALL, league, "2026", t1, t2, 5, 3, "잠실야구장",
                 MatchStatus.FINAL, LocalDateTime.now().minusDays(2));
         Match m2 = saveMatch(SportType.BASEBALL, league, "2026", t2, t3, 4, 4, "잠실야구장",
-                MatchStatus.LIVE, LocalDateTime.now());
+                MatchStatus.FINAL, LocalDateTime.now().minusDays(1));
         saveMatch(SportType.BASEBALL, league, "2026", t1, t3, null, null, "광주-기아 챔피언스 필드",
                 MatchStatus.SCHEDULED, LocalDateTime.now().plusDays(2));
 

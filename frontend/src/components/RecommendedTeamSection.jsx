@@ -1,10 +1,33 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useRecommendedTeams } from '../hooks/useRecommendedTeams';
 import { recommendedTeamsMock } from '../data/recommendedTeamsMock';
+import { getMatchSections } from '../api/matchApi';
 import RecommendedTeamCard from './RecommendedTeamCard';
 import './RecommendedTeamSection.css';
+
+function findMatchIdForTeam(team, matches) {
+  if (!team?.teamName || matches.length === 0) return null;
+
+  const teamName = team.teamName;
+  const opponent = team.nextMatch?.opponent;
+
+  const candidates = matches.filter(
+    (m) => m.homeTeam?.teamName === teamName || m.awayTeam?.teamName === teamName,
+  );
+  if (candidates.length === 0) return null;
+
+  if (opponent) {
+    const exact = candidates.find((m) => {
+      const other = m.homeTeam?.teamName === teamName ? m.awayTeam?.teamName : m.homeTeam?.teamName;
+      return other === opponent;
+    });
+    if (exact) return exact.id;
+  }
+
+  return candidates[0].id;
+}
 
 // 데모 컨트롤(상태 전환 버튼)은 기본적으로 숨깁니다.
 // 개발 중 세 가지 상태를 직접 확인할 때만 true 로 바꿔 사용하세요.
@@ -44,6 +67,23 @@ export default function RecommendedTeamSection() {
   // 데모 강제 상태 (null 이면 실제 로그인/데이터 상태를 따름)
   const [demoState, setDemoState] = useState(null);
 
+  // 추천팀 카드의 "분석 보기" 버튼을 활성화하기 위해 경기 목록을 함께 가져온다.
+  // 추천팀 API/mock 응답에는 matchId 가 없어, teamName + opponent 매칭으로 보강한다.
+  const [allMatches, setAllMatches] = useState([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    getMatchSections({}, controller.signal)
+      .then((res) => {
+        const { liveMatches = [], recentFinishedMatches = [], upcomingMatches = [] } = res.data ?? {};
+        setAllMatches([...liveMatches, ...recentFinishedMatches, ...upcomingMatches]);
+      })
+      .catch((err) => {
+        if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') return;
+        setAllMatches([]);
+      });
+    return () => controller.abort();
+  }, []);
+
   // 실제 상태 계산
   let effectiveState;
   if (!isLoggedIn) effectiveState = STATE.GUEST;
@@ -60,6 +100,18 @@ export default function RecommendedTeamSection() {
         ? teams
         : recommendedTeamsMock
       : [];
+
+  // 경기 목록에서 매칭되는 경기를 찾아 matchId 를 보강한다.
+  // 못 찾은 팀은 matchId 가 없어 카드 버튼이 disabled 로 유지된다(기존 동작과 호환).
+  const enrichedTeams = useMemo(
+    () =>
+      displayTeams.map((t) => {
+        if (t.matchId || t.nextMatch?.matchId) return t;
+        const matchId = findMatchIdForTeam(t, allMatches);
+        return matchId ? { ...t, matchId } : t;
+      }),
+    [displayTeams, allMatches],
+  );
 
   const renderBody = () => {
     if (effectiveState === STATE.GUEST) {
@@ -87,7 +139,7 @@ export default function RecommendedTeamSection() {
     // FILLED
     return (
       <div className="rec-grid">
-        {displayTeams.map((team) => (
+        {enrichedTeams.map((team) => (
           <RecommendedTeamCard key={team.id} team={team} />
         ))}
       </div>

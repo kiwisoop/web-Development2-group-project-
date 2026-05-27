@@ -9,3 +9,6 @@ export const getMatchStats = (matchId, signal) => axiosInstance.get(`/matches/${
 export const getMatchEvents = (matchId, signal) => axiosInstance.get(`/matches/${matchId}/events`, { signal });
 
 export const getMatchDetailFull = (matchId, signal) => axiosInstance.get(`/matches/${matchId}/detail-full`, { signal });
+
+export const getMatchSections = (params, signal) =>
+  axiosInstance.get('/matches/sections', { params, signal });
