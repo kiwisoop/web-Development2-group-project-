@@ -80,7 +80,7 @@ function FormRow({ teamName, results }) {
 }
 
 export default function FeaturedMatches() {
-  // 야구(BASEBALL)만 DB/API에서 가져온다. 축구·E스포츠는 기존 mock 표시 방식을 유지한다.
+  // 야구(BASEBALL)는 DB/API에서 가져온다. 축구·E스포츠는 기존 mock 표시 방식을 유지한다.
   const [baseballMatches, setBaseballMatches] = useState([]);
   const [indexes, setIndexes] = useState({ BASEBALL: 0, SOCCER: 0, ESPORTS: 0 });
 

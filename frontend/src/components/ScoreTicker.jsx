@@ -32,7 +32,7 @@ function formatTime(dateStr) {
 }
 
 export default function ScoreTicker() {
-  // 야구(BASEBALL)만 DB/API에서 가져오고, 축구·E스포츠는 기존 mock 표시 방식을 유지한다.
+  // 야구(BASEBALL)는 DB/API에서 가져오고, 축구·E스포츠는 mock을 fallback으로 표시한다.
   const [baseballMatches, setBaseballMatches] = useState([]);
   const scrollRef = useRef(null);
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function ScoreTicker() {
     return () => controller.abort();
   }, []);
 
-  // 야구는 API 데이터, 그 외 종목은 mock. 야구가 없으면 야구 카드만 빠진다(다른 종목은 그대로 표시).
+  // 야구는 API 데이터(라이브 우선), 그 외 종목은 mock fallback.
   const matches = [...baseballMatches, ...SOCCER_MOCK, ...ESPORTS_MOCK];
 
   const getStep = (el) => {
@@ -89,7 +89,11 @@ export default function ScoreTicker() {
           const awayLost = hasScores && m.awayScore < m.homeScore;
           const homeLost = hasScores && m.homeScore < m.awayScore;
 
-          const goToDetail = () => navigate(`/matches/${m.id}`);
+          const goToDetail = () => {
+            // mock 경기(축구·E스포츠)는 실제 상세 페이지가 없으므로 이동을 막는다.
+            if (m.isMock) return;
+            navigate(`/matches/${m.id}`);
+          };
 
           return (
             <article

@@ -6,7 +6,6 @@ import RecommendedTeamSection from '../components/RecommendedTeamSection';
 import FeaturedMatches from '../components/FeaturedMatches';
 import './HomePage.css';
 
-
 const sports = [
   { id: 'soccer', name: '축구', emoji: '⚽', desc: '전 세계 축구 경기 일정과 결과를 확인하세요.' },
   { id: 'baseball', name: '야구', emoji: '⚾', desc: '국내외 야구 경기 분석을 제공합니다.' },
