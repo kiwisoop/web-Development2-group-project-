@@ -4,7 +4,7 @@ import MatchCard from './MatchCard';
 import LoadingState from './LoadingState';
 import ErrorBox from './ErrorBox';
 
-function CarouselRow({ title, matches }) {
+function CarouselRow({ title, matches, emptyTitle, emptyMessage }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -31,11 +31,23 @@ function CarouselRow({ title, matches }) {
     el.scrollBy({ left: dir * (el.firstChild.offsetWidth + gap), behavior: 'smooth' });
   };
 
+  const renderEmpty = () => {
+    if (emptyTitle || emptyMessage) {
+      return (
+        <div className="carousel-empty-card" role="status">
+          {emptyTitle && <p className="carousel-empty-card-title">{emptyTitle}</p>}
+          {emptyMessage && <p className="carousel-empty-card-sub">{emptyMessage}</p>}
+        </div>
+      );
+    }
+    return <p className="carousel-empty">경기 없음</p>;
+  };
+
   return (
     <div className="match-section-block">
       <h3 className="match-section-block-title">{title}</h3>
       {matches.length === 0 ? (
-        <p className="carousel-empty">경기 없음</p>
+        renderEmpty()
       ) : (
         <div className="match-carousel-wrap">
           <button
@@ -91,7 +103,12 @@ export default function MatchSections({ sportType, leagueName }) {
 
   return (
     <div>
-      <CarouselRow title="진행 중인 경기" matches={sections.liveMatches} />
+      <CarouselRow
+        title="진행 중인 경기"
+        matches={sections.liveMatches}
+        emptyTitle="현재 진행 중인 경기가 없어요"
+        emptyMessage="최근 종료 경기와 다가오는 경기를 확인해보세요."
+      />
       <CarouselRow title="최근 종료 경기" matches={sections.recentFinishedMatches} />
       <CarouselRow title="다가오는 경기" matches={sections.upcomingMatches} />
     </div>
