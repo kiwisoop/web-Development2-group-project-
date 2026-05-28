@@ -30,7 +30,7 @@ import java.util.List;
 public class KLeagueDataCollector {
 
     // ==================== 설정 ====================
-    private static final String API_KEY   = "0812281435"; // 사용하기 전 API 키 변경 후 실행
+    private static final String API_KEY   = "********"; // 사용하기 전 API 키 변경 후 실행
     private static final String LEAGUE_ID = "4689";
     private static final List<String> SEASONS = List.of("2025", "2026");
 
