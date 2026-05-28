@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   getCitoSeasons, getCitoMatches, getCitoStandings, getCitoToday,
-  getLckTeamsWithPlayers, getCitoMatchPlayerStats, generateLckMatchAnalysis,
+  getLckTeamsWithPlayers, getCitoMatchGames, generateLckMatchAnalysis,
 } from '../api/lckApi';
 import LoadingState from '../components/LoadingState';
 import ErrorBox from '../components/ErrorBox';
@@ -57,12 +57,12 @@ function StateBadge({ state }) {
 
 // ─── Gemini 분석 패널 ─────────────────────────────────────────────────────────
 
-function GeminiAnalysisPanel({ analysis, generating, onGenerate }) {
+function GroqAnalysisPanel({ analysis, generating, onGenerate }) {
   if (generating) {
     return (
       <div className="lck-gemini-panel lck-gemini-loading">
         <span className="lck-gemini-spinner" />
-        Gemini가 경기를 분석 중입니다... (최대 50초 소요)
+        Groq AI가 경기를 분석 중입니다... (최대 50초 소요)
       </div>
     );
   }
@@ -80,7 +80,7 @@ function GeminiAnalysisPanel({ analysis, generating, onGenerate }) {
     return (
       <div className="lck-gemini-panel lck-gemini-done">
         <div className="lck-gemini-header">
-          <span className="lck-gemini-badge">Gemini AI 분석</span>
+          <span className="lck-gemini-badge">Groq AI 분석</span>
           <button className="btn btn-outline btn-sm" onClick={onGenerate}>재생성</button>
         </div>
         {analysis.summary && (
@@ -107,104 +107,144 @@ function GeminiAnalysisPanel({ analysis, generating, onGenerate }) {
 
   return (
     <div className="lck-gemini-panel lck-gemini-empty">
-      <p className="lck-gemini-desc">선수 KDA·데미지 기여도를 참고해 Gemini AI가 경기 요약을 작성합니다.</p>
+      <p className="lck-gemini-desc">선수 KDA·데미지 기여도를 참고해 Groq AI가 경기 요약을 작성합니다.</p>
       <button className="btn btn-primary" onClick={onGenerate}>AI 경기 요약 생성</button>
     </div>
   );
 }
 
-// ─── 선수 KDA 테이블 ──────────────────────────────────────────────────────────
+// ─── 게임별 팀 통계 ────────────────────────────────────────────────────────────
 
-function PlayerStatRow({ p }) {
-  const pos = (p.position || '').toUpperCase();
-  const color = POS_COLOR[pos] || '#6b7280';
-  const kda = p.deaths === 0
-    ? ((p.kills + p.assists) / 1).toFixed(1) + ':1'
-    : ((p.kills + p.assists) / p.deaths).toFixed(2);
+function formatGameTime(sec) {
+  if (!sec) return '';
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m}분 ${s}초`;
+}
+
+function teamDisplay(slug, eventTeams) {
+  const t = eventTeams?.find((x) => (x.slug || '').toLowerCase() === (slug || '').toLowerCase());
+  return {
+    name: t?.name || slug?.toUpperCase() || '?',
+    code: t?.code || slug?.toUpperCase() || '?',
+    imageUrl: t?.imageUrl,
+  };
+}
+
+function TeamStatRow({ label, blueVal, redVal, isBlueBetter, isRedBetter }) {
   return (
     <tr>
-      <td>
-        <span className="lck-pos-badge" style={{ backgroundColor: color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 18, borderRadius: 4, fontSize: '0.65rem', fontWeight: 700, color: '#fff' }}>
-          {p.position || '?'}
-        </span>
-      </td>
-      <td className="lck-stat-nick">{p.nickname}</td>
-      <td className="lck-stat-champ">{p.champion || '-'}</td>
-      <td className="lck-stat-kda">
-        <span className="lck-kda-kills">{p.kills}</span>/
-        <span className="lck-kda-deaths">{p.deaths}</span>/
-        <span className="lck-kda-assists">{p.assists}</span>
-      </td>
-      <td>{kda}</td>
-      <td>
-        <div className="lck-dmg-bar-wrap">
-          <div className="lck-dmg-bar" style={{ width: `${Math.min(p.damageShare, 100)}%` }} />
-          <span className="lck-dmg-text">{p.damageShare?.toFixed(1)}%</span>
-        </div>
-      </td>
-      <td className="lck-stat-cs">{p.cs}</td>
+      <td className={`lck-team-stat-val blue${isBlueBetter ? ' lck-stat-better' : ''}`}>{blueVal}</td>
+      <td className="lck-team-stat-label">{label}</td>
+      <td className={`lck-team-stat-val red${isRedBetter ? ' lck-stat-better' : ''}`}>{redVal}</td>
     </tr>
   );
 }
 
-function GameStatsBlock({ game, idx }) {
+function firstObjBadges(firstObjs, blueSlug, redSlug) {
+  if (!firstObjs) return null;
+  const items = [
+    ['퍼블', firstObjs.firstBlood],
+    ['퍼타', firstObjs.firstTower],
+    ['퍼드', firstObjs.firstDragon],
+    ['퍼바', firstObjs.firstBaron],
+    ['퍼전령', firstObjs.firstHerald],
+  ].filter(([, side]) => side === 'blue' || side === 'red');
+  if (items.length === 0) return null;
+  return (
+    <div className="lck-firstobj-row">
+      {items.map(([label, side]) => (
+        <span key={label} className={`lck-firstobj-chip ${side}`}>
+          <span className="lck-firstobj-label">{label}</span>
+          <span className="lck-firstobj-team">{side === 'blue' ? blueSlug : redSlug}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function GameStatsBlock({ game, idx, eventTeams }) {
   const [open, setOpen] = useState(idx === 0);
-  const winCode = game.winnerCode;
-  const blueName = game.blueTeam?.code || '블루';
-  const redName  = game.redTeam?.code  || '레드';
-  const isBlueWin = winCode === blueName;
-  const isRedWin  = winCode === redName;
+  const blue = teamDisplay(game.blueTeam?.slug, eventTeams);
+  const red  = teamDisplay(game.redTeam?.slug,  eventTeams);
+  const winSide = game.winningSide;
+
+  const b = game.blueTeam || {}, r = game.redTeam || {};
 
   return (
     <div className="lck-game-stats-block">
       <button className="lck-game-toggle" onClick={() => setOpen(!open)}>
         <span className="lck-game-num">게임 {game.gameNumber}</span>
-        {game.duration && <span className="lck-game-dur">{game.duration}</span>}
-        {winCode && (
-          <span className="lck-game-winner-badge">{winCode} 승리</span>
+        {game.duration > 0 && <span className="lck-game-dur">{formatGameTime(game.duration)}</span>}
+        {game.patch && <span className="lck-game-dur">패치 {game.patch}</span>}
+        {winSide && (
+          <span className="lck-game-winner-badge">
+            {(winSide === 'blue' ? blue.code : red.code)} 승리
+          </span>
         )}
         <span className="lck-game-arrow">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
         <div className="lck-game-tables">
-          {/* 블루팀 */}
-          <div className={`lck-team-stat-section${isBlueWin ? ' lck-win-side' : ''}`}>
-            <div className="lck-stat-team-header blue">
-              <span>{game.blueTeam?.name || blueName}</span>
-              {isBlueWin && <span className="lck-win-label">WIN</span>}
+          {/* 팀 헤더 */}
+          <div className="lck-tg-headers">
+            <div className={`lck-tg-team blue${winSide === 'blue' ? ' lck-win-side' : ''}`}>
+              <TeamLogo imageUrl={blue.imageUrl} name={blue.code} size={28} />
+              <span className="lck-tg-name">{blue.name}</span>
+              <span className="lck-tg-side">BLUE</span>
+              {winSide === 'blue' && <span className="lck-win-label">WIN</span>}
             </div>
-            <div className="lck-stat-table-wrap">
-              <table className="lck-stat-table">
-                <thead>
-                  <tr><th>포지션</th><th>선수</th><th>챔피언</th><th>KDA</th><th>KDA비율</th><th>데미지기여도</th><th>CS</th></tr>
-                </thead>
-                <tbody>
-                  {(game.blueTeam?.players || []).map((p, i) => (
-                    <PlayerStatRow key={i} p={p} />
-                  ))}
-                </tbody>
-              </table>
+            <div className={`lck-tg-team red${winSide === 'red' ? ' lck-win-side' : ''}`}>
+              {winSide === 'red' && <span className="lck-win-label">WIN</span>}
+              <span className="lck-tg-side">RED</span>
+              <span className="lck-tg-name">{red.name}</span>
+              <TeamLogo imageUrl={red.imageUrl} name={red.code} size={28} />
             </div>
           </div>
-          {/* 레드팀 */}
-          <div className={`lck-team-stat-section${isRedWin ? ' lck-win-side' : ''}`}>
-            <div className="lck-stat-team-header red">
-              <span>{game.redTeam?.name || redName}</span>
-              {isRedWin && <span className="lck-win-label">WIN</span>}
-            </div>
-            <div className="lck-stat-table-wrap">
-              <table className="lck-stat-table">
-                <thead>
-                  <tr><th>포지션</th><th>선수</th><th>챔피언</th><th>KDA</th><th>KDA비율</th><th>데미지기여도</th><th>CS</th></tr>
-                </thead>
-                <tbody>
-                  {(game.redTeam?.players || []).map((p, i) => (
-                    <PlayerStatRow key={i} p={p} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+
+          {/* 팀 통계 비교표 */}
+          <div className="lck-stat-table-wrap">
+            <table className="lck-stat-table lck-team-stat-table">
+              <tbody>
+                <TeamStatRow label="킬"      blueVal={b.kills  ?? 0} redVal={r.kills  ?? 0}
+                  isBlueBetter={(b.kills ?? 0) > (r.kills ?? 0)} isRedBetter={(r.kills ?? 0) > (b.kills ?? 0)} />
+                <TeamStatRow label="골드"    blueVal={(b.gold ?? 0).toLocaleString()} redVal={(r.gold ?? 0).toLocaleString()}
+                  isBlueBetter={(b.gold ?? 0) > (r.gold ?? 0)} isRedBetter={(r.gold ?? 0) > (b.gold ?? 0)} />
+                <TeamStatRow label="타워"    blueVal={b.towers ?? 0} redVal={r.towers ?? 0}
+                  isBlueBetter={(b.towers ?? 0) > (r.towers ?? 0)} isRedBetter={(r.towers ?? 0) > (b.towers ?? 0)} />
+                <TeamStatRow label="드래곤"  blueVal={b.dragons ?? 0} redVal={r.dragons ?? 0}
+                  isBlueBetter={(b.dragons ?? 0) > (r.dragons ?? 0)} isRedBetter={(r.dragons ?? 0) > (b.dragons ?? 0)} />
+                <TeamStatRow label="바론"    blueVal={b.barons ?? 0} redVal={r.barons ?? 0}
+                  isBlueBetter={(b.barons ?? 0) > (r.barons ?? 0)} isRedBetter={(r.barons ?? 0) > (b.barons ?? 0)} />
+                <TeamStatRow label="전령"    blueVal={b.heralds ?? 0} redVal={r.heralds ?? 0}
+                  isBlueBetter={(b.heralds ?? 0) > (r.heralds ?? 0)} isRedBetter={(r.heralds ?? 0) > (b.heralds ?? 0)} />
+              </tbody>
+            </table>
           </div>
+
+          {/* 퍼스트 오브젝트 */}
+          {firstObjBadges(game.firstObjectives, blue.code, red.code)}
+
+          {/* 밴 챔피언 */}
+          {(b.bans?.length > 0 || r.bans?.length > 0) && (
+            <div className="lck-bans-section">
+              <div className="lck-bans-team blue">
+                <span className="lck-bans-label">{blue.code} 밴</span>
+                <div className="lck-bans-list">
+                  {(b.bans || []).map((c, i) => (
+                    <span key={i} className="lck-ban-chip">{c}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="lck-bans-team red">
+                <span className="lck-bans-label">{red.code} 밴</span>
+                <div className="lck-bans-list">
+                  {(r.bans || []).map((c, i) => (
+                    <span key={i} className="lck-ban-chip">{c}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -217,19 +257,19 @@ function MatchDetailExpand({ event }) {
   const t1 = event.teams?.[0];
   const t2 = event.teams?.[1];
 
-  const [playerStats, setPlayerStats] = useState(null);
+  const [gameStats, setGameStats]     = useState(null);
   const [loadingStats, setLSt]        = useState(false);
   const [analysis, setAnalysis]       = useState(null);
   const [generating, setGenerating]   = useState(false);
 
   useEffect(() => {
-    if (!t1?.code || !t2?.code) return;
+    if (!event.matchId) return;
     setLSt(true);
-    getCitoMatchPlayerStats(t1.code, t2.code)
-      .then((res) => setPlayerStats(res.data || []))
-      .catch(() => setPlayerStats([]))
+    getCitoMatchGames(event.matchId)
+      .then((res) => setGameStats(res.data || []))
+      .catch(() => setGameStats([]))
       .finally(() => setLSt(false));
-  }, [t1?.code, t2?.code]);
+  }, [event.matchId]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -248,7 +288,7 @@ function MatchDetailExpand({ event }) {
       });
       setAnalysis(res.data);
     } catch {
-      setAnalysis({ error: 'Gemini 분석 생성에 실패했습니다.' });
+      setAnalysis({ error: 'Groq AI 분석 생성에 실패했습니다.' });
     } finally {
       setGenerating(false);
     }
@@ -256,22 +296,24 @@ function MatchDetailExpand({ event }) {
 
   return (
     <div className="lck-match-expand">
-      {/* 선수 스탯 */}
+      {/* 게임별 팀 통계 */}
       <div className="lck-expand-section">
-        <h4 className="lck-expand-section-title">선수별 KDA · 데미지 기여도</h4>
+        <h4 className="lck-expand-section-title">게임별 팀 통계</h4>
         {loadingStats ? (
-          <div className="lck-stats-loading">스탯 불러오는 중...</div>
-        ) : playerStats && playerStats.length > 0 ? (
-          playerStats.map((g, i) => <GameStatsBlock key={i} game={g} idx={i} />)
+          <div className="lck-stats-loading">통계 불러오는 중...</div>
+        ) : gameStats && gameStats.length > 0 ? (
+          gameStats.map((g, i) => (
+            <GameStatsBlock key={g.gameId || i} game={g} idx={i} eventTeams={event.teams} />
+          ))
         ) : (
-          <p className="lck-stats-empty">데이터베이스에 해당 경기의 선수 스탯이 없습니다.</p>
+          <p className="lck-stats-empty">이 경기의 게임 통계를 불러오지 못했습니다.</p>
         )}
       </div>
 
-      {/* Gemini 분석 */}
+      {/* Groq AI 분석 */}
       <div className="lck-expand-section">
         <h4 className="lck-expand-section-title">AI 경기 요약</h4>
-        <GeminiAnalysisPanel
+        <GroqAnalysisPanel
           analysis={analysis}
           generating={generating}
           onGenerate={handleGenerate}
@@ -512,20 +554,24 @@ export default function EsportsPage() {
   useEffect(() => {
     const ctrl = new AbortController();
     setLT(true);
-    Promise.all([
+    Promise.allSettled([
       getCitoSeasons(ctrl.signal),
       getCitoToday(ctrl.signal),
       getLckTeamsWithPlayers(ctrl.signal),
     ])
       .then(([sRes, tRes, teamRes]) => {
-        const list = sRes.data || [];
-        setSeasons(list);
-        if (list.length > 0) setSelected(list[0]);
-        const events = tRes?.data?.data?.events || [];
-        setTodayEvents(events);
-        setTeams(teamRes?.data || []);
+        if (sRes.status === 'fulfilled') {
+          const list = sRes.value?.data || [];
+          setSeasons(list);
+          if (list.length > 0) setSelected(list[0]);
+        }
+        if (tRes.status === 'fulfilled') {
+          setTodayEvents(tRes.value?.data?.data?.events || []);
+        }
+        if (teamRes.status === 'fulfilled') {
+          setTeams(teamRes.value?.data || []);
+        }
       })
-      .catch(() => {})
       .finally(() => setLT(false));
     return () => ctrl.abort();
   }, []);

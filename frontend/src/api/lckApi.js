@@ -24,9 +24,13 @@ export const getPlayerGameStats = (playerId, season, signal) =>
 export const getPlayerCareer = (playerId, signal) =>
   axiosInstance.get(`/lck/players/${playerId}/career`, { signal });
 
-// ── Cito 경기 선수 스탯 + Gemini 분석 ──────────────────────────────────────
+// ── Cito 경기 선수 스탯 + Groq 분석 ──────────────────────────────────────
 export const getCitoMatchPlayerStats = (team1Code, team2Code, signal) =>
   axiosInstance.get('/lck/cito/match-player-stats', { params: { team1Code, team2Code }, signal });
+
+/** Cito matchId로 게임별 양팀 통계 (kills, gold, towers, dragons, bans 등) */
+export const getCitoMatchGames = (matchId, signal) =>
+  axiosInstance.get(`/lck/cito/match-games/${matchId}`, { signal });
 
 export const generateLckMatchAnalysis = (data) =>
   axiosInstance.post('/lck/cito/match/analyze', data);

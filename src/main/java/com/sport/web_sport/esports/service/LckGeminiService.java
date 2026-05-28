@@ -25,18 +25,18 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LckGeminiService {
 
-    private static final String ENDPOINT =
-            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
+    private static final String GROQ_ENDPOINT =
+            "https://api.groq.com/openai/v1/chat/completions";
     private static final int MAX_GAMES = 5;
 
     private final GameRepository            gameRepository;
     private final PlayerGameStatRepository  playerStatRepository;
     private final ObjectMapper              objectMapper;
 
-    @Value("${gemini.api.key:}")
+    @Value("${groq.api.key:}")
     private String apiKey;
 
-    @Value("${gemini.model:gemini-2.0-flash}")
+    @Value("${groq.model:llama-3.3-70b-versatile}")
     private String model;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -45,18 +45,18 @@ public class LckGeminiService {
 
     // ── 공개 API ──────────────────────────────────────────────────────────────────
 
-    /** Cito 경기 맥락 + DB 선수 스탯으로 Gemini 분석 생성 */
+    /** Cito 경기 맥락 + DB 선수 스탯으로 Groq AI 분석 생성 */
     @Transactional(readOnly = true)
     public Map<String, Object> analyzeMatch(LckCitoAnalysisRequest req) {
         if (apiKey == null || apiKey.isBlank()) {
-            return Map.of("error", "GEMINI_API_KEY 환경변수가 설정되지 않았습니다.");
+            return Map.of("error", "GROQ_API_KEY 환경변수가 설정되지 않았습니다.");
         }
 
         List<Game> games = fetchGames(req.getTeam1Code(), req.getTeam2Code());
         String prompt = buildPrompt(req, games);
 
         try {
-            String rawResponse = callGemini(prompt);
+            String rawResponse = callGroq(prompt);
             JsonNode parsed    = parseStructured(rawResponse);
             return Map.of(
                 "summary",  textOrEmpty(parsed, "summary"),
@@ -64,7 +64,7 @@ public class LckGeminiService {
                 "keyPoint", textOrEmpty(parsed, "keyPoint")
             );
         } catch (Exception e) {
-            log.warn("LCK Gemini analysis failed for {}vs{}", req.getTeam1Code(), req.getTeam2Code(), e);
+            log.warn("LCK Groq analysis failed for {}vs{}", req.getTeam1Code(), req.getTeam2Code(), e);
             return Map.of("error", truncate(e.getMessage(), 400));
         }
     }
@@ -187,36 +187,43 @@ public class LckGeminiService {
             });
     }
 
-    private String callGemini(String prompt) throws Exception {
-        String url = String.format(ENDPOINT, model, apiKey);
+    private String callGroq(String prompt) throws Exception {
         Map<String, Object> body = Map.of(
-            "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
-            "generationConfig", Map.of("responseMimeType", "application/json", "temperature", 0.5)
+            "model", model,
+            "messages", List.of(Map.of("role", "user", "content", prompt)),
+            "temperature", 0.5,
+            "response_format", Map.of("type", "json_object")
         );
         String json = objectMapper.writeValueAsString(body);
 
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
+            .uri(URI.create(GROQ_ENDPOINT))
             .timeout(Duration.ofSeconds(50))
             .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer " + apiKey)
             .POST(HttpRequest.BodyPublishers.ofString(json))
             .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() / 100 != 2)
-            throw new RuntimeException("Gemini API 오류 (status=" + response.statusCode() + "): "
+            throw new RuntimeException("Groq API 오류 (status=" + response.statusCode() + "): "
                 + truncate(response.body(), 300));
         return response.body();
     }
 
     private JsonNode parseStructured(String body) throws Exception {
         JsonNode root = objectMapper.readTree(body);
-        JsonNode candidates = root.path("candidates");
-        if (!candidates.isArray() || candidates.isEmpty())
-            throw new RuntimeException("Gemini 응답에 candidates 없음");
-        String inner = candidates.get(0).path("content").path("parts").get(0).path("text").asText("");
-        if (inner.isBlank()) throw new RuntimeException("Gemini 응답 text가 비어있음");
-        return objectMapper.readTree(inner);
+        String inner = root.path("choices").path(0)
+                .path("message").path("content").asText("");
+        if (inner.isBlank()) throw new RuntimeException("Groq 응답 content가 비어있음");
+        return objectMapper.readTree(extractJson(inner));
+    }
+
+    private static String extractJson(String text) {
+        String trimmed = text.strip();
+        int start = trimmed.indexOf('{');
+        int end   = trimmed.lastIndexOf('}');
+        return (start >= 0 && end > start) ? trimmed.substring(start, end + 1) : trimmed;
     }
 
     private static String textOrEmpty(JsonNode node, String field) {

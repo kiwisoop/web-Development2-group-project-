@@ -70,6 +70,20 @@ public class CitoApiService {
         return first;
     }
 
+    /** 매치 내 게임별 팀 단위 통계 (kills, gold, towers, dragons, bans 등) */
+    public List<Map<String, Object>> fetchMatchGames(String matchId) {
+        String url = baseUrl + "/lol/matches/" + matchId + "/games";
+        try {
+            ResponseEntity<String> resp = restTemplate.exchange(
+                    url, HttpMethod.GET, buildRequest(), String.class);
+            log.info("Cito match games {} → {}", matchId, resp.getStatusCode());
+            return objectMapper.readValue(resp.getBody(), new TypeReference<>() {});
+        } catch (Exception e) {
+            log.warn("Cito match games 실패 [{}]: {}", matchId, e.getMessage());
+            return null;
+        }
+    }
+
     /** 토너먼트 순위표 조회 */
     public List<Map<String, Object>> fetchStandings(String tournamentId) {
         String url = baseUrl + "/lol/tournaments/" + tournamentId + "/standings";

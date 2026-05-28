@@ -127,12 +127,20 @@ public class LckController {
         return ResponseEntity.ok(resp);
     }
 
-    /** 팀 코드 쌍으로 최근 경기 선수별 KDA + 데미지 기여도 조회 */
+    /** 팀 코드 쌍으로 최근 경기 선수별 KDA + 데미지 기여도 조회 (DB 더미 데이터 한정) */
     @GetMapping("/cito/match-player-stats")
     public ResponseEntity<List<Map<String, Object>>> getMatchPlayerStats(
             @RequestParam String team1Code,
             @RequestParam String team2Code) {
         return ResponseEntity.ok(lckGeminiService.getMatchPlayerStats(team1Code, team2Code));
+    }
+
+    /** Cito matchId로 게임별 양팀 통계 (kills, gold, towers, dragons, barons, heralds, bans) */
+    @GetMapping("/cito/match-games/{matchId}")
+    public ResponseEntity<?> getMatchGames(@PathVariable String matchId) {
+        List<Map<String, Object>> games = citoApiService.fetchMatchGames(matchId);
+        if (games == null) return ResponseEntity.status(503).build();
+        return ResponseEntity.ok(games);
     }
 
     /** Cito 경기 맥락으로 Gemini 경기 요약 생성 */

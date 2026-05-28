@@ -3194,3 +3194,1983 @@
   line-height: 1.65;
   margin: 0;
 }
+/* ===== Esports Page ===== */
+.esports-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.esports-season-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.esports-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.esports-match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.esports-match-row {
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  border: 2px solid transparent;
+  padding: 1rem 1.25rem;
+}
+
+.esports-match-row:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.esports-selected {
+  border-color: var(--color-primary);
+}
+
+.esports-match-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.esports-league-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: rgba(124, 58, 237, 0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.esports-date {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.esports-match-teams {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.esports-team {
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.esports-team-right {
+  text-align: right;
+}
+
+.esports-winner {
+  color: var(--color-primary);
+}
+
+.esports-score {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.esports-detail-panel {
+  min-width: 0;
+}
+
+.esports-empty-detail {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 2.5rem;
+}
+
+.esports-game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.esports-game-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.esports-game-winner {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.esports-game-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.esports-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.esports-detail-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.esports-vs {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.esports-duration {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.esports-win-badge {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.esports-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+/* Objectives */
+.esports-obj-table {
+  background: var(--color-bg);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.esports-obj-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.esports-team-label.blue { color: #3b82f6; }
+.esports-team-label.red  { color: #ef4444; }
+
+.esports-obj-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.esports-obj-row:last-child { border-bottom: none; }
+
+.esports-obj-label {
+  color: var(--color-text-muted);
+  text-align: center;
+  flex: 1;
+}
+
+.esports-obj-val {
+  width: 48px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.esports-obj-val.esports-obj-win {
+  color: var(--color-primary);
+}
+
+/* Player Tables */
+.esports-player-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.esports-table-wrap {
+  overflow-x: auto;
+}
+
+.esports-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.esports-table th,
+.esports-table td {
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.esports-table th {
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  font-size: 0.75rem;
+}
+
+.esports-side-blue .esports-table thead { border-left: 3px solid #3b82f6; }
+.esports-side-red  .esports-table thead { border-left: 3px solid #ef4444; }
+
+.esports-pos  { color: var(--color-text-muted); font-size: 0.75rem; }
+.esports-pname { font-weight: 600; }
+.esports-kda  { font-weight: 600; color: var(--color-primary); }
+
+/* Timeline */
+.esports-timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.esports-timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.4rem;
+  background: var(--color-bg);
+}
+
+.esports-ev-time {
+  font-weight: 700;
+  color: var(--color-primary);
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.esports-ev-type {
+  font-weight: 600;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.esports-ev-team {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+}
+
+.esports-ev-desc {
+  color: var(--color-text-muted);
+}
+
+/* Analysis */
+.esports-analysis {
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.esports-key-player {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.esports-analysis-scores {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.esports-score-chip {
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.esports-analysis-text {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  white-space: pre-line;
+}
+
+/* ── New Cito-based esports components ─────────────────────────────────────── */
+
+.esports-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.esports-section-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--color-text);
+}
+
+.esports-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.esports-match-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.6rem;
+  padding: 0.7rem 1rem;
+  transition: box-shadow 0.15s;
+}
+
+.esports-match-card:hover {
+  box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,.12));
+}
+
+.esports-match-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.esports-block-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: rgba(124, 58, 237, 0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.esports-match-date {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.esports-match-time {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.esports-state-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.esports-state-badge.done {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.esports-state-badge.upcoming {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.esports-match-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.esports-match-team {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 80px;
+  flex: 1;
+}
+
+.esports-match-team-right {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.esports-team-win .esports-team-name {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.esports-team-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.esports-team-logo {
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.esports-logo-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.esports-match-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.esports-score-text {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.esports-score-win {
+  color: var(--color-primary);
+}
+
+.esports-score-vs {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.esports-bo {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+/* Today section */
+.esports-today-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.esports-today-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--color-text);
+}
+
+.esports-today-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Standings panel */
+.esports-standings-panel {
+  position: sticky;
+  top: 1rem;
+}
+
+.esports-standings {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.esports-standings-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.esports-standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.esports-standings-table th,
+.esports-standings-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.esports-standings-table th {
+  font-weight: 700;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.esports-standings-table .esports-rank-team {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.esports-rank-top td {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.esports-rank-num {
+  font-weight: 700;
+  color: var(--color-text-muted);
+  width: 28px;
+}
+
+.esports-rank-wins {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.esports-rank-losses {
+  color: var(--color-text-muted);
+}
+
+/* ── 2026 시즌 배지 & 탭 강조 ─────────────────────────────────────────────── */
+.lck-tab-2026 {
+  position: relative;
+}
+
+.lck-tab-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.02em;
+}
+
+.lck-season-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  color: #fff;
+  border-radius: 10px;
+  vertical-align: middle;
+}
+
+/* ── 뷰 모드 토글 ──────────────────────────────────────────────────────────── */
+.lck-view-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 1rem 0 0.5rem;
+}
+
+.lck-view-btn {
+  padding: 6px 18px;
+  border: 1.5px solid var(--color-border, #e5e7eb);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.lck-view-btn.active,
+.lck-view-btn:hover {
+  background: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, #3b82f6);
+  color: #fff;
+}
+
+/* ── 팀 정보 그리드 ─────────────────────────────────────────────────────────── */
+.lck-team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.lck-team-card {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: box-shadow 0.15s;
+}
+
+.lck-team-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.lck-team-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.lck-team-title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.lck-team-fullname {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #111827);
+  line-height: 1.3;
+}
+
+.lck-team-code {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 500;
+}
+
+.lck-team-record {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.lck-record-wins   { color: #22c55e; }
+.lck-record-losses { color: var(--color-text-muted, #6b7280); }
+.lck-record-rank   { color: #f59e0b; font-size: 0.7rem; }
+
+/* ── 선수 목록 ──────────────────────────────────────────────────────────────── */
+.lck-player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lck-player-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.lck-pos-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.lck-player-nick {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #111827);
+  min-width: 60px;
+}
+
+.lck-player-name {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* ── state badge 추가 (LIVE) ────────────────────────────────────────────────── */
+.esports-state-badge.live {
+  background: #ef4444;
+  color: #fff;
+  animation: lck-blink 1s step-start infinite;
+}
+
+@keyframes lck-blink {
+  50% { opacity: 0.5; }
+}
+
+.lck-standings-empty {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #6b7280);
+  padding: 1rem 0;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .esports-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lck-team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 선수 카드 클릭 가능 ─────────────────────────────────────────────────── */
+.lck-player-clickable {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 4px 6px;
+  transition: background-color 0.12s;
+}
+
+.lck-player-clickable:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.lck-player-arrow {
+  margin-left: auto;
+  color: var(--color-text-muted, #9ca3af);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.lck-player-clickable:hover .lck-player-arrow {
+  color: var(--color-primary, #3b82f6);
+}
+
+/* ── 선수 지표 모달 ──────────────────────────────────────────────────────── */
+.lck-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: lck-fadein 0.15s ease-out;
+}
+
+@keyframes lck-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lck-modal {
+  background: var(--color-surface, #fff);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+}
+
+.lck-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  background: linear-gradient(135deg, rgba(59,130,246,0.05), rgba(168,85,247,0.05));
+}
+
+.lck-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lck-modal-nick {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary, #111827);
+}
+
+.lck-modal-real {
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.lck-modal-team {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-primary, #3b82f6);
+  border-radius: 12px;
+}
+
+.lck-modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  padding: 0 6px;
+  transition: color 0.12s;
+}
+
+.lck-modal-close:hover {
+  color: var(--color-text-primary, #111827);
+}
+
+.lck-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.lck-modal-error {
+  padding: 1rem;
+  color: #ef4444;
+  background: rgba(239,68,68,0.08);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.lck-modal-section {
+  margin-bottom: 2rem;
+}
+
+.lck-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.lck-modal-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  color: var(--color-text-primary, #111827);
+  padding-left: 8px;
+  border-left: 3px solid var(--color-primary, #3b82f6);
+}
+
+.lck-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.lck-table-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #6b7280);
+  margin: 0 0 0.5rem 0;
+}
+
+/* ── 통산 전적 바 ────────────────────────────────────────────────────────── */
+.lck-career-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: var(--color-bg-subtle, #f9fafb);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.lck-career-bar .lck-win  { color: #22c55e; font-weight: 600; }
+.lck-career-bar .lck-loss { color: #ef4444; font-weight: 600; }
+
+/* ── 시즌 요약 카드 그리드 ───────────────────────────────────────────────── */
+.lck-pstat-season-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.lck-pstat-season-card {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.lck-pstat-season-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.lck-pstat-season-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #111827);
+}
+
+.lck-pstat-season-games {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.lck-pstat-kda-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.lck-pstat-kda-main {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.lck-pstat-kda-k   { color: #22c55e; }
+.lck-pstat-kda-d   { color: #ef4444; }
+.lck-pstat-kda-a   { color: #f59e0b; }
+.lck-pstat-kda-sep { color: var(--color-text-muted, #9ca3af); margin: 0 4px; }
+
+.lck-pstat-kda-value {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.lck-pstat-kda-value strong {
+  font-size: 1.1rem;
+  color: var(--color-primary, #3b82f6);
+  margin-left: 4px;
+}
+
+.lck-pstat-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.lck-pstat-stat-grid > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 4px;
+  background: var(--color-bg-subtle, #f9fafb);
+  border-radius: 6px;
+}
+
+.lck-pstat-stat-grid span {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #6b7280);
+  margin-bottom: 2px;
+}
+
+.lck-pstat-stat-grid strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.lck-pstat-stat-grid .lck-win  { color: #22c55e; }
+.lck-pstat-stat-grid .lck-loss { color: #ef4444; }
+
+/* ── 시즌 필터 ───────────────────────────────────────────────────────────── */
+.lck-season-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lck-filter-btn {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.lck-filter-btn.active,
+.lck-filter-btn:hover {
+  background: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, #3b82f6);
+  color: #fff;
+}
+
+/* ── 경기별 지표 테이블 ──────────────────────────────────────────────────── */
+.lck-pstat-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 8px;
+}
+
+.lck-pstat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.lck-pstat-table thead {
+  background: var(--color-bg-subtle, #f9fafb);
+}
+
+.lck-pstat-table th {
+  padding: 10px 8px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.lck-pstat-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border, #f3f4f6);
+  white-space: nowrap;
+}
+
+.lck-pstat-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lck-pstat-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.03);
+}
+
+.lck-row-win  { border-left: 3px solid transparent; }
+.lck-row-loss { border-left: 3px solid transparent; }
+
+.lck-pstat-table .lck-champ {
+  font-weight: 600;
+  color: var(--color-text-primary, #111827);
+}
+
+.lck-pstat-table .lck-opp-code {
+  font-weight: 700;
+  color: var(--color-text-primary, #111827);
+}
+
+.lck-pstat-table .lck-game-no {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted, #6b7280);
+  background: var(--color-bg-subtle, #f3f4f6);
+  border-radius: 3px;
+}
+
+.lck-pstat-table .lck-dpm     { font-weight: 700; color: #ef4444; }
+.lck-pstat-table .lck-dmg-ratio { font-weight: 700; color: #f59e0b; }
+.lck-pstat-table .lck-duration  { color: var(--color-text-muted, #6b7280); font-size: 0.8rem; }
+
+.lck-pstat-table .lck-kda-cell {
+  font-weight: 600;
+}
+
+.lck-badge-win,
+.lck-badge-loss {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lck-badge-win  { background: #22c55e; }
+.lck-badge-loss { background: #ef4444; }
+
+@media (max-width: 768px) {
+  .lck-modal {
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .lck-pstat-season-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lck-pstat-table {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-message {
+    flex-wrap: wrap;
+  }
+
+  .chat-time {
+    order: 3;
+    width: 100%;
+    padding-left: 0;
+  }
+}
+
+/* Admin API Test Page */
+.api-test-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.api-test-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.api-test-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.api-test-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.api-test-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.api-test-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  transition: box-shadow 0.15s;
+}
+
+.api-test-card--active {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.api-test-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.api-test-endpoint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.api-test-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.api-test-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  flex: 1;
+}
+
+.api-test-btn {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.9rem;
+}
+
+.api-method-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.api-method-badge--get {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.api-method-badge--post {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.api-method-badge--put {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.api-method-badge--delete {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.api-response-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.api-response-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.api-response-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.api-response-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.api-response-endpoint code {
+  color: var(--text-muted);
+}
+
+.api-status-badge {
+  margin-left: auto;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.api-status-badge--ok {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.api-status-badge--err {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.api-response-loading {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.json-output-wrap {
+  overflow-x: auto;
+  background: #1e1e2e;
+  border-radius: var(--radius);
+}
+
+.json-output {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #cdd6f4;
+  white-space: pre;
+  font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+}
+
+/* Access guard pages */
+.page-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.access-denied-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+}
+
+.access-denied-card {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.access-denied-msg {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.access-denied-sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+  text-align: center;
+}
+
+.error-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error-page {
+  gap: 1rem;
+}
+
+.error-page-code {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+
+/* ── Rankings - LCK 순위표 ─────────────────────────────────────────────────── */
+.lck-rankings-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.lck-rank-season-tabs {
+  margin-bottom: 0;
+}
+
+.lck-rank-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lck-rank-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lck-rank-season-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.lck-rank-source-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--color-accent, #7c3aed);
+}
+
+.lck-rank-table th.team-name-cell,
+.lck-rank-table td.team-name-cell {
+  min-width: 160px;
+}
+
+.lck-rank-team-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lck-rank-team-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.lck-rank-team-code {
+  font-size: 0.72rem;
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 500;
+}
+
+.lck-rank-logo-fb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg, #f9fafb);
+  color: var(--color-text-muted, #6b7280);
+  border-radius: 4px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.lck-rank-top-row td {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+/* ── EsportsPage - 경기 클릭 확장 ─────────────────────────────────────────── */
+.lck-match-card-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.lck-match-clickable {
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  border: 1.5px solid transparent;
+}
+
+.lck-match-clickable:hover {
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.12);
+}
+
+.lck-match-card-expanded .lck-match-clickable {
+  border-color: var(--color-primary, #3b82f6);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+.lck-expand-hint {
+  font-size: 0.65rem;
+  color: var(--color-text-muted, #9ca3af);
+  margin-left: auto;
+}
+
+.lck-click-hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #6b7280);
+  margin: -0.25rem 0 0.25rem;
+  padding: 0 0.25rem;
+}
+
+/* ── 경기 확장 패널 ─────────────────────────────────────────────────────────── */
+.lck-match-expand {
+  background: var(--color-surface, #fff);
+  border: 1.5px solid var(--color-primary, #3b82f6);
+  border-top: none;
+  border-bottom-left-radius: 0.6rem;
+  border-bottom-right-radius: 0.6rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: lck-fadein 0.18s ease-out;
+}
+
+.lck-expand-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.lck-expand-section-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* ── 게임 스탯 블록 ─────────────────────────────────────────────────────────── */
+.lck-game-stats-block {
+  background: var(--color-bg, #f9fafb);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.lck-game-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.82rem;
+  color: var(--color-text, #111827);
+  transition: background 0.12s;
+}
+
+.lck-game-toggle:hover {
+  background: rgba(59,130,246,0.05);
+}
+
+.lck-game-num {
+  font-weight: 700;
+  color: var(--color-primary, #3b82f6);
+  min-width: 46px;
+}
+
+.lck-game-dur {
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.78rem;
+}
+
+.lck-game-winner-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+}
+
+.lck-game-arrow {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #9ca3af);
+}
+
+.lck-game-tables {
+  padding: 0.5rem 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── 팀별 스탯 섹션 ─────────────────────────────────────────────────────────── */
+.lck-team-stat-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.lck-team-stat-section.lck-win-side .lck-stat-team-header {
+  font-weight: 800;
+}
+
+.lck-stat-team-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+}
+
+.lck-stat-team-header.blue { color: #3b82f6; background: rgba(59,130,246,0.06); }
+.lck-stat-team-header.red  { color: #ef4444; background: rgba(239,68,68,0.06); }
+
+.lck-win-label {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #22c55e;
+  color: #fff;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.lck-stat-table-wrap {
+  overflow-x: auto;
+}
+
+.lck-stat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.lck-stat-table th {
+  padding: 0.3rem 0.5rem;
+  background: var(--color-surface, #fff);
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.lck-stat-table td {
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border, #f3f4f6);
+}
+
+.lck-stat-table tbody tr:last-child td { border-bottom: none; }
+.lck-stat-table tbody tr:hover { background: rgba(59,130,246,0.03); }
+
+.lck-stat-nick  { font-weight: 600; text-align: left !important; }
+.lck-stat-champ { color: var(--color-text-muted, #6b7280); }
+.lck-stat-kda   { font-weight: 600; }
+.lck-stat-cs    { color: var(--color-text-muted, #6b7280); }
+
+.lck-kda-kills   { color: #22c55e; }
+.lck-kda-deaths  { color: #ef4444; }
+.lck-kda-assists { color: #f59e0b; }
+
+/* ── 데미지 기여도 바 ─────────────────────────────────────────────────────────── */
+.lck-dmg-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 80px;
+}
+
+.lck-dmg-bar {
+  height: 6px;
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  border-radius: 999px;
+  min-width: 2px;
+  transition: width 0.3s ease;
+}
+
+.lck-dmg-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ef4444;
+  min-width: 36px;
+}
+
+/* ── 스탯 로딩/비어있음 ─────────────────────────────────────────────────────── */
+.lck-stats-loading {
+  padding: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #6b7280);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.lck-stats-empty {
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #6b7280);
+  padding: 0.5rem 0;
+}
+
+/* ── Gemini 분석 패널 ────────────────────────────────────────────────────────── */
+.lck-gemini-panel {
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+}
+
+.lck-gemini-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-text-muted, #6b7280);
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px dashed rgba(99,102,241,0.3);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.lck-gemini-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(99,102,241,0.3);
+  border-top-color: var(--color-accent, #7c3aed);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.lck-gemini-error {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.lck-gemini-error-msg {
+  color: #b91c1c;
+  font-size: 0.82rem;
+}
+
+.lck-gemini-empty {
+  background: rgba(99, 102, 241, 0.04);
+  border: 1px dashed rgba(99,102,241,0.25);
+  align-items: flex-start;
+}
+
+.lck-gemini-desc {
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.lck-gemini-done {
+  background: rgba(124, 58, 237, 0.04);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+.lck-gemini-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lck-gemini-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #7c3aed, #3b82f6);
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.lck-gemini-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--color-bg, #f9fafb);
+  border-radius: 0.4rem;
+  line-height: 1.6;
+}
+
+.lck-gemini-block strong {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-accent, #7c3aed);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lck-gemini-block p {
+  margin: 0;
+  color: var(--color-text, #111827);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .lck-game-tables {
+    padding: 0.5rem;
+  }
+
+  .lck-stat-table {
+    font-size: 0.75rem;
+  }
+
+  .lck-dmg-bar-wrap {
+    min-width: 60px;
+  }
+}
+
+/* ===== LCK Game Stats: Team-level View (replaces player KDA tables) ===== */
+.lck-tg-headers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.lck-tg-team {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+  font-weight: 600;
+}
+.lck-tg-team.blue { border-left: 4px solid #3b82f6; }
+.lck-tg-team.red  {
+  border-right: 4px solid #ef4444;
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.lck-tg-team.lck-win-side {
+  background: #fefce8;
+  box-shadow: 0 0 0 1px #fde047 inset;
+}
+.lck-tg-name { font-size: 0.95rem; color: #111827; }
+.lck-tg-side {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  color: #6b7280;
+  letter-spacing: 0.05em;
+}
+.lck-tg-team.blue .lck-tg-side { background: #dbeafe; color: #1d4ed8; }
+.lck-tg-team.red  .lck-tg-side { background: #fee2e2; color: #b91c1c; }
+
+.lck-team-stat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.25rem 0;
+  table-layout: fixed;
+}
+.lck-team-stat-table td {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+.lck-team-stat-table tr:last-child td { border-bottom: none; }
+.lck-team-stat-val {
+  width: 40%;
+  font-weight: 600;
+  color: #374151;
+}
+.lck-team-stat-val.blue { text-align: right; }
+.lck-team-stat-val.red  { text-align: left; }
+.lck-team-stat-val.lck-stat-better {
+  color: #111827;
+  font-weight: 800;
+}
+.lck-team-stat-val.blue.lck-stat-better { color: #1d4ed8; }
+.lck-team-stat-val.red.lck-stat-better  { color: #b91c1c; }
+.lck-team-stat-label {
+  width: 20%;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* First objectives row */
+.lck-firstobj-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  padding: 0.5rem;
+  border-top: 1px dashed #e5e7eb;
+}
+.lck-firstobj-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+}
+.lck-firstobj-chip.blue { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.lck-firstobj-chip.red  { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+.lck-firstobj-label { opacity: 0.75; }
+.lck-firstobj-team { font-weight: 800; }
+
+/* Bans section */
+.lck-bans-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+.lck-bans-team {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+.lck-bans-team.blue { border-left: 3px solid #3b82f6; }
+.lck-bans-team.red  { border-right: 3px solid #ef4444; align-items: flex-end; }
+.lck-bans-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+.lck-bans-team.blue .lck-bans-label { color: #1d4ed8; }
+.lck-bans-team.red  .lck-bans-label { color: #b91c1c; }
+.lck-bans-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.lck-bans-team.red .lck-bans-list { justify-content: flex-end; }
+.lck-ban-chip {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.72rem;
+  background: #f3f4f6;
+  color: #4b5563;
+  border-radius: 4px;
+  position: relative;
+}
+.lck-ban-chip::before {
+  content: '🚫';
+  margin-right: 0.2rem;
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .lck-tg-headers,
+  .lck-bans-section { grid-template-columns: 1fr; }
+  .lck-tg-team.red { flex-direction: row; text-align: left; }
+  .lck-bans-team.red { align-items: flex-start; border-right: none; border-left: 3px solid #ef4444; }
+  .lck-bans-team.red .lck-bans-list { justify-content: flex-start; }
+}
