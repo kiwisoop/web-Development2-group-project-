@@ -16,7 +16,7 @@ TheSportsDB 프리미엄 API → Oracle DB 적재 → Spring Boot REST API → R
 [TheSportsDB API]
         │
         ▼
-[collect_kleague.py]  ← Python 스크립트 (수동 실행)
+[KLeagueDataCollector.java]  ← Java 수집기 (수동 실행, 프로젝트 루트)
         │
         ▼
 [Oracle DB]
@@ -48,16 +48,76 @@ GRANT UNLIMITED TABLESPACE TO soccer;
 ```
 
 `Soccer123!`는 예시 비밀번호이며, 운영 환경에서는 다른 값을 사용하세요.
-바꿀 경우 `collect_kleague.py`, `application.properties`의 default 값을 함께 수정하거나
-환경변수(`DB_USERNAME`, `DB_PASSWORD`)로 오버라이드하세요.
+바꿀 경우 `KLeagueDataCollector.java`, `application.properties`의 default 값을 함께
+수정하거나 환경변수(`DB_USERNAME`, `DB_PASSWORD`)로 오버라이드하세요.
 
-### 2-2. Python 환경 (스크립트 실행용)
+### 2-2. Java 환경 + 필요 라이브러리 (수동 설치)
 
-Python 3.8 이상.
+`KLeagueDataCollector.java`를 실행하려면 아래 환경·라이브러리가 필요합니다.
+
+**JDK 17 이상** — 백엔드 실행 조건과 동일.
+
+#### 필요 JAR 파일 4개
+
+| 파일 | 용도 |
+|---|---|
+| `ojdbc11-23.4.0.24.05.jar` | Oracle JDBC 드라이버 |
+| `jackson-databind-2.17.0.jar` | JSON 매핑 (`ObjectMapper`, `JsonNode`) |
+| `jackson-core-2.17.0.jar` | `jackson-databind` 의존 (저수준 JSON 파서) |
+| `jackson-annotations-2.17.0.jar` | `jackson-databind` 의존 (어노테이션 정의) |
+
+#### 다운로드 — 두 가지 방법 중 선택
+
+**방법 A. 커맨드라인 (curl) — 가장 빠름**
+
+프로젝트 루트에서 아래 명령 그대로 실행:
 
 ```bash
-pip install requests oracledb
+mkdir -p lib
+cd lib
+curl -O https://repo1.maven.org/maven2/com/oracle/database/jdbc/ojdbc11/23.4.0.24.05/ojdbc11-23.4.0.24.05.jar
+curl -O https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.17.0/jackson-databind-2.17.0.jar
+curl -O https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.17.0/jackson-core-2.17.0.jar
+curl -O https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.17.0/jackson-annotations-2.17.0.jar
+cd ..
 ```
+
+**방법 B. 브라우저로 다운로드**
+
+위 4개 URL을 브라우저 주소창에 붙여넣으면 곧바로 JAR가 받아집니다 (Maven Central 공식 저장소).
+받은 파일을 프로젝트 루트의 `lib/` 폴더에 모두 옮기세요.
+
+#### 폴더 구조 (다운로드 완료 후)
+
+```
+web-Development2-group-project-/
+├── KLeagueDataCollector.java
+├── lib/
+│   ├── ojdbc11-23.4.0.24.05.jar
+│   ├── jackson-databind-2.17.0.jar
+│   ├── jackson-core-2.17.0.jar
+│   └── jackson-annotations-2.17.0.jar
+├── pom.xml
+└── ...
+```
+
+#### IntelliJ에 라이브러리 등록
+
+IntelliJ에서 `KLeagueDataCollector.java`의 `import` 빨간 줄을 없애려면:
+
+1. **File → Project Structure** (`⌘ ;` 또는 `Ctrl+Alt+Shift+S`)
+2. 좌측 **Modules → Dependencies** 탭
+3. 우측 **+** → **JARs or directories…**
+4. 방금 만든 `lib/` 폴더 선택 → **OK**
+5. **Apply → OK**
+
+#### VS Code에 라이브러리 등록
+
+`Extension Pack for Java` 설치 후:
+
+1. 좌측 사이드바 **JAVA PROJECTS** 패널 열기
+2. **Referenced Libraries** 옆 **+** 클릭
+3. `lib/` 폴더의 JAR 4개 선택
 
 ### 2-3. TheSportsDB API 키
 
@@ -66,25 +126,46 @@ free tier에서는 일부 엔드포인트가 제한되므로 **프리미엄 키*
 
 ---
 
-## 3. collect_kleague.py 사용법
+## 3. KLeagueDataCollector.java 사용법
 
-K리그 1의 팀·경기·순위 데이터를 TheSportsDB에서 받아 Oracle DB에 저장하는 스크립트입니다.
+K리그 1의 팀·경기·순위 데이터를 TheSportsDB에서 받아 Oracle DB에 저장하는 Java 프로그램입니다.
+프로젝트 루트(`pom.xml`과 같은 위치)에 단독 클래스 파일로 존재하며, `package` 선언 없이
+`main` 메서드를 가진 standalone 실행 클래스입니다.
 
 ### 실행 절차
 
-1. **`collect_kleague.py` 파일을 열어 두 변수를 본인 환경에 맞게 수정**합니다.
+1. **`KLeagueDataCollector.java` 파일을 열어 상수 3개를 본인 환경에 맞게 수정**합니다.
 
-   ```python
-   API_KEY     = "********"   # ← 자신의 TheSportsDB 프리미엄 키로 교체
-   DB_USER     = "soccer"     # ← 다른 계정 사용 중이면 교체
-   DB_PASSWORD = "Soccer123!" # ← 본인 비밀번호로 교체
+   ```java
+   private static final String API_KEY     = "********";   // ← 자신의 TheSportsDB 프리미엄 키
+   private static final String DB_USER     = "soccer";     // ← 본인 DB 계정
+   private static final String DB_PASSWORD = "Soccer123!"; // ← 본인 비밀번호
    ```
 
-2. **실행**
+2. **실행 (IntelliJ / VS Code 등 IDE — 권장)**
+
+   2-2에서 `lib/`를 라이브러리로 등록했다면, IDE에서 `KLeagueDataCollector.java`를 열고
+   `main` 메서드 옆의 **Run** 버튼(▶) 클릭.
+
+3. **실행 (커맨드라인)**
+
+   2-2에서 다운로드한 `lib/` 폴더를 classpath로 지정해 컴파일·실행합니다.
 
    ```bash
-   python collect_kleague.py
+   # 컴파일
+   javac -cp "lib/*" KLeagueDataCollector.java
+
+   # 실행 (macOS / Linux)
+   java -cp ".:lib/*" KLeagueDataCollector
+
+   # 실행 (Windows)
+   java -cp ".;lib/*" KLeagueDataCollector
+
+   # 정리 (선택)
+   rm KLeagueDataCollector.class
    ```
+
+   ※ `-cp` 구분자가 macOS/Linux는 콜론(`:`), Windows는 세미콜론(`;`)으로 다릅니다.
 
 3. **출력 예시**
 
@@ -119,16 +200,16 @@ K리그 1의 팀·경기·순위 데이터를 TheSportsDB에서 받아 Oracle DB
 
 ### ⚠️ Git에 올리기 전 반드시
 
-스크립트를 실행한 후 **commit/push 하기 전에 `API_KEY`를 다시 `"********"`로 복원**하세요.
+실행 후 **commit/push 하기 전에 `API_KEY`를 다시 `"********"`로 복원**하세요.
 실제 API 키가 GitHub에 노출되면 누구나 본인 quota를 소진할 수 있습니다.
 
-```python
-API_KEY     = "********" # 사용하기전 API키 변경 후 실행
+```java
+private static final String API_KEY = "********"; // 사용하기 전 API 키 변경 후 실행
 ```
 
 ### 재실행 동작
 
-스크립트는 매번 실행 시 `DROP TABLE CASCADE CONSTRAINTS` 후 다시 생성합니다.
+수집기는 매번 실행 시 `DROP TABLE CASCADE CONSTRAINTS` 후 다시 생성합니다.
 즉 **기존 데이터를 전부 지우고 새로 적재**합니다. (UPDATE 로직은 안전장치)
 시즌 종료·새 라운드 추가 등으로 데이터를 갱신할 때 그냥 다시 돌리면 됩니다.
 
@@ -271,9 +352,17 @@ spring.jpa.hibernate.naming.physical-strategy=com.sport.web_sport.config.Preserv
 → `Fixture` 엔티티의 `@JoinColumn`에 `foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)`
    가 있는지 확인. 실제 FIXTURES 데이터에 TEAMS에 없는 팀 ID가 일부 포함되어 있어 의도된 처리입니다.
 
-### `python collect_kleague.py` 실행 시 `oracledb` 임포트 에러
-→ `pip install oracledb` 후 다시 실행. Oracle Instant Client는 oracledb 라이브러리가
-   thin 모드로 동작하므로 별도 설치 불필요합니다.
+### `KLeagueDataCollector` 실행 시 `ClassNotFoundException: oracle.jdbc.OracleDriver`
+→ `lib/` 폴더에 `ojdbc11-*.jar`가 없거나 classpath에 포함되지 않은 경우입니다.
+   2-2의 다운로드 단계와 실행 시 `-cp` 인자를 확인하세요.
+
+### `KLeagueDataCollector` 실행 시 `ClassNotFoundException: com.fasterxml.jackson.databind.JsonNode`
+→ jackson 관련 JAR 3개(`jackson-databind`, `jackson-core`, `jackson-annotations`) 중 일부가 빠졌습니다.
+   `jackson-databind`만으로는 동작하지 않으니 **3개 모두** `lib/`에 있어야 합니다.
+
+### IntelliJ에서 import 빨간 줄이 안 사라짐
+→ 2-2 마지막 단계(File → Project Structure → Modules → Dependencies)에서 `lib/` 폴더를
+   등록했는지 확인. 등록 후에도 안 풀리면 **File → Invalidate Caches → Invalidate and Restart**.
 
 ### 프론트엔드에서 데이터가 안 보이고 콘솔에 CORS 에러
 → 백엔드가 켜져 있고 `application.properties`의 포트가 8080인지 확인.
@@ -286,5 +375,5 @@ spring.jpa.hibernate.naming.physical-strategy=com.sport.web_sport.config.Preserv
 - [ ] TheSportsDB 외에도 K리그 공식 데이터(KFA) 연동
 - [ ] 경기 상세에 라인업·이벤트(골·교체·카드) 표시
 - [ ] 팀 상세 페이지 (선수 명단·최근 경기·순위 추이)
-- [ ] `collect_kleague.py`를 cron/스케줄러로 자동 실행
-- [ ] 환경변수 기반 시크릿 관리 (`.env` + python-dotenv)
+- [ ] `KLeagueDataCollector`를 Spring Boot `CommandLineRunner`로 통합하여 스케줄 실행
+- [ ] 환경변수·`@Value` 기반 시크릿 관리 (현재는 상수 직접 수정 방식)
