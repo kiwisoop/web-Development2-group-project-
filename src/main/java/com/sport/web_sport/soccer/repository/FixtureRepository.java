@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FixtureRepository extends JpaRepository<Fixture, String> {
@@ -36,4 +37,21 @@ public interface FixtureRepository extends JpaRepository<Fixture, String> {
                          @Param("teamId") String teamId,
                          @Param("keyword") String keyword,
                          Pageable pageable);
+
+    /**
+     * 특정 시즌 내 특정 팀의 종료된(FT) 경기 중 가장 최근 N개를 반환.
+     * 분석 대상 경기 자체는 :excludeId로 제외 가능.
+     */
+    @Query("""
+            select f from Fixture f
+            where f.season = :season
+              and f.status = 'FT'
+              and f.fixtureId <> :excludeId
+              and (f.homeTeamId = :teamId or f.awayTeamId = :teamId)
+            order by f.matchDate desc
+            """)
+    List<Fixture> findRecentFinishedByTeam(@Param("season") String season,
+                                           @Param("teamId") String teamId,
+                                           @Param("excludeId") String excludeId,
+                                           Pageable pageable);
 }

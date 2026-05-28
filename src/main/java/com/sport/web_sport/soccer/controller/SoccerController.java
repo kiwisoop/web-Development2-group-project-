@@ -1,13 +1,16 @@
 package com.sport.web_sport.soccer.controller;
 
 import com.sport.web_sport.common.response.ApiResponse;
+import com.sport.web_sport.common.type.AnalysisProvider;
 import com.sport.web_sport.soccer.dto.FixtureSearchCondition;
+import com.sport.web_sport.soccer.dto.response.FixtureAnalysisResponse;
 import com.sport.web_sport.soccer.dto.response.FixtureDetailResponse;
 import com.sport.web_sport.soccer.dto.response.FixtureResponse;
 import com.sport.web_sport.soccer.dto.response.SoccerTeamResponse;
 import com.sport.web_sport.soccer.dto.response.StandingResponse;
 import com.sport.web_sport.soccer.entity.Fixture;
 import com.sport.web_sport.soccer.entity.SoccerTeam;
+import com.sport.web_sport.soccer.service.FixtureAnalysisService;
 import com.sport.web_sport.soccer.service.FixtureService;
 import com.sport.web_sport.soccer.service.SoccerTeamService;
 import com.sport.web_sport.soccer.service.StandingService;
@@ -26,6 +29,7 @@ public class SoccerController {
     private final FixtureService fixtureService;
     private final StandingService standingService;
     private final SoccerTeamService soccerTeamService;
+    private final FixtureAnalysisService fixtureAnalysisService;
 
     @GetMapping("/fixtures")
     public ApiResponse<PageResponse<FixtureResponse>> fixtures(
@@ -54,5 +58,27 @@ public class SoccerController {
     @GetMapping("/teams/{id}")
     public ApiResponse<SoccerTeamResponse> teamDetail(@PathVariable String id) {
         return ApiResponse.ok(SoccerTeamResponse.from(soccerTeamService.findById(id)));
+    }
+
+    // ────────── AI 분석 (Gemini) ──────────
+
+    @GetMapping("/fixtures/{id}/analysis")
+    public ApiResponse<FixtureAnalysisResponse> getAnalysis(@PathVariable String id) {
+        return ApiResponse.ok(fixtureAnalysisService
+                .getSavedAnalysis(id, AnalysisProvider.GEMINI)
+                .map(FixtureAnalysisResponse::from)
+                .orElseGet(FixtureAnalysisResponse::notCreated));
+    }
+
+    @PostMapping("/fixtures/{id}/analysis/generate")
+    public ApiResponse<FixtureAnalysisResponse> generateAnalysis(@PathVariable String id) {
+        return ApiResponse.ok(
+                FixtureAnalysisResponse.from(fixtureAnalysisService.generateGeminiAnalysis(id)));
+    }
+
+    @PostMapping("/fixtures/{id}/analysis/regenerate")
+    public ApiResponse<FixtureAnalysisResponse> regenerateAnalysis(@PathVariable String id) {
+        return ApiResponse.ok(
+                FixtureAnalysisResponse.from(fixtureAnalysisService.regenerateGeminiAnalysis(id)));
     }
 }

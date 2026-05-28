@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getFixture } from '../api/soccerApi';
+import {
+  getFixture,
+  getFixtureAnalysis,
+  generateFixtureAnalysis,
+  regenerateFixtureAnalysis,
+} from '../api/soccerApi';
 import Scoreboard from '../components/Scoreboard';
+import AiAnalysisCard from '../components/AiAnalysisCard';
 import LoadingState from '../components/LoadingState';
 import ErrorBox from '../components/ErrorBox';
 
@@ -10,6 +16,9 @@ export default function SoccerFixtureDetailPage() {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [analysis, setAnalysis] = useState(null);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -27,12 +36,46 @@ export default function SoccerFixtureDetailPage() {
     return () => controller.abort();
   }, [fixtureId]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    getFixtureAnalysis(fixtureId, controller.signal)
+      .then((res) => setAnalysis(res.data.data))
+      .catch((err) => {
+        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
+        // 분석 미생성은 에러 아님 — null로 둠
+      });
+    return () => controller.abort();
+  }, [fixtureId]);
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    try {
+      const res = await generateFixtureAnalysis(fixtureId);
+      setAnalysis(res.data.data);
+    } catch (e) {
+      setAnalysis({ status: 'FAILED', errorMessage: 'AI 분석 생성에 실패했습니다.' });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleRegenerate = async () => {
+    setGenerating(true);
+    try {
+      const res = await regenerateFixtureAnalysis(fixtureId);
+      setAnalysis(res.data.data);
+    } catch (e) {
+      setAnalysis({ status: 'FAILED', errorMessage: 'AI 분석 재생성에 실패했습니다.' });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   if (loading) return <LoadingState />;
   if (error) return <ErrorBox message={error} />;
   if (!detail || !detail.fixture) return <ErrorBox message="경기 정보가 없습니다." />;
 
   const f = detail.fixture;
-  // Adapt FixtureResponse to the shape Scoreboard expects (nested league object).
   const scoreboardMatch = {
     ...f,
     league: f.leagueName ? { leagueName: f.leagueName } : null,
@@ -60,6 +103,14 @@ export default function SoccerFixtureDetailPage() {
           <dt>관중</dt><dd>{detail.spectators || '-'}</dd>
         </dl>
       </section>
+
+      <AiAnalysisCard
+        matchStatus={f.status}
+        analysis={analysis}
+        onGenerate={handleGenerate}
+        onRegenerate={handleRegenerate}
+        generating={generating}
+      />
 
       {f.thumbnailUrl && (
         <section className="card" style={{ padding: '1.25rem' }}>

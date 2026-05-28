@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StandingRepository extends JpaRepository<Standing, Long> {
 
@@ -15,4 +16,11 @@ public interface StandingRepository extends JpaRepository<Standing, Long> {
             order by s.rankPosition asc
             """)
     List<Standing> findBySeason(@Param("season") String season);
+
+    @Query("""
+            select s from Standing s
+            where s.season = :season and s.teamId = :teamId
+            """)
+    Optional<Standing> findBySeasonAndTeamId(@Param("season") String season,
+                                             @Param("teamId") String teamId);
 }
