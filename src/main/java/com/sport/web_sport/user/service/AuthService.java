@@ -7,6 +7,7 @@ import com.sport.web_sport.user.entity.User;
 import com.sport.web_sport.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,27 +20,29 @@ public class AuthService {
     public static final String SESSION_USER_ID = "LOGIN_USER_ID";
     public static final String SESSION_USERNAME = "LOGIN_USERNAME";
 
+    private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
     private final UserRepository userRepository;
 
     @Transactional
     public User register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException("이미 사용중인 아이디입니다.");
+            throw new BusinessException("이미 사용 중인 아이디입니다.");
         }
         User user = User.builder()
                 .username(request.getUsername())
-                .password(request.getPassword())
+                .password(PASSWORD_ENCODER.encode(request.getPassword()))
                 .nickname(request.getNickname())
                 .createdAt(LocalDateTime.now())
                 .build();
         return userRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public User login(LoginRequest request, HttpSession session) {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BusinessException("아이디 또는 비밀번호가 올바르지 않습니다."));
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!isPasswordValid(request.getPassword(), user)) {
             throw new BusinessException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
         session.setAttribute(SESSION_USER_ID, user.getId());
@@ -71,5 +74,20 @@ public class AuthService {
         if (!"ADMIN".equals(user.getRole())) {
             throw new BusinessException("관리자 권한이 필요합니다.");
         }
+    }
+
+    private boolean isPasswordValid(String rawPassword, User user) {
+        String savedPassword = user.getPassword();
+        if (savedPassword == null) {
+            return false;
+        }
+        if (savedPassword.startsWith("$2")) {
+            return PASSWORD_ENCODER.matches(rawPassword, savedPassword);
+        }
+        if (savedPassword.equals(rawPassword)) {
+            user.setPassword(PASSWORD_ENCODER.encode(rawPassword));
+            return true;
+        }
+        return false;
     }
 }

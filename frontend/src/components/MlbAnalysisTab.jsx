@@ -34,12 +34,10 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
 
   return (
     <div className="mlb-analysis-tab">
-
-      {/* 승률 예측 */}
       {winProbability && (
         <div className="card analysis-section-card">
           <div className="analysis-section-header">
-            <span className="analysis-section-icon">📊</span>
+            <span className="analysis-section-icon">%</span>
             <h3 className="detail-section-title" style={{ margin: 0 }}>승률 예측</h3>
           </div>
           <div className="analysis-win-prob">
@@ -64,11 +62,10 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
         </div>
       )}
 
-      {/* 이닝별 득점 흐름 */}
       {inningFlow && inningFlow.length > 0 && (
         <div className="card analysis-section-card">
           <div className="analysis-section-header">
-            <span className="analysis-section-icon">📈</span>
+            <span className="analysis-section-icon">#</span>
             <h3 className="detail-section-title" style={{ margin: 0 }}>이닝별 득점 흐름</h3>
           </div>
           <div className="analysis-inning-wrap">
@@ -109,11 +106,10 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
         </div>
       )}
 
-      {/* 선발 투수 비교 */}
       {(homePitcher || awayPitcher) && (
         <div className="card analysis-section-card">
           <div className="analysis-section-header">
-            <span className="analysis-section-icon">⚾</span>
+            <span className="analysis-section-icon">P</span>
             <h3 className="detail-section-title" style={{ margin: 0 }}>선발 투수 비교</h3>
           </div>
           <div className="analysis-pitcher-grid">
@@ -121,22 +117,10 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
               <div className="analysis-pitcher-team">{homeTeam} <span className="analysis-pitcher-role">홈 선발</span></div>
               <div className="analysis-pitcher-name">{homePitcher?.name ?? '-'}</div>
               <div className="analysis-pitcher-stats">
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{homePitcher?.strikeOuts ?? 0}</span>
-                  <span className="analysis-pitcher-stat-label">삼진</span>
-                </div>
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{homePitcher?.baseOnBalls ?? 0}</span>
-                  <span className="analysis-pitcher-stat-label">볼넷</span>
-                </div>
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{homePitcher?.numberOfPitches ?? 0}</span>
-                  <span className="analysis-pitcher-stat-label">투구수</span>
-                </div>
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{homePitcher?.era ?? '-'}</span>
-                  <span className="analysis-pitcher-stat-label">ERA</span>
-                </div>
+                <PitcherStat value={homePitcher?.strikeOuts ?? 0} label="삼진" />
+                <PitcherStat value={homePitcher?.baseOnBalls ?? 0} label="볼넷" />
+                <PitcherStat value={homePitcher?.numberOfPitches ?? 0} label="투구 수" />
+                <PitcherStat value={homePitcher?.era ?? '-'} label="ERA" />
               </div>
             </div>
 
@@ -146,33 +130,20 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
               <div className="analysis-pitcher-team">{awayTeam} <span className="analysis-pitcher-role">원정 선발</span></div>
               <div className="analysis-pitcher-name">{awayPitcher?.name ?? '-'}</div>
               <div className="analysis-pitcher-stats">
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{awayPitcher?.strikeOuts ?? 0}</span>
-                  <span className="analysis-pitcher-stat-label">삼진</span>
-                </div>
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{awayPitcher?.baseOnBalls ?? 0}</span>
-                  <span className="analysis-pitcher-stat-label">볼넷</span>
-                </div>
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{awayPitcher?.numberOfPitches ?? 0}</span>
-                  <span className="analysis-pitcher-stat-label">투구수</span>
-                </div>
-                <div className="analysis-pitcher-stat">
-                  <span className="analysis-pitcher-stat-val">{awayPitcher?.era ?? '-'}</span>
-                  <span className="analysis-pitcher-stat-label">ERA</span>
-                </div>
+                <PitcherStat value={awayPitcher?.strikeOuts ?? 0} label="삼진" />
+                <PitcherStat value={awayPitcher?.baseOnBalls ?? 0} label="볼넷" />
+                <PitcherStat value={awayPitcher?.numberOfPitches ?? 0} label="투구 수" />
+                <PitcherStat value={awayPitcher?.era ?? '-'} label="ERA" />
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 핵심 타자 */}
       {keyBatters && keyBatters.length > 0 && (
         <div className="card analysis-section-card">
           <div className="analysis-section-header">
-            <span className="analysis-section-icon">🏆</span>
+            <span className="analysis-section-icon">B</span>
             <h3 className="detail-section-title" style={{ margin: 0 }}>핵심 타자 Top {keyBatters.length}</h3>
           </div>
           <div className="analysis-batters">
@@ -186,18 +157,9 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
                   <span className="analysis-batter-name">{b.name}</span>
                 </div>
                 <div className="analysis-batter-stats">
-                  <span className="analysis-batter-chip">
-                    <span className="analysis-batter-chip-val">{b.hits}</span>
-                    <span className="analysis-batter-chip-label">안타</span>
-                  </span>
-                  <span className="analysis-batter-chip analysis-batter-chip--hr">
-                    <span className="analysis-batter-chip-val">{b.homeRuns}</span>
-                    <span className="analysis-batter-chip-label">홈런</span>
-                  </span>
-                  <span className="analysis-batter-chip">
-                    <span className="analysis-batter-chip-val">{b.rbi}</span>
-                    <span className="analysis-batter-chip-label">타점</span>
-                  </span>
+                  <BatterChip value={b.hits} label="안타" />
+                  <BatterChip value={b.homeRuns} label="홈런" extraClass="analysis-batter-chip--hr" />
+                  <BatterChip value={b.rbi} label="타점" />
                 </div>
               </div>
             ))}
@@ -205,35 +167,46 @@ export default function MlbAnalysisTab({ matchId, homeTeam = '홈', awayTeam = '
         </div>
       )}
 
-      {/* AI 분석 */}
       {(summary || tactical || keyPoint) && (
         <div className="card analysis-section-card">
           <div className="analysis-section-header">
-            <span className="analysis-section-icon">🤖</span>
+            <span className="analysis-section-icon">AI</span>
             <h3 className="detail-section-title" style={{ margin: 0 }}>AI 분석</h3>
           </div>
           <div className="analysis-ai-blocks">
-            {summary && (
-              <div className="analysis-ai-block">
-                <div className="analysis-ai-label">경기 요약</div>
-                <p className="analysis-ai-text">{summary}</p>
-              </div>
-            )}
-            {tactical && (
-              <div className="analysis-ai-block">
-                <div className="analysis-ai-label">전술 분석</div>
-                <p className="analysis-ai-text">{tactical}</p>
-              </div>
-            )}
-            {keyPoint && (
-              <div className="analysis-ai-block analysis-ai-block--highlight">
-                <div className="analysis-ai-label">핵심 포인트</div>
-                <p className="analysis-ai-text">{keyPoint}</p>
-              </div>
-            )}
+            {summary && <AnalysisBlock label="경기 요약" text={summary} />}
+            {tactical && <AnalysisBlock label="전술 분석" text={tactical} />}
+            {keyPoint && <AnalysisBlock label="핵심 포인트" text={keyPoint} highlight />}
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function PitcherStat({ value, label }) {
+  return (
+    <div className="analysis-pitcher-stat">
+      <span className="analysis-pitcher-stat-val">{value}</span>
+      <span className="analysis-pitcher-stat-label">{label}</span>
+    </div>
+  );
+}
+
+function BatterChip({ value, label, extraClass = '' }) {
+  return (
+    <span className={`analysis-batter-chip ${extraClass}`.trim()}>
+      <span className="analysis-batter-chip-val">{value}</span>
+      <span className="analysis-batter-chip-label">{label}</span>
+    </span>
+  );
+}
+
+function AnalysisBlock({ label, text, highlight = false }) {
+  return (
+    <div className={`analysis-ai-block ${highlight ? 'analysis-ai-block--highlight' : ''}`.trim()}>
+      <div className="analysis-ai-label">{label}</div>
+      <p className="analysis-ai-text">{text}</p>
     </div>
   );
 }

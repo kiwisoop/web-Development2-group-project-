@@ -49,12 +49,6 @@ public class MlbAnalysisService {
     @Value("${groq.model:llama-3.3-70b-versatile}")
     private String model;
 
-    @Value("${ollama.url:http://localhost:11434}")
-    private String ollamaUrl;
-
-    @Value("${ollama.model:gemma4:e4b}")
-    private String ollamaModel;
-
     private static final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(15))
             .build();
@@ -200,28 +194,20 @@ public class MlbAnalysisService {
                          WinProbability winProb,
                          PitcherSummary home, PitcherSummary away,
                          List<KeyBatter> keyBatters) {
-        String prompt = buildPrompt(detail, winProb, home, away, keyBatters);
-        String inner = null;
-
-        if (apiKey != null && !apiKey.isBlank()) {
-            try {
-                String responseBody = sendGroqRequest(prompt);
-                JsonNode root = objectMapper.readTree(responseBody);
-                String text = root.path("choices").path(0)
-                        .path("message").path("content").asText("");
-                if (!text.isBlank()) inner = text;
-            } catch (Exception e) {
-                log.warn("Groq 분석 실패 (Ollama로 전환): {}", e.getMessage());
-            }
+        if (apiKey == null || apiKey.isBlank()) {
+            return;
         }
 
-        if (inner == null) {
-            try {
-                inner = callOllama(prompt);
-            } catch (Exception e) {
-                log.warn("Ollama 분석 실패: {}", e.getMessage());
-                return;
-            }
+        String prompt = buildPrompt(detail, winProb, home, away, keyBatters);
+        String inner;
+        try {
+            String responseBody = sendGroqRequest(prompt);
+            JsonNode root = objectMapper.readTree(responseBody);
+            inner = root.path("choices").path(0)
+                    .path("message").path("content").asText("");
+        } catch (Exception e) {
+            log.warn("Groq analysis failed: {}", e.getMessage());
+            return;
         }
 
         if (inner == null || inner.isBlank()) return;
@@ -232,30 +218,8 @@ public class MlbAnalysisService {
                    .tactical(parsed.path("tactical").asText(""))
                    .keyPoint(parsed.path("keyPoint").asText(""));
         } catch (Exception e) {
-            log.warn("AI 응답 파싱 실패: {}", e.getMessage());
+            log.warn("AI response parsing failed: {}", e.getMessage());
         }
-    }
-
-    private String callOllama(String prompt) throws Exception {
-        String url = ollamaUrl + "/api/generate";
-        Map<String, Object> body = Map.of(
-                "model", ollamaModel,
-                "prompt", prompt,
-                "stream", false
-        );
-        String json = objectMapper.writeValueAsString(body);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(120))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() / 100 != 2) {
-            throw new RuntimeException("Ollama HTTP " + response.statusCode());
-        }
-        JsonNode root = objectMapper.readTree(response.body());
-        return root.path("response").asText("");
     }
 
     private String extractJson(String text) {
