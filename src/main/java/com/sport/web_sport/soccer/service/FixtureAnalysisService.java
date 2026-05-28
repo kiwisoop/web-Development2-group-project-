@@ -22,15 +22,15 @@ public class FixtureAnalysisService {
         return analysisRepository.findByFixtureIdAndProvider(fixtureId, provider);
     }
 
-    public FixtureAnalysis generateGeminiAnalysis(String fixtureId) {
-        Optional<FixtureAnalysis> existing = getSavedAnalysis(fixtureId, AnalysisProvider.GEMINI);
+    public FixtureAnalysis generateGroqAnalysis(String fixtureId) {
+        Optional<FixtureAnalysis> existing = getSavedAnalysis(fixtureId, AnalysisProvider.GROQ);
         if (existing.isPresent() && existing.get().getStatus() == AnalysisStatus.DONE) {
             return existing.get();
         }
         return generator.generate(fixtureId);
     }
 
-    public FixtureAnalysis regenerateGeminiAnalysis(String fixtureId) {
+    public FixtureAnalysis regenerateGroqAnalysis(String fixtureId) {
         return generator.generate(fixtureId);
     }
 }

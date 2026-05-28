@@ -25,7 +25,7 @@ export default function AiAnalysisCard({ matchStatus, analysis, onGenerate, onRe
       <div className="analysis-card card">
         <h3 className="preview-card-title">경기 결과 분석</h3>
         <div className="analysis-loading">
-          Gemini가 분석 중입니다... (최대 45초 소요)
+          Groq AI가 분석 중입니다... (최대 45초 소요)
         </div>
       </div>
     );

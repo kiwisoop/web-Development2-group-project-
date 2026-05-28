@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * K리그 Fixture에 대한 Gemini 분석 생성기.
+ * K리그 Fixture에 대한 Groq AI 분석 생성기.
  * 프롬프트에 양 팀 시즌 성적(STANDINGS) + 최근 5경기 폼(FIXTURES)을 함께 보내 상세 분석 생성.
  */
 @Slf4j
@@ -38,18 +38,18 @@ import java.util.Optional;
 public class FixtureAnalysisGenerator {
 
     private static final int RECENT_MATCHES = 5;
-    private static final String ENDPOINT =
-            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
+    private static final String GROQ_ENDPOINT =
+            "https://api.groq.com/openai/v1/chat/completions";
 
     private final FixtureRepository fixtureRepository;
     private final FixtureAnalysisRepository analysisRepository;
     private final StandingRepository standingRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${gemini.api.key:}")
+    @Value("${groq.api.key:}")
     private String apiKey;
 
-    @Value("${gemini.model:gemini-2.0-flash}")
+    @Value("${groq.model:llama-3.3-70b-versatile}")
     private String model;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -62,16 +62,16 @@ public class FixtureAnalysisGenerator {
                 .orElseThrow(() -> new BusinessException("경기를 찾을 수 없습니다."));
 
         FixtureAnalysis analysis = analysisRepository
-                .findByFixtureIdAndProvider(fixtureId, AnalysisProvider.GEMINI)
+                .findByFixtureIdAndProvider(fixtureId, AnalysisProvider.GROQ)
                 .orElseGet(() -> FixtureAnalysis.builder()
                         .fixtureId(fixtureId)
-                        .provider(AnalysisProvider.GEMINI)
+                        .provider(AnalysisProvider.GROQ)
                         .createdAt(LocalDateTime.now())
                         .build());
 
         if (apiKey == null || apiKey.isBlank()) {
             analysis.setStatus(AnalysisStatus.FAILED);
-            analysis.setErrorMessage("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.");
+            analysis.setErrorMessage("GROQ_API_KEY 환경변수가 설정되지 않았습니다.");
             analysis.setUpdatedAt(LocalDateTime.now());
             return analysisRepository.save(analysis);
         }
@@ -84,7 +84,7 @@ public class FixtureAnalysisGenerator {
             List<Fixture> awayRecent = safeRecentMatches(fixture, fixture.getAwayTeamId());
 
             String prompt = buildPrompt(fixture, homeStanding, awayStanding, homeRecent, awayRecent);
-            String responseText = callGemini(prompt);
+            String responseText = callGroq(prompt);
             JsonNode parsed = parseStructured(responseText);
 
             analysis.setSummaryText(textOrEmpty(parsed, "summary"));
@@ -95,7 +95,7 @@ public class FixtureAnalysisGenerator {
             analysis.setUpdatedAt(LocalDateTime.now());
             return analysisRepository.save(analysis);
         } catch (Exception e) {
-            log.warn("Gemini analysis failed for fixtureId={}", fixtureId, e);
+            log.warn("Groq analysis failed for fixtureId={}", fixtureId, e);
             analysis.setStatus(AnalysisStatus.FAILED);
             analysis.setErrorMessage(truncate(e.getMessage(), 500));
             analysis.setUpdatedAt(LocalDateTime.now());
@@ -224,29 +224,27 @@ public class FixtureAnalysisGenerator {
 
     private static int nz(Integer v) { return v == null ? 0 : v; }
 
-    private String callGemini(String prompt) throws Exception {
-        String url = String.format(ENDPOINT, model, apiKey);
-
+    private String callGroq(String prompt) throws Exception {
         Map<String, Object> body = Map.of(
-                "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
-                "generationConfig", Map.of(
-                        "responseMimeType", "application/json",
-                        "temperature", 0.5,
-                        "maxOutputTokens", 2048
-                )
+                "model", model,
+                "messages", List.of(Map.of("role", "user", "content", prompt)),
+                "temperature", 0.5,
+                "max_tokens", 2048,
+                "response_format", Map.of("type", "json_object")
         );
         String json = objectMapper.writeValueAsString(body);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
+                .uri(URI.create(GROQ_ENDPOINT))
                 .timeout(Duration.ofSeconds(60))
                 .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() / 100 != 2) {
-            throw new BusinessException("Gemini API 오류 (status=" + response.statusCode() + "): "
+            throw new BusinessException("Groq API 오류 (status=" + response.statusCode() + "): "
                     + truncate(response.body(), 300));
         }
         return response.body();
@@ -254,19 +252,19 @@ public class FixtureAnalysisGenerator {
 
     private JsonNode parseStructured(String responseBody) throws Exception {
         JsonNode root = objectMapper.readTree(responseBody);
-        JsonNode candidates = root.path("candidates");
-        if (!candidates.isArray() || candidates.isEmpty()) {
-            throw new BusinessException("Gemini 응답에 candidates 없음");
-        }
-        JsonNode parts = candidates.get(0).path("content").path("parts");
-        if (!parts.isArray() || parts.isEmpty()) {
-            throw new BusinessException("Gemini 응답에 parts 없음");
-        }
-        String inner = parts.get(0).path("text").asText("");
+        String inner = root.path("choices").path(0)
+                .path("message").path("content").asText("");
         if (inner.isBlank()) {
-            throw new BusinessException("Gemini 응답 text가 비어있음");
+            throw new BusinessException("Groq 응답 content가 비어있음");
         }
-        return objectMapper.readTree(inner);
+        return objectMapper.readTree(extractJson(inner));
+    }
+
+    private static String extractJson(String text) {
+        String trimmed = text.strip();
+        int start = trimmed.indexOf('{');
+        int end   = trimmed.lastIndexOf('}');
+        return (start >= 0 && end > start) ? trimmed.substring(start, end + 1) : trimmed;
     }
 
     private static String textOrEmpty(JsonNode node, String field) {

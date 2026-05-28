@@ -15,7 +15,7 @@ export const getSoccerTeams = (signal) =>
 export const getSoccerTeam = (teamId, signal) =>
   axiosInstance.get(`/soccer/teams/${teamId}`, { signal });
 
-// ───── AI 분석 (Gemini) ─────
+// ───── AI 분석 (Groq) ─────
 export const getFixtureAnalysis = (fixtureId, signal) =>
   axiosInstance.get(`/soccer/fixtures/${fixtureId}/analysis`, { signal });
 

@@ -60,12 +60,12 @@ public class SoccerController {
         return ApiResponse.ok(SoccerTeamResponse.from(soccerTeamService.findById(id)));
     }
 
-    // ────────── AI 분석 (Gemini) ──────────
+    // ────────── AI 분석 (Groq) ──────────
 
     @GetMapping("/fixtures/{id}/analysis")
     public ApiResponse<FixtureAnalysisResponse> getAnalysis(@PathVariable String id) {
         return ApiResponse.ok(fixtureAnalysisService
-                .getSavedAnalysis(id, AnalysisProvider.GEMINI)
+                .getSavedAnalysis(id, AnalysisProvider.GROQ)
                 .map(FixtureAnalysisResponse::from)
                 .orElseGet(FixtureAnalysisResponse::notCreated));
     }
@@ -73,12 +73,12 @@ public class SoccerController {
     @PostMapping("/fixtures/{id}/analysis/generate")
     public ApiResponse<FixtureAnalysisResponse> generateAnalysis(@PathVariable String id) {
         return ApiResponse.ok(
-                FixtureAnalysisResponse.from(fixtureAnalysisService.generateGeminiAnalysis(id)));
+                FixtureAnalysisResponse.from(fixtureAnalysisService.generateGroqAnalysis(id)));
     }
 
     @PostMapping("/fixtures/{id}/analysis/regenerate")
     public ApiResponse<FixtureAnalysisResponse> regenerateAnalysis(@PathVariable String id) {
         return ApiResponse.ok(
-                FixtureAnalysisResponse.from(fixtureAnalysisService.regenerateGeminiAnalysis(id)));
+                FixtureAnalysisResponse.from(fixtureAnalysisService.regenerateGroqAnalysis(id)));
     }
 }
