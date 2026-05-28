@@ -5,15 +5,15 @@ import RecommendedTeamSection from '../components/RecommendedTeamSection';
 import FeaturedMatches from '../components/FeaturedMatches';
 
 const sports = [
-  { id: 'soccer', name: '축구', emoji: '⚽', desc: '전 세계 축구 경기 일정과 결과를 확인하세요.' },
-  { id: 'baseball', name: '야구', emoji: '⚾', desc: '국내외 야구 경기 분석을 제공합니다.' },
-  { id: 'esports', name: 'E스포츠', emoji: '🎮', desc: 'AI 분석이 지원되는 E스포츠 경기를 확인하세요.' },
+  { id: 'soccer', name: '축구', emoji: 'SO', desc: '전 세계 축구 경기 일정과 결과를 확인하세요.' },
+  { id: 'baseball', name: '야구', emoji: 'BB', desc: 'MLB 경기 상세 정보와 분석을 제공합니다.' },
+  { id: 'esports', name: 'E스포츠', emoji: 'ES', desc: 'LCK 경기 일정, 선수 기록, AI 분석을 확인하세요.' },
 ];
 
 const SLIDES = [
-  { src: '/images/premier-league.jpg', label: '프리미어리그' },
-  { src: '/images/esport.jpg',         label: 'E스포츠' },
-  { src: '/images/mlb.jpg',            label: 'MLB' },
+  { src: '/images/premier-league.jpg', label: 'Premier League' },
+  { src: '/images/esport.jpg', label: 'E스포츠' },
+  { src: '/images/mlb.jpg', label: 'MLB' },
 ];
 
 export default function HomePage() {
@@ -51,7 +51,7 @@ export default function HomePage() {
             else cls += ' waiting';
             return (
               <div
-                key={i}
+                key={slide.label}
                 className={cls}
                 style={{ backgroundImage: `url(${slide.src})` }}
               />
@@ -62,25 +62,26 @@ export default function HomePage() {
 
         <div className="hero-content">
           <h1 className="hero-title">스포츠 경기 분석 플랫폼</h1>
-          <p className="hero-desc">AI 기반 경기 분석으로 더 깊은 스포츠 인사이트를 경험하세요.</p>
+          <p className="hero-desc">축구, 야구, E스포츠 경기 데이터를 한곳에서 확인하고 분석하세요.</p>
           <div className="hero-actions">
             <Link to="/matches" className="btn btn-primary btn-lg">경기 목록 보기</Link>
           </div>
         </div>
 
         <div className="hero-dots">
-          {SLIDES.map((_, i) => (
+          {SLIDES.map((slide, i) => (
             <button
-              key={i}
+              key={slide.label}
+              type="button"
               className={`hero-dot${i === current ? ' active' : ''}`}
               onClick={() => goTo(i)}
+              aria-label={`${slide.label} 보기`}
             />
           ))}
         </div>
       </section>
 
       <ScoreTicker />
-
       <RecommendedTeamSection />
 
       <section className="sports-section">

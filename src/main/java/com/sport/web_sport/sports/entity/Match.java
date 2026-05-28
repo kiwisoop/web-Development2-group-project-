@@ -51,4 +51,8 @@ public class Match {
     private MatchStatus status;
 
     private String gameType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_team_id")
+    private Team winnerTeam;
 }

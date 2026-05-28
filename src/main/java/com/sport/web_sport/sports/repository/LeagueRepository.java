@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface LeagueRepository extends JpaRepository<League, Long> {
     List<League> findBySportType(SportType sportType);
     Optional<League> findBySportTypeAndLeagueName(SportType sportType, String leagueName);
+    Optional<League> findByLeagueNameAndSeason(String leagueName, String season);
 }

@@ -31,6 +31,16 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             join fetch m.homeTeam
             join fetch m.awayTeam
             join fetch m.league
+            where m.sportType = :sportType
+            order by m.matchDate desc
+            """)
+    List<Match> findBySportTypeWithTeams(@Param("sportType") SportType sportType);
+
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
+            join fetch m.league
             where m.id = :id
             """)
     java.util.Optional<Match> findByIdWithTeams(@Param("id") Long id);

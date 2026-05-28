@@ -10,6 +10,7 @@ import MatchListPage from '../pages/MatchListPage';
 import MatchDetailPage from '../pages/MatchDetailPage';
 import FavoritesPage from '../pages/FavoritesPage';
 import SportsPage from '../pages/SportsPage';
+import EsportsPage from '../pages/EsportsPage';
 import RankingsPage from '../pages/RankingsPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
 import AdminApiTestPage from '../pages/AdminApiTestPage';
@@ -27,6 +28,7 @@ export default function AppRouter() {
             <Route path="matches" element={<MatchListPage />} />
             <Route path="matches/:matchId" element={<MatchDetailPage />} />
             <Route path="favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+            <Route path="sports/esports" element={<EsportsPage />} />
             <Route path="sports/:sportType" element={<SportsPage />} />
             <Route path="rankings" element={<Navigate to="/rankings/soccer" replace />} />
             <Route path="rankings/:sportType" element={<RankingsPage />} />
