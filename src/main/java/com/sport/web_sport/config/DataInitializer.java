@@ -41,7 +41,8 @@ public class DataInitializer implements CommandLineRunner {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        seedSoccer();
+        // Soccer는 실제 K리그 DB(TEAMS / FIXTURES / STANDINGS), Baseball은 MLB Stats API를 사용 →
+        // 두 종목 모두 샘플 시드를 비활성화. E스포츠만 샘플 데이터 유지.
         seedEsports();
     }
 

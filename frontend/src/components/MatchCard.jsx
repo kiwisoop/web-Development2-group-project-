@@ -48,15 +48,16 @@ function CompactTeamRow({ team, score }) {
   );
 }
 
-export default function MatchCard({ match, compact }) {
+export default function MatchCard({ match, compact, detailPath }) {
   const navigate = useNavigate();
   const hasScore = match.homeScore !== null && match.homeScore !== undefined
     && match.awayScore !== null && match.awayScore !== undefined;
+  const target = detailPath || `/matches/${match.id}`;
 
   return (
     <div
       className={`match-card card${compact ? ' match-card-compact' : ''}`}
-      onClick={() => navigate(`/matches/${match.id}`)}
+      onClick={() => navigate(target)}
     >
       <div className="match-card-header">
         <span className="sport-tag">{SPORT_LABELS[match.sportType] || match.sportType}</span>
