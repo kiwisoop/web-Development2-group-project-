@@ -1,9 +1,12 @@
 package com.sport.web_sport.admin.service;
 
 import com.sport.web_sport.admin.dto.AdminDashboardResponse;
+import com.sport.web_sport.admin.dto.AnalysisStatusCountResponse;
 import com.sport.web_sport.admin.dto.RecentMatchResponse;
 import com.sport.web_sport.admin.dto.RecentUserResponse;
 import com.sport.web_sport.admin.dto.SportMatchCountResponse;
+import com.sport.web_sport.analysis.repository.MatchAnalysisRepository;
+import com.sport.web_sport.common.type.AnalysisStatus;
 import com.sport.web_sport.common.type.MatchStatus;
 import com.sport.web_sport.common.type.SportType;
 import com.sport.web_sport.favorite.repository.FavoriteTeamRepository;
@@ -34,6 +37,7 @@ public class AdminDashboardService {
     private final PlayerRepository playerRepository;
     private final FavoriteTeamRepository favoriteTeamRepository;
     private final PredictionVoteRepository predictionVoteRepository;
+    private final MatchAnalysisRepository matchAnalysisRepository;
 
     public AdminDashboardResponse buildDashboard() {
         List<RecentMatchResponse> recentMatches = matchRepository
@@ -69,6 +73,13 @@ public class AdminDashboardService {
                         .build())
                 .collect(Collectors.toList());
 
+        List<AnalysisStatusCountResponse> analysisCountByStatus = Arrays.stream(AnalysisStatus.values())
+                .map(status -> AnalysisStatusCountResponse.builder()
+                        .status(status.name())
+                        .count(matchAnalysisRepository.countByStatus(status))
+                        .build())
+                .collect(Collectors.toList());
+
         return AdminDashboardResponse.builder()
                 .totalUsers(userRepository.count())
                 .totalMatches(matchRepository.count())
@@ -77,10 +88,14 @@ public class AdminDashboardService {
                 .totalTeams(teamRepository.count())
                 .totalPlayers(playerRepository.count())
                 .totalFavoriteTeams(favoriteTeamRepository.count())
+                .totalAnalyses(matchAnalysisRepository.count())
+                .doneAnalyses(matchAnalysisRepository.countByStatus(AnalysisStatus.DONE))
+                .failedAnalyses(matchAnalysisRepository.countByStatus(AnalysisStatus.FAILED))
                 .totalPredictionVotes(predictionVoteRepository.count())
                 .recentMatches(recentMatches)
                 .recentUsers(recentUsers)
                 .matchCountBySportType(matchCountBySportType)
+                .analysisCountByStatus(analysisCountByStatus)
                 .build();
     }
 }

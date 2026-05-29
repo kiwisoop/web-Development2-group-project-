@@ -8,6 +8,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import MatchListPage from '../pages/MatchListPage';
 import MatchDetailPage from '../pages/MatchDetailPage';
+import AnalysisPage from '../pages/AnalysisPage';
 import FavoritesPage from '../pages/FavoritesPage';
 import SportsPage from '../pages/SportsPage';
 import EsportsPage from '../pages/EsportsPage';
@@ -17,7 +18,6 @@ import SoccerFixturesPage from '../pages/SoccerFixturesPage';
 import SoccerFixtureDetailPage from '../pages/SoccerFixtureDetailPage';
 import SoccerStandingsPage from '../pages/SoccerStandingsPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
-import AdminApiTestPage from '../pages/AdminApiTestPage';
 import ErrorPage from '../pages/ErrorPage';
 
 export default function AppRouter() {
@@ -31,7 +31,9 @@ export default function AppRouter() {
             <Route path="register" element={<RegisterPage />} />
             <Route path="matches" element={<MatchListPage />} />
             <Route path="matches/:matchId" element={<MatchDetailPage />} />
+            <Route path="analysis" element={<AnalysisPage />} />
             <Route path="favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+            <Route path="sports" element={<SportsPage />} />
             <Route path="sports/esports" element={<EsportsPage />} />
             <Route path="sports/soccer" element={<SoccerOverviewPage />} />
             <Route path="sports/:sportType" element={<SportsPage />} />
@@ -42,7 +44,6 @@ export default function AppRouter() {
             <Route path="soccer/fixtures/:fixtureId" element={<SoccerFixtureDetailPage />} />
             <Route path="soccer/standings" element={<SoccerStandingsPage />} />
             <Route path="admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
-            <Route path="admin/api-test" element={<AdminRoute><AdminApiTestPage /></AdminRoute>} />
             <Route path="*" element={<ErrorPage />} />
           </Route>
         </Routes>

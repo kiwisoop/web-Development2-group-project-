@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sport.web_sport.esports.dto.RiotMatchDetail;
 import com.sport.web_sport.esports.dto.RiotMatchSummary;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,9 +21,11 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class RiotApiProxyService {
 
-    private static final String API_KEY   = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z";
     private static final String BASE_URL  = "https://esports-api.lolesports.com/persisted/gw";
     private static final String LEAGUE_ID = "98767991310872058";
+
+    @Value("${riot.api.key:}")
+    private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper  = new ObjectMapper();
@@ -199,7 +202,7 @@ public class RiotApiProxyService {
     // ── Helpers ──────────────────────────────────────────────────────────────────
     private HttpEntity<Void> buildRequest() {
         HttpHeaders h = new HttpHeaders();
-        h.set("x-api-key", API_KEY);
+        h.set("x-api-key", apiKey);
         return new HttpEntity<>(h);
     }
 

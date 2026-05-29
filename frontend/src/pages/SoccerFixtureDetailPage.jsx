@@ -52,7 +52,7 @@ export default function SoccerFixtureDetailPage() {
     try {
       const res = await generateFixtureAnalysis(fixtureId);
       setAnalysis(res.data.data);
-    } catch (e) {
+    } catch {
       setAnalysis({ status: 'FAILED', errorMessage: 'AI 분석 생성에 실패했습니다.' });
     } finally {
       setGenerating(false);
@@ -64,7 +64,7 @@ export default function SoccerFixtureDetailPage() {
     try {
       const res = await regenerateFixtureAnalysis(fixtureId);
       setAnalysis(res.data.data);
-    } catch (e) {
+    } catch {
       setAnalysis({ status: 'FAILED', errorMessage: 'AI 분석 재생성에 실패했습니다.' });
     } finally {
       setGenerating(false);

@@ -1,7 +1,11 @@
 .rec-section {
-  margin-top: 2.5rem;
-  /* 종목 선택 섹션과 붙지 않도록 충분한 하단 여백 */
-  margin-bottom: 2.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 1.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
 }
 
 .rec-head {
@@ -58,7 +62,7 @@
   align-items: center;
   gap: 1.25rem;
   background: var(--color-surface);
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--color-border);
   border-left: 4px solid var(--color-primary);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -70,12 +74,14 @@
   flex-shrink: 0;
   width: 52px;
   height: 52px;
-  border-radius: 50%;
+  border-radius: var(--radius);
   background: #eff6ff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+  color: var(--color-primary-dark);
+  font-size: 0.8rem;
+  font-weight: 850;
   line-height: 1;
 }
 
@@ -144,19 +150,19 @@
 }
 
 .rec-card {
-  background: var(--color-surface);
-  border: 1px solid #bfdbfe;
+  background: #fbfdff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: none;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .rec-card:hover {
-  transform: translateY(-3px);
+  border-color: #bfdbfe;
   box-shadow: var(--shadow-lg);
 }
 
@@ -317,7 +323,7 @@
   width: 100%;
   padding: 0.5rem 0.9rem;
   border-radius: 0.5rem;
-  border: 1.5px solid var(--color-primary);
+  border: 1px solid var(--color-primary);
   background: var(--color-primary);
   color: #fff;
   font-size: 0.85rem;

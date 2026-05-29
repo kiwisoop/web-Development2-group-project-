@@ -21,7 +21,7 @@ function CtaBanner({ title, description, buttonLabel, onClick }) {
   return (
     <div className="rec-cta">
       <div className="rec-cta-icon" aria-hidden="true">
-        ⭐
+        MY
       </div>
       <div className="rec-cta-body">
         <p className="rec-cta-title">{title}</p>

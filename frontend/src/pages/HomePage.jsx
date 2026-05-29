@@ -1,13 +1,30 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import { getMatchSections } from '../api/matchApi';
 import ScoreTicker from '../components/ScoreTicker';
 import RecommendedTeamSection from '../components/RecommendedTeamSection';
 import FeaturedMatches from '../components/FeaturedMatches';
+import MatchCard from '../components/MatchCard';
 
-const sports = [
-  { id: 'soccer', name: '축구', emoji: 'SO', desc: '전 세계 축구 경기 일정과 결과를 확인하세요.' },
-  { id: 'baseball', name: '야구', emoji: 'BB', desc: 'MLB 경기 상세 정보와 분석을 제공합니다.' },
-  { id: 'esports', name: 'E스포츠', emoji: 'ES', desc: 'LCK 경기 일정, 선수 기록, AI 분석을 확인하세요.' },
+const SPORTS = [
+  {
+    key: 'soccer',
+    label: '축구',
+    description: 'K리그 일정, 결과, 순위, 경기 분석',
+    path: '/sports/soccer',
+  },
+  {
+    key: 'baseball',
+    label: '야구',
+    description: 'MLB 라인업, 기록, 중계, 존 차트',
+    path: '/matches?sportType=BASEBALL',
+  },
+  {
+    key: 'esports',
+    label: 'e스포츠',
+    description: 'LCK 경기, 선수 스탯, AI 요약',
+    path: '/sports/esports',
+  },
 ];
 
 const SLIDES = [
@@ -16,9 +33,42 @@ const SLIDES = [
   { src: '/images/mlb.jpg', label: 'MLB' },
 ];
 
+function collectMatches(sections) {
+  if (!sections) return [];
+  return [
+    ...(sections.liveMatches || []),
+    ...(sections.recentFinishedMatches || []),
+    ...(sections.upcomingMatches || []),
+  ];
+}
+
+function MiniMatchList({ title, description, matches, actionPath, actionLabel }) {
+  return (
+    <section className="dashboard-panel card">
+      <div className="dashboard-panel-head">
+        <div>
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+        <Link to={actionPath} className="btn btn-outline btn-sm">{actionLabel}</Link>
+      </div>
+      {matches.length === 0 ? (
+        <p className="dashboard-empty">표시할 경기가 없습니다.</p>
+      ) : (
+        <div className="dashboard-mini-grid">
+          {matches.slice(0, 3).map((match) => (
+            <MatchCard key={match.id} match={match} compact />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function HomePage() {
   const [current, setCurrent] = useState(0);
   const [prev, setPrev] = useState(null);
+  const [sections, setSections] = useState(null);
   const timerRef = useRef(null);
 
   const goTo = (next) => {
@@ -39,6 +89,21 @@ export default function HomePage() {
     }, 4000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getMatchSections({}, controller.signal)
+      .then((res) => setSections(res.data))
+      .catch((err) => {
+        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
+      });
+    return () => controller.abort();
+  }, []);
+
+  const allMatches = collectMatches(sections);
+  const liveMatches = sections?.liveMatches || [];
+  const analysisMatches = allMatches.filter((match) => match.analysisAvailable);
+  const upcomingMatches = sections?.upcomingMatches || [];
 
   return (
     <div className="home-page">
@@ -61,10 +126,27 @@ export default function HomePage() {
         </div>
 
         <div className="hero-content">
-          <h1 className="hero-title">스포츠 경기 분석 플랫폼</h1>
-          <p className="hero-desc">축구, 야구, E스포츠 경기 데이터를 한곳에서 확인하고 분석하세요.</p>
+          <span className="hero-kicker">SPORT DATA PLATFORM</span>
+          <h1 className="hero-title">오늘 볼 경기와 분석을 한 화면에서</h1>
+          <p className="hero-desc">진행 중 경기, 분석 가능한 경기, 내 팀 흐름을 빠르게 확인하는 스포츠 분석 대시보드입니다.</p>
           <div className="hero-actions">
-            <Link to="/matches" className="btn btn-primary btn-lg">경기 목록 보기</Link>
+            <Link to="/analysis" className="btn btn-primary btn-lg">AI 분석 보기</Link>
+            <Link to="/matches" className="btn btn-outline btn-lg">경기센터</Link>
+          </div>
+        </div>
+
+        <div className="hero-metrics" aria-label="서비스 요약">
+          <div>
+            <span>3</span>
+            <strong>종목 통합</strong>
+          </div>
+          <div>
+            <span>LIVE</span>
+            <strong>경기 흐름</strong>
+          </div>
+          <div>
+            <span>AI</span>
+            <strong>분석 요약</strong>
           </div>
         </div>
 
@@ -82,22 +164,68 @@ export default function HomePage() {
       </section>
 
       <ScoreTicker />
-      <RecommendedTeamSection />
 
-      <section className="sports-section">
-        <h2 className="section-title">종목 선택</h2>
+      <section className="home-dashboard-grid">
+        <Link to="/matches?status=LIVE" className="dashboard-kpi card">
+          <span>진행 중</span>
+          <strong>{liveMatches.length}</strong>
+          <em>실시간 경기</em>
+        </Link>
+        <Link to="/analysis" className="dashboard-kpi card">
+          <span>AI 분석</span>
+          <strong>{analysisMatches.length}</strong>
+          <em>분석 가능한 경기</em>
+        </Link>
+        <Link to="/matches?sort=oldest" className="dashboard-kpi card">
+          <span>예정</span>
+          <strong>{upcomingMatches.length}</strong>
+          <em>다가오는 경기</em>
+        </Link>
+        <Link to="/favorites" className="dashboard-kpi card">
+          <span>내 팀</span>
+          <strong>MY</strong>
+          <em>추천팀 맞춤 분석</em>
+        </Link>
+      </section>
+
+      <MiniMatchList
+        title="지금 확인할 경기"
+        description="진행 중이거나 바로 확인할 가치가 높은 경기입니다."
+        matches={liveMatches.length > 0 ? liveMatches : upcomingMatches}
+        actionPath="/matches"
+        actionLabel="경기센터"
+      />
+
+      <MiniMatchList
+        title="AI 분석 가능한 경기"
+        description="상세 기록과 경기 맥락을 바탕으로 분석을 볼 수 있습니다."
+        matches={analysisMatches}
+        actionPath="/analysis"
+        actionLabel="분석 전체"
+      />
+
+      <section className="home-sports-showcase">
+        <div className="section-head-row">
+          <div>
+            <span className="section-kicker">Sports</span>
+            <h2 className="section-title">종목별 화면</h2>
+          </div>
+          <Link to="/sports" className="btn btn-outline btn-sm">전체 종목 보기</Link>
+        </div>
         <div className="sport-cards">
-          {sports.map((sport) => (
-            <Link to={`/sports/${sport.id}`} key={sport.id} className="sport-card card">
-              <div className="sport-emoji">{sport.emoji}</div>
-              <h3>{sport.name}</h3>
-              <p>{sport.desc}</p>
+          {SPORTS.map((sport) => (
+            <Link key={sport.key} to={sport.path} className="sport-card card">
+              <div className="sport-emoji">{sport.key.slice(0, 2).toUpperCase()}</div>
+              <h3>{sport.label}</h3>
+              <p>{sport.description}</p>
+              <span className="sport-card-link">바로 보기</span>
             </Link>
           ))}
         </div>
       </section>
 
       <FeaturedMatches />
+      <RecommendedTeamSection />
     </div>
   );
 }

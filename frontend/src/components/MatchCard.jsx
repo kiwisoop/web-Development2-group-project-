@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 
 const SPORT_LABELS = {
-  SOCCER: '⚽ 축구',
-  BASEBALL: '⚾ 야구',
-  ESPORTS: '🎮 E스포츠',
+  SOCCER: '축구',
+  BASEBALL: '야구',
+  ESPORTS: 'e스포츠',
 };
 
 function formatDate(dateStr) {
@@ -28,7 +28,7 @@ function CompactTeamRow({ team, score }) {
           className="team-logo-compact"
           src={team.logoUrl}
           alt={abbr}
-          onError={e => {
+          onError={(e) => {
             e.currentTarget.style.display = 'none';
             e.currentTarget.nextElementSibling.style.display = 'flex';
           }}
