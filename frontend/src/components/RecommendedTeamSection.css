@@ -17,6 +17,18 @@
   margin-bottom: 0;
 }
 
+.rec-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rec-section-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 /* ===== Demo controls (개발 전용) ===== */
 .rec-demo-controls {
   display: flex;

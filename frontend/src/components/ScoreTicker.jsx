@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMatchSections } from '../api/matchApi';
-import { SOCCER_MOCK, ESPORTS_MOCK } from '../data/otherSportsMatches';
+import { effectiveMatchStatus } from '../utils/matchStatus';
+import { SOCCER_MOCK } from '../data/otherSportsMatches';
 import './ScoreTicker.css';
 
 const STATUS_LABEL = {
@@ -32,19 +33,19 @@ function formatTime(dateStr) {
 }
 
 export default function ScoreTicker() {
-  // 야구(BASEBALL)는 DB/API에서 가져오고, 축구·E스포츠는 mock을 fallback으로 표시한다.
-  const [baseballMatches, setBaseballMatches] = useState([]);
+  // 야구·E스포츠는 DB/API에서 가져오고, 축구만 mock 으로 표시한다.
+  const [apiMatches, setApiMatches] = useState([]);
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const controller = new AbortController();
-    getMatchSections({ sportType: 'BASEBALL' }, controller.signal)
+    getMatchSections({}, controller.signal)
       .then(res => {
         const { liveMatches, recentFinishedMatches, upcomingMatches } = res.data;
         const all = [...liveMatches, ...recentFinishedMatches, ...upcomingMatches];
-        // 응답에 다른 종목이 섞여 오더라도 야구만 사용한다.
-        setBaseballMatches(all.filter(m => m.sportType === 'BASEBALL'));
+        // 야구·E스포츠만 실제 API 데이터를 사용하고, 축구는 mock 으로 둔다.
+        setApiMatches(all.filter(m => m.sportType === 'BASEBALL' || m.sportType === 'ESPORTS'));
       })
       .catch(err => {
         if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
@@ -52,8 +53,7 @@ export default function ScoreTicker() {
     return () => controller.abort();
   }, []);
 
-  // 야구는 API 데이터(라이브 우선), 그 외 종목은 mock fallback.
-  const matches = [...baseballMatches, ...SOCCER_MOCK, ...ESPORTS_MOCK];
+  const matches = [...apiMatches, ...SOCCER_MOCK];
 
   const getStep = (el) => {
     const firstCard = el.querySelector('.ticker-card');
@@ -95,6 +95,7 @@ export default function ScoreTicker() {
             navigate(`/matches/${m.id}`);
           };
 
+          const effStatus = effectiveMatchStatus(m);
           return (
             <article
               key={m.id}
@@ -110,8 +111,8 @@ export default function ScoreTicker() {
               }}
             >
               <div className="ticker-card-top">
-                <span className={`ticker-status ${STATUS_CLASS[m.status] || 'ticker-status--scheduled'}`}>
-                  {STATUS_LABEL[m.status] || m.status}
+                <span className={`ticker-status ${STATUS_CLASS[effStatus] || 'ticker-status--scheduled'}`}>
+                  {STATUS_LABEL[effStatus] || effStatus}
                 </span>
                 <span className="ticker-league">
                   {SPORT_LABEL[m.sportType]} · {m.league?.leagueName || ''}
@@ -139,7 +140,7 @@ export default function ScoreTicker() {
                 </span>
               </div>
 
-              {m.status === 'SCHEDULED' && m.matchDate && (
+              {effStatus === 'SCHEDULED' && m.matchDate && (
                 <div className="ticker-scheduled-time">{formatTime(m.matchDate)}</div>
               )}
             </article>

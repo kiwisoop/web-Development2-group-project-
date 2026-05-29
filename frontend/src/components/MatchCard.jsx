@@ -60,7 +60,7 @@ export default function MatchCard({ match, compact }) {
     >
       <div className="match-card-header">
         <span className="sport-tag">{SPORT_LABELS[match.sportType] || match.sportType}</span>
-        <StatusBadge status={match.status} />
+        <StatusBadge match={match} />
       </div>
 
       {match.league && (

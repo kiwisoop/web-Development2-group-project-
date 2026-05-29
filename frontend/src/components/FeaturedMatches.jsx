@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMatchSections } from '../api/matchApi';
-import { SOCCER_MOCK, ESPORTS_MOCK } from '../data/otherSportsMatches';
+import { effectiveMatchStatus } from '../utils/matchStatus';
+import { SOCCER_MOCK } from '../data/otherSportsMatches';
 import './FeaturedMatches.css';
 
 const STATUS_LABEL = {
@@ -80,25 +81,29 @@ function FormRow({ teamName, results }) {
 }
 
 export default function FeaturedMatches() {
-  // 야구(BASEBALL)는 DB/API에서 가져온다. 축구·E스포츠는 기존 mock 표시 방식을 유지한다.
+  // 야구·E스포츠는 DB/API에서 가져온다. 축구는 기존 mock 표시 방식을 유지한다.
   const [baseballMatches, setBaseballMatches] = useState([]);
+  const [esportsMatches, setEsportsMatches] = useState([]);
   const [indexes, setIndexes] = useState({ BASEBALL: 0, SOCCER: 0, ESPORTS: 0 });
 
   useEffect(() => {
     const controller = new AbortController();
-    getMatchSections({ sportType: 'BASEBALL' }, controller.signal)
+    getMatchSections({}, controller.signal)
       .then(res => {
         const { liveMatches, recentFinishedMatches, upcomingMatches } = res.data;
         const all = [...liveMatches, ...recentFinishedMatches, ...upcomingMatches];
-        // 응답에 다른 종목이 섞여 오더라도 야구만 사용한다.
+
         const baseball = all.filter(m => m.sportType === 'BASEBALL');
         // 분석값이 채워진 경기가 먼저 보이도록 우선순위로 정렬한 뒤 최대 5경기만 노출한다.
         // (Array.prototype.sort는 안정 정렬이므로 동일 우선순위 내에서는 백엔드 정렬 순서를 유지한다.)
-        const ordered = baseball
+        const orderedBaseball = baseball
           .map((m, i) => ({ m, i }))
           .sort((a, b) => baseballPriority(a.m) - baseballPriority(b.m) || a.i - b.i)
           .map(x => x.m);
-        setBaseballMatches(ordered.slice(0, 5));
+        setBaseballMatches(orderedBaseball.slice(0, 5));
+
+        // E스포츠는 백엔드 섹션 분류 순서(live → recent → upcoming)를 그대로 유지한다.
+        setEsportsMatches(all.filter(m => m.sportType === 'ESPORTS').slice(0, 5));
       })
       .catch(err => {
         if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
@@ -107,11 +112,11 @@ export default function FeaturedMatches() {
   }, []);
 
   // 종목 순서·레이아웃은 기존과 동일하게 유지한다.
-  // 야구는 API 데이터(없으면 빈 배열 → 안내 문구), 축구·E스포츠는 mock.
+  // 야구·E스포츠는 API 데이터(없으면 빈 배열 → 안내 문구), 축구는 mock.
   const groups = SPORT_ORDER.map(k => ({
     sportKey: k,
     sportName: SPORT_LABEL[k],
-    matches: k === 'BASEBALL' ? baseballMatches : (k === 'SOCCER' ? SOCCER_MOCK : ESPORTS_MOCK),
+    matches: k === 'BASEBALL' ? baseballMatches : k === 'ESPORTS' ? esportsMatches : SOCCER_MOCK,
   }));
 
   const prev = (sportKey, total) =>
@@ -156,9 +161,14 @@ export default function FeaturedMatches() {
                 <span className="featured-sport">{sportName}</span>
                 <span className="featured-divider">·</span>
                 <span className="featured-league">{m.league?.leagueName || ''}</span>
-                <span className={`featured-status ${STATUS_CLASS[m.status] || 'featured-status--scheduled'}`}>
-                  {STATUS_LABEL[m.status] || m.status}
-                </span>
+                {(() => {
+                  const eff = effectiveMatchStatus(m);
+                  return (
+                    <span className={`featured-status ${STATUS_CLASS[eff] || 'featured-status--scheduled'}`}>
+                      {STATUS_LABEL[eff] || eff}
+                    </span>
+                  );
+                })()}
               </div>
 
               <div className="featured-teams">
@@ -183,6 +193,22 @@ export default function FeaturedMatches() {
                 <div className="featured-analysis-point">{m.mainAnalysisPoint}</div>
               )}
               {m.aiInsight && <p className="featured-insight">{m.aiInsight}</p>}
+              {!m.aiInsight && m.analysisSummary && (
+                <p className="featured-insight">{m.analysisSummary}</p>
+              )}
+              {m.keyPoint && (
+                <p className="featured-insight featured-insight--keypoint">{m.keyPoint}</p>
+              )}
+              {Array.isArray(m.keyPoints) && m.keyPoints.length > 0 && (
+                <ul className="featured-metrics">
+                  {m.keyPoints.map((point, i) => (
+                    <li key={`kp-${i}`} className="featured-metric">{point}</li>
+                  ))}
+                </ul>
+              )}
+              {m.recentFormSummary && (
+                <p className="featured-insight">{m.recentFormSummary}</p>
+              )}
 
               {hasForm && (
                 <div className="form-comparison">

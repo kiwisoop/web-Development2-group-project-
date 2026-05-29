@@ -149,7 +149,12 @@ export default function RecommendedTeamSection() {
   return (
     <section className="rec-section">
       <div className="rec-head">
-        <h2 className="section-title">내 추천팀 맞춤 분석</h2>
+        <div className="rec-head-text">
+          <h2 className="section-title">내 추천팀 맞춤 분석</h2>
+          <p className="rec-section-desc">
+            관심팀 기준으로 다음 경기, 최근 흐름, 분석 가능 여부를 우선 보여줍니다.
+          </p>
+        </div>
         {showDemoControls && import.meta.env.DEV && (
           <div className="rec-demo-controls">
             <span className="rec-demo-label">데모 상태:</span>
