@@ -118,6 +118,13 @@ public class RankingService {
                     .build());
         }
 
+        // ESPORTS: duplicate Team rows can exist in DB with the same visible
+        // teamName (e.g. T1, Gen.G, DRX seeded twice under different ids).
+        // Merge by normalized teamName so the standings show one row per team.
+        if (sportType == SportType.ESPORTS) {
+            list = mergeByTeamName(list);
+        }
+
         // Sort by sport-specific rules
         if (sportType == SportType.SOCCER) {
             // 1. points desc  2. wins desc  3. scoreDiff desc  4. scoresFor desc  5. teamName asc
@@ -146,6 +153,42 @@ public class RankingService {
             ranked.add(list.get(i).toBuilder().rank(i + 1).build());
         }
         return ranked;
+    }
+
+    private List<RankingTeamResponse> mergeByTeamName(List<RankingTeamResponse> rows) {
+        Map<String, RankingTeamResponse> merged = new LinkedHashMap<>();
+        for (RankingTeamResponse r : rows) {
+            String key = r.getTeamName() == null ? "" : r.getTeamName().trim().toLowerCase();
+            RankingTeamResponse prev = merged.get(key);
+            if (prev == null) {
+                merged.put(key, r);
+                continue;
+            }
+            int wins = prev.getWins() + r.getWins();
+            int draws = prev.getDraws() + r.getDraws();
+            int losses = prev.getLosses() + r.getLosses();
+            int gamesPlayed = wins + draws + losses;
+            int scoresFor = prev.getScoresFor() + r.getScoresFor();
+            int scoresAgainst = prev.getScoresAgainst() + r.getScoresAgainst();
+            int points = prev.getPoints() + r.getPoints();
+            double winRate = gamesPlayed > 0
+                    ? Math.round(wins * 1000.0 / gamesPlayed) / 10.0
+                    : 0.0;
+            RankingTeamResponse canonical = (prev.getLogoUrl() != null && !prev.getLogoUrl().isBlank())
+                    ? prev : r;
+            merged.put(key, canonical.toBuilder()
+                    .gamesPlayed(gamesPlayed)
+                    .wins(wins)
+                    .draws(draws)
+                    .losses(losses)
+                    .winRate(winRate)
+                    .points(points)
+                    .scoresFor(scoresFor)
+                    .scoresAgainst(scoresAgainst)
+                    .scoreDifference(scoresFor - scoresAgainst)
+                    .build());
+        }
+        return new ArrayList<>(merged.values());
     }
 
     private String resultChar(int mine, int theirs) {

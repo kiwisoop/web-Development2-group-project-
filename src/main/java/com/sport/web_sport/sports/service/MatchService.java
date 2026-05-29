@@ -33,11 +33,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -139,25 +141,73 @@ public class MatchService {
                 start, end, keyword, pageable);
     }
 
+    // A match is "actually live" only when its scheduled time is close to now.
+    // Status alone is unreliable because syncs/seeds can leave status=LIVE on
+    // matches whose scheduled time is days in the past or far in the future.
+    private static final Duration LIVE_WINDOW_AFTER_START = Duration.ofHours(4);
+    private static final Duration LIVE_WINDOW_BEFORE_START = Duration.ofMinutes(10);
+
+    static boolean isActuallyLive(Match m, LocalDateTime now) {
+        if (m.getStatus() != MatchStatus.LIVE) return false;
+        LocalDateTime dt = m.getMatchDate();
+        if (dt == null) return false;
+        return !dt.isBefore(now.minus(LIVE_WINDOW_AFTER_START))
+                && !dt.isAfter(now.plus(LIVE_WINDOW_BEFORE_START));
+    }
+
     public MatchSectionsResponse findMatchSections(SportType sportType, String leagueName) {
-        Pageable top6 = PageRequest.of(0, 6);
+        LocalDateTime now = LocalDateTime.now();
+        Pageable top12 = PageRequest.of(0, 12);
 
-        List<MatchResponse> live = matchRepository
-                .findTopByStatusDesc(sportType, leagueName, MatchStatus.LIVE, top6)
-                .stream().map(this::toSectionResponse).toList();
+        List<Match> liveByStatus = matchRepository
+                .findTopByStatusDesc(sportType, leagueName, MatchStatus.LIVE, top12);
+        List<Match> finalByStatus = matchRepository
+                .findTopByStatusDesc(sportType, leagueName, MatchStatus.FINAL, top12);
+        List<Match> scheduledByStatus = matchRepository
+                .findTopByStatusAsc(sportType, leagueName, MatchStatus.SCHEDULED, top12);
 
-        List<MatchResponse> recent = matchRepository
-                .findTopByStatusDesc(sportType, leagueName, MatchStatus.FINAL, top6)
-                .stream().map(this::toSectionResponse).toList();
+        List<Match> actuallyLive = new ArrayList<>();
+        List<Match> recentPool = new ArrayList<>(finalByStatus);
+        List<Match> upcomingPool = new ArrayList<>(scheduledByStatus);
 
-        List<MatchResponse> upcoming = matchRepository
-                .findTopByStatusAsc(sportType, leagueName, MatchStatus.SCHEDULED, top6)
-                .stream().map(this::toSectionResponse).toList();
+        // Reclassify LIVE-status matches that fall outside the time window:
+        // past stuck-LIVE → recent (if scores), future stuck-LIVE → upcoming.
+        for (Match m : liveByStatus) {
+            if (isActuallyLive(m, now)) {
+                actuallyLive.add(m);
+                continue;
+            }
+            LocalDateTime dt = m.getMatchDate();
+            boolean hasScores = m.getHomeScore() != null && m.getAwayScore() != null;
+            if (dt != null && dt.isAfter(now.plus(LIVE_WINDOW_BEFORE_START))) {
+                upcomingPool.add(m);
+            } else if (hasScores) {
+                recentPool.add(m);
+            }
+            // else: null date with no scores — drop silently
+        }
+
+        Comparator<Match> byDateDesc = (a, b) -> {
+            LocalDateTime da = a.getMatchDate(), db = b.getMatchDate();
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return db.compareTo(da);
+        };
+        Comparator<Match> byDateAsc = (a, b) -> {
+            LocalDateTime da = a.getMatchDate(), db = b.getMatchDate();
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return da.compareTo(db);
+        };
+        recentPool.sort(byDateDesc);
+        upcomingPool.sort(byDateAsc);
 
         return MatchSectionsResponse.builder()
-                .liveMatches(live)
-                .recentFinishedMatches(recent)
-                .upcomingMatches(upcoming)
+                .liveMatches(actuallyLive.stream().limit(6).map(this::toSectionResponse).toList())
+                .recentFinishedMatches(recentPool.stream().limit(6).map(this::toSectionResponse).toList())
+                .upcomingMatches(upcomingPool.stream().limit(6).map(this::toSectionResponse).toList())
                 .build();
     }
 
