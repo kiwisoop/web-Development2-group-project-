@@ -23,7 +23,7 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class LckGeminiService {
+public class LckGroqService {
 
     private static final String GROQ_ENDPOINT =
             "https://api.groq.com/openai/v1/chat/completions";

@@ -171,18 +171,18 @@
 - **채택 여부:** 채택
 
 - **후속 조치:**  
-  AI 분析 탭 구현
+  AI 분석 탭 구현
 
 ---
 
-## B-8. MLB 경기 AI 분析 탭 (MlbAnalysisTab)
+## B-8. MLB 경기 AI 분석 탭 (MlbAnalysisTab)
 
 - **목적:**  
-  Gemini API 기반 MLB 경기 분석 결과를 전용 탭에서 제공
+  Groq API 기반 MLB 경기 분석 결과를 전용 탭에서 제공
 
 - **프롬프트 요약:**  
   `GET /api/mlb/games/{matchId}/analysis` 엔드포인트 구현 및 `MlbAnalysisTab` 컴포넌트 생성 요청.  
-  종료 경기에서 타자·투수 성적을 Gemini에 전달하고 분석 텍스트 생성.  
+  종료 경기에서 타자·투수 성적을 Groq API에 전달하고 분석 텍스트 생성.  
   홈팀·원정팀 이름을 props로 받아 분석 결과에 팀명 표시
 
 - **기대 결과:**  
@@ -190,7 +190,7 @@
 
 - **실제 결과:**  
   `MlbAnalysisTab.jsx` 구현, 로딩·에러·데이터 없음 상태 처리.  
-  백엔드 `MlbAnalysisService`에서 Gemini API 호출 후 분석 텍스트 반환.  
+  백엔드 `MlbAnalysisService`에서 Groq API 호출 후 분석 텍스트 반환.  
   `MatchDetailPage` 분석 탭에 `homeTeam`, `awayTeam` props 전달
 
 - **채택 여부:** 채택
@@ -231,7 +231,7 @@
 | `GET /api/mlb/games/{matchId}` | 경기 상세(라인업, 박스스코어, 이닝 점수, 투수) |
 | `GET /api/mlb/games/{matchId}/play-by-play` | 플레이별 문자중계 |
 | `GET /api/mlb/games/{matchId}/pitch-zone` | 투구 좌표 데이터 |
-| `GET /api/mlb/games/{matchId}/analysis` | Gemini AI 경기 분석 |
+| `GET /api/mlb/games/{matchId}/analysis` | Groq AI 경기 분석 |
 
 ## MLB 기능 구현 시 적용된 제약 조건
 
@@ -240,5 +240,5 @@
 | 데이터 출처 | MLB Stats API (공개 API, 인증 불필요) |
 | 적용 조건 | `match.sportType === 'BASEBALL'` AND `match.league.leagueName === 'MLB'`인 경우만 표시 |
 | 라이브 폴링 | 문자중계만 30초 간격 자동 갱신, 나머지는 페이지 진입 시 1회 로드 |
-| AI 분析 | 종료 경기(`FINAL`)에서만 분석 생성 가능 |
+| AI 분석 | 종료 경기(`FINAL`)에서만 분석 생성 가능 |
 | 에러 처리 | MLB 데이터 로드 실패 시 해당 섹션만 에러 표시, 나머지 탭은 정상 작동 |

@@ -213,15 +213,15 @@ GET /api/matches/{matchId}/mlb-pitch-zone
 
 ---
 
-## MLB 분析 탭 (2026-05-25)
+## MLB 분석 탭 (2026-05-25)
 
 ### 목표
-직접 계산한 수치 지표(승률·투수 효율·핵심 타자·이닝 흐름)와 Gemini 생성 문구를 분析 탭에 표시
+직접 계산한 수치 지표(승률·투수 효율·핵심 타자·이닝 흐름)와 Groq 생성 문구를 분석 탭에 표시
 
 ### 아키텍처 결정
 - 기존 범용 `AnalysisService` 대신 MLB 전용 `MlbAnalysisService` 신설
-- 수치 지표 먼저 계산 → Gemini에 수치 포함한 프롬프트 전달 (수치 재계산 금지 지시)
-- Gemini 실패해도 수치 지표는 항상 반환 (에러 노출 없음)
+- 수치 지표 먼저 계산 → Groq에 수치 포함한 프롬프트 전달 (수치 재계산 금지 지시)
+- Groq 실패해도 수치 지표는 항상 반환 (에러 노출 없음)
 - DB 캐싱 없음, 매 요청마다 실시간 계산
 
 ### 승률 계산 공식
@@ -242,8 +242,8 @@ awayProb = 100 - homeProb
 |---|---|
 | MLB 경기 아님 | 404 반환 |
 | linescore/boxscore 없음 | 승률 50:50 기본값 반환 |
-| Gemini 실패 | analysis 필드 빈 문자열, 수치는 정상 반환 |
-| 프론트 API 실패 | 분析 탭 내 에러 표시, 다른 탭 영향 없음 |
+| Groq 실패 | analysis 필드 빈 문자열, 수치는 정상 반환 |
+| 프론트 API 실패 | 분석 탭 내 에러 표시, 다른 탭 영향 없음 |
 
 ### 엔드포인트
 ```
@@ -261,7 +261,7 @@ GET /api/matches/{matchId}/mlb-analysis
 | `GET /api/matches/{id}/mlb-detail` | 라인업·박스스코어·이닝 스코어 | 없음 |
 | `GET /api/matches/{id}/mlb-play-by-play` | 이닝별 문자중계 | 없음 |
 | `GET /api/matches/{id}/mlb-pitch-zone` | 투구 좌표 데이터 | 없음 |
-| `GET /api/matches/{id}/mlb-analysis` | 수치 지표 + Gemini 분析 | 없음 |
+| `GET /api/matches/{id}/mlb-analysis` | 수치 지표 + Groq 분석 | 없음 |
 
 ---
 
@@ -277,4 +277,4 @@ GET /api/matches/{matchId}/mlb-analysis
 | `docs/superpowers/specs/2026-05-20-mlb-play-by-play-design.md` | Phase 3B 문자중계 |
 | `docs/superpowers/specs/2026-05-20-mlb-strike-zone-design.md` | Phase 3D 존 차트 |
 | `docs/superpowers/specs/2026-05-20-mlb-tab-layout-design.md` | Phase 3C 탭 UI |
-| `docs/superpowers/specs/2026-05-25-mlb-analysis-design.md` | MLB 분析 탭 |
+| `docs/superpowers/specs/2026-05-25-mlb-analysis-design.md` | MLB 분석 탭 |

@@ -9,7 +9,7 @@ Sport Analysis Dashboard 프로젝트의 커밋 및 제출 전 최종 검증 체
 - [ ] Backend 실행 — `.\mvnw.cmd spring-boot:run` 정상 구동
 - [ ] Frontend 실행 — `cd frontend && npm run dev` 정상 구동 (`http://localhost:5173`)
 - [ ] Oracle DB 연결 — `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` 환경 변수 또는 `application.properties` 설정 확인
-- [ ] Gemini API Key — `GEMINI_API_KEY` 설정 여부 확인 (없으면 AI 분석 생성 실패, 나머지 기능 정상)
+- [ ] Groq API Key — `GROQ_API_KEY` 설정 여부 확인 (없으면 종목별 AI 분석 생성 실패, 나머지 기능 정상)
 - [ ] `admin` / `admin123` 계정 자동 생성 확인 (앱 시작 로그 또는 `/api/auth/me` 호출)
 - [ ] `demo` / `demo123` 계정 수동 또는 초기 데이터로 존재 확인
 
@@ -60,13 +60,13 @@ Sport Analysis Dashboard 프로젝트의 커밋 및 제출 전 최종 검증 체
 
 ---
 
-## 6. Gemini 경기 결과 분석 테스트
+## 6. Groq 경기 결과 분석 테스트
 
 - [ ] FINAL 경기 상세에서 AI 분석 생성 버튼 표시
-- [ ] 분석 생성 클릭 — Gemini API 호출 후 결과 텍스트 표시
+- [ ] 분석 생성 클릭 — Groq API 호출 후 결과 텍스트 표시
 - [ ] AI 분석 재생성 버튼 — 기존 결과 교체 확인
 - [ ] SCHEDULED 경기 — 분석 생성 불가 또는 안내 메시지 표시
-- [ ] `GEMINI_API_KEY` 없을 때 — 실패 메시지 표시 (서버 오류)
+- [ ] `GROQ_API_KEY` 없을 때 — 종목별 AI 분석 실패 메시지 표시, 기본 조회 기능 정상 유지
 
 ---
 
@@ -96,7 +96,7 @@ Sport Analysis Dashboard 프로젝트의 커밋 및 제출 전 최종 검증 체
 - [ ] 비로그인 `/admin` 접근 — 로그인 필요 안내 카드 표시
 - [ ] 일반 사용자 `/admin` 접근 — 관리자 권한 필요 안내 카드 표시
 - [ ] admin 계정 `/admin` 접근 — 관리자 대시보드 정상 표시
-- [ ] 대시보드 통계 — 사용자 수, 경기 수, 팀 수 등 수치 표시 (AI 분析 항목은 `-` 표시)
+- [ ] 대시보드 통계 — 사용자 수, 경기 수, 팀 수 등 수치 표시 (AI 분석 항목은 `-` 표시)
 - [ ] 최근 경기 / 최근 사용자 테이블 표시
 - [ ] `/admin/api-test` 접근 — API 테스트 페이지 정상 표시
 - [ ] API 테스트 버튼 클릭 — JSON 응답 뷰어에 결과 표시
@@ -153,7 +153,7 @@ cd ..
 | 인증 기능 | PASS / FAIL | |
 | 경기 목록 / 상세 | PASS / FAIL | |
 | 관심 팀 | PASS / FAIL | |
-| Gemini 분석 | PASS / FAIL | |
+| Groq 분석 | PASS / FAIL | |
 | 팬 예측 투표 | PASS / FAIL | |
 | 종목별 랭킹 | PASS / FAIL | |
 | 관리자 기능 | PASS / FAIL | |

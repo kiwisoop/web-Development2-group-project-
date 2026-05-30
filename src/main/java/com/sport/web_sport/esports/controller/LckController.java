@@ -8,7 +8,7 @@ import com.sport.web_sport.esports.dto.PlayerGameStatDetail;
 import com.sport.web_sport.esports.dto.PlayerSeasonSummary;
 import com.sport.web_sport.esports.service.CitoApiService;
 import com.sport.web_sport.esports.service.LckDataService;
-import com.sport.web_sport.esports.service.LckGeminiService;
+import com.sport.web_sport.esports.service.LckGroqService;
 import com.sport.web_sport.sports.dto.response.MatchResponse;
 import com.sport.web_sport.sports.dto.response.PlayerResponse;
 import com.sport.web_sport.sports.dto.response.TeamResponse;
@@ -27,7 +27,7 @@ public class LckController {
 
     private final LckDataService  lckDataService;
     private final CitoApiService  citoApiService;
-    private final LckGeminiService lckGeminiService;
+    private final LckGroqService lckGroqService;
 
     // ── DB 기반 엔드포인트 ───────────────────────────────────────────────────────
 
@@ -132,7 +132,7 @@ public class LckController {
     public ResponseEntity<List<Map<String, Object>>> getMatchPlayerStats(
             @RequestParam String team1Code,
             @RequestParam String team2Code) {
-        return ResponseEntity.ok(lckGeminiService.getMatchPlayerStats(team1Code, team2Code));
+        return ResponseEntity.ok(lckGroqService.getMatchPlayerStats(team1Code, team2Code));
     }
 
     /** Cito matchId로 게임별 양팀 통계 (kills, gold, towers, dragons, barons, heralds, bans) */
@@ -143,10 +143,10 @@ public class LckController {
         return ResponseEntity.ok(games);
     }
 
-    /** Cito 경기 맥락으로 Gemini 경기 요약 생성 */
+    /** Cito 경기 맥락으로 Groq 경기 요약 생성 */
     @PostMapping("/cito/match/analyze")
     public ResponseEntity<Map<String, Object>> analyzeMatch(@RequestBody LckCitoAnalysisRequest request) {
-        return ResponseEntity.ok(lckGeminiService.analyzeMatch(request));
+        return ResponseEntity.ok(lckGroqService.analyzeMatch(request));
     }
 
     // ── 헬퍼 ─────────────────────────────────────────────────────────────────────

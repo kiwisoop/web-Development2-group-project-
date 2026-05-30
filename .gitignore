@@ -39,6 +39,9 @@ frontend/dist/
 .claude/
 *.log
 *.txt
+*.docx
+*.hwp
+*.hwpx
 application-local.properties
 src/main/resources/application-local.properties
 web-Development2-group-project--main/

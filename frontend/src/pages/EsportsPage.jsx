@@ -55,13 +55,13 @@ function StateBadge({ state }) {
   return <span className="esports-state-badge upcoming">예정</span>;
 }
 
-// ─── Gemini 분석 패널 ─────────────────────────────────────────────────────────
+// ─── Groq 분석 패널 ─────────────────────────────────────────────────────────
 
 function GroqAnalysisPanel({ analysis, generating, onGenerate }) {
   if (generating) {
     return (
-      <div className="lck-gemini-panel lck-gemini-loading">
-        <span className="lck-gemini-spinner" />
+      <div className="lck-groq-panel lck-groq-loading">
+        <span className="lck-groq-spinner" />
         Groq AI가 경기를 분석 중입니다... (최대 50초 소요)
       </div>
     );
@@ -69,8 +69,8 @@ function GroqAnalysisPanel({ analysis, generating, onGenerate }) {
 
   if (analysis?.error) {
     return (
-      <div className="lck-gemini-panel lck-gemini-error">
-        <span className="lck-gemini-error-msg">{analysis.error}</span>
+      <div className="lck-groq-panel lck-groq-error">
+        <span className="lck-groq-error-msg">{analysis.error}</span>
         <button className="btn btn-outline btn-sm" onClick={onGenerate}>다시 시도</button>
       </div>
     );
@@ -78,25 +78,25 @@ function GroqAnalysisPanel({ analysis, generating, onGenerate }) {
 
   if (analysis) {
     return (
-      <div className="lck-gemini-panel lck-gemini-done">
-        <div className="lck-gemini-header">
-          <span className="lck-gemini-badge">Groq AI 분석</span>
+      <div className="lck-groq-panel lck-groq-done">
+        <div className="lck-groq-header">
+          <span className="lck-groq-badge">Groq AI 분석</span>
           <button className="btn btn-outline btn-sm" onClick={onGenerate}>재생성</button>
         </div>
         {analysis.summary && (
-          <div className="lck-gemini-block">
+          <div className="lck-groq-block">
             <strong>요약</strong>
             <p>{analysis.summary}</p>
           </div>
         )}
         {analysis.tactical && (
-          <div className="lck-gemini-block">
+          <div className="lck-groq-block">
             <strong>전술 분석</strong>
             <p>{analysis.tactical}</p>
           </div>
         )}
         {analysis.keyPoint && (
-          <div className="lck-gemini-block">
+          <div className="lck-groq-block">
             <strong>핵심 포인트</strong>
             <p>{analysis.keyPoint}</p>
           </div>
@@ -106,8 +106,8 @@ function GroqAnalysisPanel({ analysis, generating, onGenerate }) {
   }
 
   return (
-    <div className="lck-gemini-panel lck-gemini-empty">
-      <p className="lck-gemini-desc">선수 KDA·데미지 기여도를 참고해 Groq AI가 경기 요약을 작성합니다.</p>
+    <div className="lck-groq-panel lck-groq-empty">
+      <p className="lck-groq-desc">선수 KDA·데미지 기여도를 참고해 Groq AI가 경기 요약을 작성합니다.</p>
       <button className="btn btn-primary" onClick={onGenerate}>AI 경기 요약 생성</button>
     </div>
   );

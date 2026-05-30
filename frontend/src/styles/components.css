@@ -5167,8 +5167,8 @@
   padding: 0.5rem 0;
 }
 
-/* ── Gemini 분석 패널 ────────────────────────────────────────────────────────── */
-.lck-gemini-panel {
+/* ── Groq 분석 패널 ────────────────────────────────────────────────────────── */
+.lck-groq-panel {
   border-radius: 0.5rem;
   padding: 0.85rem 1rem;
   display: flex;
@@ -5177,7 +5177,7 @@
   font-size: 0.875rem;
 }
 
-.lck-gemini-loading {
+.lck-groq-loading {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -5187,7 +5187,7 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-.lck-gemini-spinner {
+.lck-groq-spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
@@ -5198,7 +5198,7 @@
   flex-shrink: 0;
 }
 
-.lck-gemini-error {
+.lck-groq-error {
   background: rgba(239, 68, 68, 0.06);
   border: 1px solid rgba(239,68,68,0.2);
   display: flex;
@@ -5208,29 +5208,29 @@
   flex-wrap: wrap;
 }
 
-.lck-gemini-error-msg {
+.lck-groq-error-msg {
   color: #b91c1c;
   font-size: 0.82rem;
 }
 
-.lck-gemini-empty {
+.lck-groq-empty {
   background: rgba(99, 102, 241, 0.04);
   border: 1px dashed rgba(99,102,241,0.25);
   align-items: flex-start;
 }
 
-.lck-gemini-desc {
+.lck-groq-desc {
   color: var(--color-text-muted, #6b7280);
   font-size: 0.82rem;
   margin: 0;
 }
 
-.lck-gemini-done {
+.lck-groq-done {
   background: rgba(124, 58, 237, 0.04);
   border: 1px solid rgba(124, 58, 237, 0.15);
 }
 
-.lck-gemini-header {
+.lck-groq-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5238,7 +5238,7 @@
   gap: 0.4rem;
 }
 
-.lck-gemini-badge {
+.lck-groq-badge {
   font-size: 0.72rem;
   font-weight: 700;
   background: linear-gradient(90deg, #7c3aed, #3b82f6);
@@ -5247,7 +5247,7 @@
   border-radius: 999px;
 }
 
-.lck-gemini-block {
+.lck-groq-block {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -5257,7 +5257,7 @@
   line-height: 1.6;
 }
 
-.lck-gemini-block strong {
+.lck-groq-block strong {
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--color-accent, #7c3aed);
@@ -5265,7 +5265,7 @@
   letter-spacing: 0.04em;
 }
 
-.lck-gemini-block p {
+.lck-groq-block p {
   margin: 0;
   color: var(--color-text, #111827);
   font-size: 0.85rem;
