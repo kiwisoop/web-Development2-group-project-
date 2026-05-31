@@ -20,9 +20,9 @@ function TeamLogo({ name, logoUrl }) {
   return <span className="rank-team-logo rank-team-logo--fallback" aria-hidden="true">{initial}</span>;
 }
 
-function RecentForm({ form }) {
+function RecentForm({ form, emptyText = '데이터 부족' }) {
   if (!form || form.length === 0) {
-    return <span className="rank-form-empty">데이터 부족</span>;
+    return <span className="rank-form-empty">{emptyText}</span>;
   }
   return (
     <span className="rank-form">
@@ -33,13 +33,16 @@ function RecentForm({ form }) {
   );
 }
 
-export default function RankingTable({ rankings, sportType }) {
+export default function RankingTable({ rankings, sportType, formEmptyText = '데이터 부족' }) {
   if (!rankings || rankings.length === 0) {
     return <p className="empty-text">등록된 팀 데이터가 없습니다.</p>;
   }
 
   const isSoccer = sportType === 'SOCCER';
   const isBaseball = sportType === 'BASEBALL';
+  const isEsports = sportType === 'ESPORTS';
+  // 최근 5경기 폼은 DB 집계가 제공하는 모든 종목에서 노출(데이터 없으면 '데이터 부족' 표시).
+  const showForm = isBaseball || isSoccer || isEsports;
 
   return (
     <div className="ranking-table-wrap">
@@ -56,7 +59,8 @@ export default function RankingTable({ rankings, sportType }) {
             <th>득점</th>
             <th>실점</th>
             <th>득실차</th>
-            {isBaseball ? <th>최근 5경기</th> : <th>승점</th>}
+            {isSoccer && <th>승점</th>}
+            {showForm && <th>최근 5경기</th>}
           </tr>
         </thead>
         <tbody>
@@ -85,11 +89,8 @@ export default function RankingTable({ rankings, sportType }) {
                 <td>{row.scoresFor}</td>
                 <td>{row.scoresAgainst}</td>
                 <td className={diffClass}>{diffText}</td>
-                {isBaseball ? (
-                  <td><RecentForm form={row.recentForm} /></td>
-                ) : (
-                  <td>{isSoccer ? <strong>{row.points}</strong> : '-'}</td>
-                )}
+                {isSoccer && <td><strong>{row.points}</strong></td>}
+                {showForm && <td><RecentForm form={row.recentForm} emptyText={formEmptyText} /></td>}
               </tr>
             );
           })}

@@ -101,7 +101,9 @@ function LckStandingsTable({ standings }) {
 function EsportsRankingsView() {
   const [seasons, setSeasons]           = useState([]);
   const [selectedSeason, setSelected]   = useState(null);
-  const [standings, setStandings]       = useState([]);
+  const [standings, setStandings]       = useState([]);   // Cito 라이브 순위
+  const [dbRankings, setDbRankings]     = useState([]);   // Cito 불가 시 DB 집계 순위(폴백)
+  const [source, setSource]             = useState(null); // 'cito' | 'db'
   const [loadingSeasons, setLS]         = useState(true);
   const [loadingStandings, setLSt]      = useState(false);
   const [error, setError]               = useState(null);
@@ -120,20 +122,45 @@ function EsportsRankingsView() {
     return () => ctrl.abort();
   }, []);
 
-  // 선택 시즌 변경 시 순위 로드
+  // 선택 시즌 변경 시 순위 로드.
+  // Cito 라이브 순위를 우선 시도하고, 503/에러/빈 응답이면 DB 집계 순위로 폴백한다(가짜 데이터 아님).
   useEffect(() => {
     if (!selectedSeason) return;
     const ctrl = new AbortController();
     setLSt(true);
     setError(null);
     setStandings([]);
+    setDbRankings([]);
+    setSource(null);
+
+    const loadDbFallback = () =>
+      getRankings('ESPORTS', ctrl.signal)
+        .then((res) => {
+          setDbRankings(res.data.data || []);
+          setSource('db');
+        })
+        .catch((err) => {
+          if (err?.code === 'ERR_CANCELED') return;
+          setError('순위 데이터를 불러오지 못했습니다.');
+        });
+
     getCitoStandings(selectedSeason.id, ctrl.signal)
-      .then((res) => setStandings(res?.data || []))
-      .catch((err) => {
-        if (err?.code === 'ERR_CANCELED') return;
-        setError('순위 데이터를 불러오지 못했습니다.');
+      .then((res) => {
+        const data = res?.data || [];
+        if (data.length > 0) {
+          setStandings(data);
+          setSource('cito');
+          return undefined;
+        }
+        return loadDbFallback(); // 빈 응답 → DB 폴백
       })
-      .finally(() => setLSt(false));
+      .catch((err) => {
+        if (err?.code === 'ERR_CANCELED') return undefined;
+        return loadDbFallback(); // 503(키 없음)·네트워크 등 → DB 폴백
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLSt(false);
+      });
     return () => ctrl.abort();
   }, [selectedSeason]);
 
@@ -162,11 +189,20 @@ function EsportsRankingsView() {
         <div className="lck-rank-container">
           <div className="lck-rank-header-bar">
             <span className="lck-rank-season-label">
-              {selectedSeason?.name} 순위표
+              {source === 'db' ? 'LCK 팀 순위 (DB 기준)' : `${selectedSeason?.name} 순위표`}
             </span>
-            <span className="lck-rank-source-tag">Cito API</span>
+            <span className="lck-rank-source-tag">{source === 'db' ? 'DB 기준' : 'Cito API'}</span>
           </div>
-          <LckStandingsTable standings={standings} />
+          {source === 'db' ? (
+            <>
+              <p className="ranking-note">
+                Cito 라이브 순위를 불러올 수 없어, DB에 저장된 종료 경기로 계산한 순위를 표시합니다.
+              </p>
+              <RankingTable rankings={dbRankings} sportType="ESPORTS" />
+            </>
+          ) : (
+            <LckStandingsTable standings={standings} />
+          )}
         </div>
       )}
     </div>
@@ -181,6 +217,7 @@ export default function RankingsPage() {
   const current = SPORT_TABS.find((t) => t.key === sportType) || SPORT_TABS[0];
   const isBaseball = current.key === 'baseball';
   const isEsports = current.key === 'esports';
+  const isSoccer = current.key === 'soccer';
 
   const [rankings, setRankings] = useState([]);
   const [leagueFilter, setLeagueFilter] = useState('MLB');
@@ -221,6 +258,12 @@ export default function RankingsPage() {
   const showKboTable = leagueFilter === 'KBO' || leagueFilter === 'ALL';
   const showMlbSections = leagueFilter === 'MLB' || leagueFilter === 'ALL';
 
+  // 축구: 종료 경기 기록이 있는 팀만 메인 순위표에 노출하고, 0경기 팀은 별도 섹션으로 분리한다.
+  const soccerPlayedTeams = isSoccer ? rankings.filter((r) => (r.gamesPlayed || 0) > 0) : [];
+  const soccerNoRecord    = isSoccer ? rankings.filter((r) => !((r.gamesPlayed || 0) > 0)) : [];
+  const soccerRanked      = renumber(soccerPlayedTeams); // 0경기 제외 후 1위부터 재부여
+  const soccerScarce      = isSoccer && rankings.length > 0 && rankings.length < 3;
+
   const renderBaseballBody = () => (
     <>
       {showKboTable && (
@@ -251,7 +294,7 @@ export default function RankingsPage() {
 
   return (
     <div className="rankings-page">
-      <h1 className="page-title">{isBaseball ? 'DB 기준 팀 순위' : '팀 순위'}</h1>
+      <h1 className="page-title">{(isBaseball || isSoccer) ? 'DB 기준 팀 순위' : '팀 순위'}</h1>
       <div className="ranking-tabs">
         {SPORT_TABS.map((tab) => (
           <button
@@ -317,7 +360,39 @@ export default function RankingsPage() {
           {!loading && !error && (
             isBaseball
               ? renderBaseballBody()
-              : <RankingTable rankings={rankings} sportType={current.apiKey} />
+              : (
+                <>
+                  {isSoccer && (
+                    <div className="ranking-notes">
+                      <p className="ranking-note">
+                        현재 DB에 저장된 종료 경기만 기준으로 계산한 순위입니다. 경기 데이터가 적어 공식 리그 순위와 다를 수 있습니다.
+                        {soccerScarce && (
+                          <span className="ranking-badge ranking-badge--warn">데이터 부족</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {soccerRanked.length > 0 ? (
+                    <RankingTable rankings={soccerRanked} sportType={current.apiKey} formEmptyText="-" />
+                  ) : (
+                    rankings.length === 0 && (
+                      <p className="empty-text">등록된 팀 데이터가 없습니다.</p>
+                    )
+                  )}
+
+                  {soccerNoRecord.length > 0 && (
+                    <div className="ranking-block ranking-no-record">
+                      <h3 className="ranking-no-record-title">경기 기록이 아직 없는 팀</h3>
+                      <ul className="ranking-no-record-list">
+                        {soccerNoRecord.map((t) => (
+                          <li key={t.teamId} className="ranking-no-record-item">{t.teamName}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )
           )}
         </>
       )}

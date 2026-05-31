@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMatchSections } from '../api/matchApi';
 import { effectiveMatchStatus } from '../utils/matchStatus';
-import { SOCCER_MOCK } from '../data/otherSportsMatches';
 import './FeaturedMatches.css';
 
 const STATUS_LABEL = {
@@ -81,8 +80,9 @@ function FormRow({ teamName, results }) {
 }
 
 export default function FeaturedMatches() {
-  // 야구·E스포츠는 DB/API에서 가져온다. 축구는 기존 mock 표시 방식을 유지한다.
+  // 야구·축구·E스포츠 모두 /api/matches/sections(DB/API)에서 가져온다.
   const [baseballMatches, setBaseballMatches] = useState([]);
+  const [soccerMatches, setSoccerMatches] = useState([]);
   const [esportsMatches, setEsportsMatches] = useState([]);
   const [indexes, setIndexes] = useState({ BASEBALL: 0, SOCCER: 0, ESPORTS: 0 });
 
@@ -102,7 +102,8 @@ export default function FeaturedMatches() {
           .map(x => x.m);
         setBaseballMatches(orderedBaseball.slice(0, 5));
 
-        // E스포츠는 백엔드 섹션 분류 순서(live → recent → upcoming)를 그대로 유지한다.
+        // 축구·E스포츠는 백엔드 섹션 분류 순서(live → recent → upcoming)를 그대로 유지한다.
+        setSoccerMatches(all.filter(m => m.sportType === 'SOCCER').slice(0, 5));
         setEsportsMatches(all.filter(m => m.sportType === 'ESPORTS').slice(0, 5));
       })
       .catch(err => {
@@ -112,11 +113,11 @@ export default function FeaturedMatches() {
   }, []);
 
   // 종목 순서·레이아웃은 기존과 동일하게 유지한다.
-  // 야구·E스포츠는 API 데이터(없으면 빈 배열 → 안내 문구), 축구는 mock.
+  // 세 종목 모두 API 데이터(없으면 빈 배열 → 안내 문구)를 사용한다.
   const groups = SPORT_ORDER.map(k => ({
     sportKey: k,
     sportName: SPORT_LABEL[k],
-    matches: k === 'BASEBALL' ? baseballMatches : k === 'ESPORTS' ? esportsMatches : SOCCER_MOCK,
+    matches: k === 'BASEBALL' ? baseballMatches : k === 'ESPORTS' ? esportsMatches : soccerMatches,
   }));
 
   const prev = (sportKey, total) =>
@@ -135,7 +136,7 @@ export default function FeaturedMatches() {
         {groups.map(({ sportKey, sportName, matches }) => {
           const total = matches.length;
 
-          // 야구 API 데이터가 없을 때만 빈 상태로 안내한다. (mock인 축구·E스포츠는 항상 데이터가 있음)
+          // 해당 종목의 API 경기 데이터가 없으면 빈 상태로 안내한다.
           if (total === 0) {
             return (
               <article key={sportKey} className="featured-card featured-card--empty">
@@ -154,6 +155,9 @@ export default function FeaturedMatches() {
           const homeName = m.homeTeam?.teamName || '홈팀';
           const awayName = m.awayTeam?.teamName || '원정팀';
           const hasForm = m.homeRecentForm?.length > 0 || m.awayRecentForm?.length > 0;
+          const eff = effectiveMatchStatus(m);
+          // 야구는 기존 분석 블록(폼·메트릭)을 그대로 쓰고, 그 외 종목만 기본 정보 박스를 추가한다.
+          const isBaseball = sportKey === 'BASEBALL';
 
           return (
             <article key={sportKey} className="featured-card">
@@ -161,14 +165,9 @@ export default function FeaturedMatches() {
                 <span className="featured-sport">{sportName}</span>
                 <span className="featured-divider">·</span>
                 <span className="featured-league">{m.league?.leagueName || ''}</span>
-                {(() => {
-                  const eff = effectiveMatchStatus(m);
-                  return (
-                    <span className={`featured-status ${STATUS_CLASS[eff] || 'featured-status--scheduled'}`}>
-                      {STATUS_LABEL[eff] || eff}
-                    </span>
-                  );
-                })()}
+                <span className={`featured-status ${STATUS_CLASS[eff] || 'featured-status--scheduled'}`}>
+                  {STATUS_LABEL[eff] || eff}
+                </span>
               </div>
 
               <div className="featured-teams">
@@ -187,6 +186,33 @@ export default function FeaturedMatches() {
 
               <div className="featured-time">{formatMatchTime(m.matchDate)}</div>
               {m.venue && <div className="featured-venue">📍 {m.venue}</div>}
+
+              {/* 야구 외 종목(축구·E스포츠): API에 이미 있는 값만으로 기본 정보 박스를 구성한다.
+                  없는 값(최근 폼·평균 득점·AI 인사이트 등)은 만들지 않는다. */}
+              {!isBaseball && (
+                <div className="featured-infobox">
+                  <div className="featured-infobox-title">
+                    {eff === 'FINAL' ? '경기 결과' : '경기 정보'}
+                  </div>
+                  <div className="featured-infobox-teams">
+                    <div className="featured-infobox-row">
+                      <span className="featured-infobox-team">{homeName}</span>
+                      {hasScores && <span className="featured-infobox-score">{m.homeScore}</span>}
+                    </div>
+                    <div className="featured-infobox-row">
+                      <span className="featured-infobox-team">{awayName}</span>
+                      {hasScores && <span className="featured-infobox-score">{m.awayScore}</span>}
+                    </div>
+                  </div>
+                  <div className="featured-pills">
+                    <span className="featured-pill">{STATUS_LABEL[eff] || eff}</span>
+                    {m.league?.leagueName && (
+                      <span className="featured-pill">{m.league.leagueName}</span>
+                    )}
+                    {m.venue && <span className="featured-pill">📍 {m.venue}</span>}
+                  </div>
+                </div>
+              )}
 
               {/* 리치 분석 블록: 백엔드가 해당 필드를 제공할 때만 렌더 (없으면 생략). */}
               {m.mainAnalysisPoint && (
@@ -240,8 +266,8 @@ export default function FeaturedMatches() {
               <div className="featured-card-actions">
                 <button type="button" className="match-nav-btn"
                   onClick={() => prev(sportKey, total)} aria-label={`이전 ${sportName} 경기`}>←</button>
-                {/* mock 경기(축구·E스포츠)는 실제 상세 페이지가 없으므로 링크를 비활성화한다. */}
-                {m.isMock ? (
+                {/* 유효한 matchId가 없으면(또는 mock) 실제 상세 페이지가 없으므로 링크를 비활성화한다. */}
+                {(m.isMock || m.id == null) ? (
                   <span className="featured-analysis-btn featured-analysis-btn--disabled" aria-disabled="true">경기 상세</span>
                 ) : (
                   <Link to={`/matches/${m.id}`} className="featured-analysis-btn">경기 상세</Link>

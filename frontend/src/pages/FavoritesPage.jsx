@@ -27,22 +27,20 @@ const LEAGUE_FILTERS = [
   { key: 'KBO', label: 'KBO 리그' },
 ];
 
-// 축구·E스포츠는 아직 DB가 연결되지 않아 "준비 중" 더미 팀만 노출한다. (저장/분석 미연동)
-const SOCCER_DUMMY = [
-  { teamName: '아스널', league: '프리미어리그' },
-  { teamName: '토트넘', league: '프리미어리그' },
-  { teamName: '맨시티', league: '프리미어리그' },
-];
-const ESPORTS_DUMMY = [
-  { teamName: 'T1', league: 'LCK' },
-  { teamName: 'Gen.G', league: 'LCK' },
-  { teamName: 'Hanwha Life Esports', league: 'LCK' },
-];
+// 종목별 카드 라벨 + 전적 표기 방식(축구만 무승부 표시).
+const SPORT_CARD = {
+  BASEBALL: { label: '⚾ 야구',    showDraws: false },
+  SOCCER:   { label: '⚽ 축구',    showDraws: true },
+  ESPORTS:  { label: '🎮 E스포츠', showDraws: false },
+};
 
-// 야구 카드 메타: 순위/전적/승률 데이터가 있으면 표시, 없으면 안전한 문구.
-function baseballMeta(team) {
+// 카드 메타: 순위/전적/승률 데이터가 있으면 표시, 없으면 안전한 문구(가짜 수치 없음).
+function teamMeta(team, showDraws) {
   if (team.gamesPlayed > 0) {
-    return `${team.rank}위 · ${team.wins}승 ${team.losses}패 · 승률 ${team.winRate}%`;
+    const record = showDraws
+      ? `${team.wins}승 ${team.draws}무 ${team.losses}패`
+      : `${team.wins}승 ${team.losses}패`;
+    return `${team.rank}위 · ${record} · 승률 ${team.winRate}%`;
   }
   return '최근 데이터 확인 중';
 }
@@ -79,6 +77,8 @@ export default function FavoritesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const [favorites, setFavorites] = useState([]);
   const [baseballTeams, setBaseballTeams] = useState([]);
+  const [soccerTeams, setSoccerTeams] = useState([]);
+  const [esportsTeams, setEsportsTeams] = useState([]);
   const [activeTab, setActiveTab] = useState('ALL');
   const [leagueFilter, setLeagueFilter] = useState('ALL');
   const [search, setSearch] = useState('');
@@ -96,19 +96,25 @@ export default function FavoritesPage() {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
-    // 즐겨찾기 목록 + 야구 팀 목록(랭킹 API)을 함께 불러온다.
-    Promise.all([
+    // 즐겨찾기 + 종목별 팀 목록(랭킹 API)을 함께 불러온다.
+    // 즐겨찾기·야구는 핵심(실패 시 에러), 축구·E스포츠는 실패해도 빈 목록으로 처리(페이지 유지).
+    Promise.allSettled([
       getFavoriteTeams(controller.signal),
       getRankings('BASEBALL', controller.signal),
+      getRankings('SOCCER', controller.signal),
+      getRankings('ESPORTS', controller.signal),
     ])
-      .then(([favRes, rankRes]) => {
-        setFavorites(favRes.data ?? []);
-        // 랭킹 API는 ApiResponse 래퍼 → res.data.data 가 실제 배열
-        setBaseballTeams(rankRes.data?.data ?? []);
-      })
-      .catch((err) => {
-        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
-        setError('관심 팀 정보를 불러오지 못했습니다.');
+      .then(([favRes, bbRes, socRes, espRes]) => {
+        if (controller.signal.aborted) return;
+        if (favRes.status === 'fulfilled' && bbRes.status === 'fulfilled') {
+          setFavorites(favRes.value.data ?? []);
+          // 랭킹 API는 ApiResponse 래퍼 → res.data.data 가 실제 배열
+          setBaseballTeams(bbRes.value.data?.data ?? []);
+        } else {
+          setError('관심 팀 정보를 불러오지 못했습니다.');
+        }
+        setSoccerTeams(socRes.status === 'fulfilled' ? (socRes.value.data?.data ?? []) : []);
+        setEsportsTeams(espRes.status === 'fulfilled' ? (espRes.value.data?.data ?? []) : []);
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -121,8 +127,8 @@ export default function FavoritesPage() {
     [favorites],
   );
 
-  // 야구팀 토글: 미선택이면 추가(POST), 선택됨이면 해제(DELETE). 백엔드 즐겨찾기 API 사용.
-  const handleToggleBaseball = async (team) => {
+  // 팀 토글(종목 공용): 미선택이면 추가(POST), 선택됨이면 해제(DELETE). 백엔드 즐겨찾기 API 사용.
+  const handleToggleTeam = async (team) => {
     const existing = findFavorite(team.teamId);
     setTogglingTeamId(team.teamId);
     try {
@@ -206,32 +212,47 @@ export default function FavoritesPage() {
     })
     .map((x) => x.t);
 
-  const soccerList = SOCCER_DUMMY.filter((t) => matchName(t.teamName));
-  const esportsList = ESPORTS_DUMMY.filter((t) => matchName(t.teamName));
+  // 검색 필터 + 선택된 팀 우선 정렬(야구와 동일 규칙). 종목 공용.
+  const buildTeamList = (teams) =>
+    teams
+      .filter((t) => matchName(t.teamName))
+      .map((t, i) => ({ t, i }))
+      .sort((a, b) => {
+        const sa = findFavorite(a.t.teamId) ? 1 : 0;
+        const sb = findFavorite(b.t.teamId) ? 1 : 0;
+        if (sa !== sb) return sb - sa;
+        return a.i - b.i;
+      })
+      .map((x) => x.t);
+
+  const soccerList = buildTeamList(soccerTeams);
+  const esportsList = buildTeamList(esportsTeams);
 
   const visibleCount =
     (showBaseball ? baseballList.length : 0) +
     (showSoccer ? soccerList.length : 0) +
     (showEsports ? esportsList.length : 0);
 
-  const renderBaseballCard = (team) => {
+  // 종목 공용 팀 카드(야구와 동일 레이아웃/버튼/로고 폴백). sportType에 따라 라벨·전적 표기만 달라진다.
+  const renderTeamCard = (team, sportType) => {
+    const cfg = SPORT_CARD[sportType];
     const selected = !!findFavorite(team.teamId);
     const busy = togglingTeamId === team.teamId;
     return (
-      <article key={`b-${team.teamId}`} className="team-select-card card">
+      <article key={`${sportType}-${team.teamId}`} className="team-select-card card">
         <div className="tsc-top">
-          <span className="tsc-sport">⚾ 야구</span>
+          <span className="tsc-sport">{cfg.label}</span>
           <span className="tsc-league">{team.leagueName || '리그 정보 없음'}</span>
         </div>
         <div className="tsc-name-row">
           <TeamLogo name={team.teamName} logoUrl={team.logoUrl} />
           <p className="tsc-team-name">{team.teamName}</p>
         </div>
-        <p className="tsc-meta">{baseballMeta(team)}</p>
+        <p className="tsc-meta">{teamMeta(team, cfg.showDraws)}</p>
         <button
           type="button"
           className={`btn btn-sm tsc-btn ${selected ? 'btn-outline' : 'btn-primary'}`}
-          onClick={() => handleToggleBaseball(team)}
+          onClick={() => handleToggleTeam(team)}
           disabled={busy}
         >
           {busy ? '처리 중...' : selected ? '✓ 선택됨' : '관심팀 추가'}
@@ -239,23 +260,6 @@ export default function FavoritesPage() {
       </article>
     );
   };
-
-  const renderPendingCard = (team, sportLabel, key) => (
-    <article key={key} className="team-select-card team-select-card--pending card">
-      <div className="tsc-top">
-        <span className="tsc-sport">{sportLabel}</span>
-        <span className="tsc-pending-badge">준비 중</span>
-      </div>
-      <div className="tsc-name-row">
-        <TeamLogo name={team.teamName} />
-        <p className="tsc-team-name">{team.teamName}</p>
-      </div>
-      <p className="tsc-meta">{team.league}</p>
-      <button type="button" className="btn btn-sm tsc-btn" disabled>
-        준비 중
-      </button>
-    </article>
-  );
 
   return (
     <div className="favorites-page">
@@ -337,14 +341,14 @@ export default function FavoritesPage() {
       {/* 팀 목록 */}
       {visibleCount === 0 ? (
         <EmptyState
-          title={query ? '검색 결과가 없습니다' : '표시할 팀이 없습니다'}
-          description={query ? '다른 팀 이름으로 검색해 보세요.' : '잠시 후 다시 시도해 주세요.'}
+          title={query ? '검색 결과가 없습니다' : '표시할 팀 데이터가 없습니다.'}
+          description={query ? '다른 팀 이름으로 검색해 보세요.' : '연결된 실제 팀 데이터가 없습니다.'}
         />
       ) : (
         <div className="team-select-grid">
-          {showBaseball && baseballList.map(renderBaseballCard)}
-          {showSoccer && soccerList.map((t, i) => renderPendingCard(t, '⚽ 축구', `s-${i}`))}
-          {showEsports && esportsList.map((t, i) => renderPendingCard(t, '🎮 E스포츠', `e-${i}`))}
+          {showBaseball && baseballList.map((t) => renderTeamCard(t, 'BASEBALL'))}
+          {showSoccer && soccerList.map((t) => renderTeamCard(t, 'SOCCER'))}
+          {showEsports && esportsList.map((t) => renderTeamCard(t, 'ESPORTS'))}
         </div>
       )}
     </div>

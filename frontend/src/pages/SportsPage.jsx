@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getMatches } from '../api/matchApi';
+import { getMatches, getMatchSections } from '../api/matchApi';
 import MatchCard from '../components/MatchCard';
 import LoadingState from '../components/LoadingState';
 import ErrorBox from '../components/ErrorBox';
@@ -22,16 +22,16 @@ const SPORTS = {
     apiKey: 'SOCCER',
     label: '축구',
     icon: '⚽',
-    description: '국내외 주요 리그 경기 정보를 곧 제공할 예정입니다.',
-    ready: false,
+    description: 'K League 1 등 등록된 축구 경기와 팀 순위를 확인하세요.',
+    ready: true,
   },
   esports: {
     key: 'esports',
     apiKey: 'ESPORTS',
     label: 'E스포츠',
     icon: '🎮',
-    description: 'LCK 등 주요 e스포츠 일정과 결과를 곧 제공할 예정입니다.',
-    ready: false,
+    description: 'LCK 등 등록된 e스포츠 경기와 팀 순위를 확인하세요.',
+    ready: true,
   },
 };
 
@@ -79,16 +79,49 @@ function BaseballMatches({ apiKey }) {
   );
 }
 
-function ComingSoon({ apiKey }) {
+// 축구·E스포츠 주요 경기. paged /api/matches 는 E스포츠에서 지연로딩 500 이슈가 있어,
+// 서비스 트랜잭션 내부에서 DTO로 매핑되는 /api/matches/sections 를 사용한다(야구와 동일한 카드로 렌더).
+function SportMatches({ apiKey }) {
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+    getMatchSections({ sportType: apiKey }, controller.signal)
+      .then((res) => {
+        const { liveMatches = [], recentFinishedMatches = [], upcomingMatches = [] } = res.data ?? {};
+        setMatches([...liveMatches, ...recentFinishedMatches, ...upcomingMatches].slice(0, 6));
+      })
+      .catch((err) => {
+        if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') return;
+        setError('경기 목록을 불러오지 못했습니다.');
+        setMatches([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [apiKey]);
+
+  if (loading) return <LoadingState message="경기 정보를 불러오는 중..." />;
+  if (error) return <ErrorBox message={error} />;
+  if (matches.length === 0) {
+    return (
+      <EmptyState
+        title="표시할 경기가 없습니다"
+        description="아직 등록된 경기가 없습니다. 전체 경기 페이지에서 다른 조건으로 검색해보세요."
+      />
+    );
+  }
+
   return (
-    <div className="sports-coming-soon card">
-      <p className="sports-coming-title">현재 준비 중인 종목입니다.</p>
-      <p className="sports-coming-desc">
-        전체 경기 페이지에서 등록된 경기를 확인할 수 있습니다.
-      </p>
-      <Link to={`/matches?sportType=${apiKey}`} className="btn btn-primary">
-        경기 보기
-      </Link>
+    <div className="sports-match-grid">
+      {matches.map((m) => (
+        <MatchCard key={m.id} match={m} compact />
+      ))}
     </div>
   );
 }
@@ -145,13 +178,11 @@ export default function SportsPage() {
       </nav>
 
       <section className="sports-body">
-        <h2 className="sports-section-title">
-          {sport.label} {sport.ready ? '주요 경기' : '안내'}
-        </h2>
-        {sport.ready ? (
+        <h2 className="sports-section-title">{sport.label} 주요 경기</h2>
+        {sport.key === 'baseball' ? (
           <BaseballMatches apiKey={sport.apiKey} />
         ) : (
-          <ComingSoon apiKey={sport.apiKey} />
+          <SportMatches apiKey={sport.apiKey} />
         )}
       </section>
 
