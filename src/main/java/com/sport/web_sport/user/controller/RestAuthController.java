@@ -1,6 +1,7 @@
 package com.sport.web_sport.user.controller;
 
 import com.sport.web_sport.common.response.ApiResponse;
+import com.sport.web_sport.user.dto.ChangePasswordRequest;
 import com.sport.web_sport.user.dto.LoginRequest;
 import com.sport.web_sport.user.dto.MeResponse;
 import com.sport.web_sport.user.dto.RegisterRequest;
@@ -14,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,5 +64,19 @@ public class RestAuthController {
             return ResponseEntity.ok(ApiResponse.ok(MeResponse.anonymous()));
         }
         return ResponseEntity.ok(ApiResponse.ok(MeResponse.of(user)));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deleteMe(HttpSession session) {
+        authService.deleteMe(session);
+        return ResponseEntity.ok(ApiResponse.ok("회원 탈퇴가 완료되었습니다.", null));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            HttpSession session) {
+        authService.changePassword(request, session);
+        return ResponseEntity.ok(ApiResponse.ok("비밀번호가 변경되었습니다.", null));
     }
 }

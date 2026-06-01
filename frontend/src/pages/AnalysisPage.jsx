@@ -13,14 +13,13 @@ const SPORT_LABELS = {
 };
 
 const ANALYSIS_QUERIES = [
-  { sportType: 'SOCCER', status: 'FINAL', size: 100 },
-  { sportType: 'BASEBALL', status: 'FINAL', size: 80 },
-  { sportType: 'BASEBALL', status: 'LIVE', size: 40 },
-  { sportType: 'ESPORTS', status: 'FINAL', size: 100 },
+  { sportType: 'SOCCER', status: 'FINAL', size: 120 },
+  { sportType: 'BASEBALL', status: 'FINAL', size: 120 },
+  { sportType: 'ESPORTS', status: 'FINAL', size: 120 },
 ];
 
 function uniqueMatches(matches) {
-  return Array.from(new Map(matches.map((match) => [match.id, match])).values())
+  return Array.from(new Map(matches.map((match) => [match.id || match.externalId, match])).values())
     .sort((a, b) => new Date(b.matchDate || 0) - new Date(a.matchDate || 0));
 }
 
@@ -66,26 +65,23 @@ export default function AnalysisPage() {
     return matches.filter((match) => match.sportType === sport);
   }, [matches, sport]);
 
-  const counts = {
-    available: matches.length,
-    live: matches.filter((match) => match.status === 'LIVE').length,
-    finished: matches.filter((match) => match.status === 'FINAL').length,
-  };
-
   return (
     <div className="analysis-page">
-      <section className="analysis-hero card">
-        <div>
+      <section className="analysis-hero analysis-hero--visual card">
+        <div className="analysis-hero-copy">
           <span className="section-kicker">AI Analysis</span>
           <h1 className="page-title">분석 가능한 경기</h1>
           <p className="page-desc">
-            축구, 야구, e스포츠의 완료 경기와 야구 라이브 경기 중 AI 요약을 확인할 수 있는 경기를 모았습니다.
+            종료된 경기 중 상세 기록과 AI 요약 데이터가 준비된 경기만 모았습니다.
+            실시간처럼 보이는 오래된 경기는 제외하고, 실제로 분석 가능한 경기만 보여줍니다.
           </p>
+          <div className="analysis-hero-actions">
+            <Link to="/matches" className="btn btn-primary">경기센터 보기</Link>
+            <Link to="/sports" className="btn btn-outline">종목별 탐색</Link>
+          </div>
         </div>
-        <div className="analysis-hero-stats">
-          <div><strong>{counts.available}</strong><span>분석 가능</span></div>
-          <div><strong>{counts.live}</strong><span>진행 중</span></div>
-          <div><strong>{counts.finished}</strong><span>완료 경기</span></div>
+        <div className="analysis-hero-media" aria-hidden="true">
+          <span>AI Report</span>
         </div>
       </section>
 
@@ -108,20 +104,20 @@ export default function AnalysisPage() {
       {!loading && !error && analysisMatches.length === 0 && (
         <EmptyState
           title="분석 가능한 경기가 없습니다"
-          description="경기 종료 후 상세 데이터가 준비되면 이곳에 표시됩니다."
+          description="경기가 종료되고 상세 데이터가 준비되면 이곳에 표시됩니다."
         />
       )}
 
       {!loading && !error && analysisMatches.length > 0 && (
         <div className="match-grid">
           {analysisMatches.map((match) => (
-            <MatchCard key={match.id} match={match} detailPath={getDetailPath(match)} />
+            <MatchCard key={match.id || match.externalId} match={match} detailPath={getDetailPath(match)} />
           ))}
         </div>
       )}
 
       <div className="analysis-footer card">
-        <strong>더 많은 경기를 찾고 있나요?</strong>
+        <strong>원하는 경기를 찾고 있나요?</strong>
         <Link to="/matches" className="btn btn-outline btn-sm">경기센터로 이동</Link>
       </div>
     </div>

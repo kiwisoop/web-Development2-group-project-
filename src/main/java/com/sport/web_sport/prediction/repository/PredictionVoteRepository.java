@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface PredictionVoteRepository extends JpaRepository<PredictionVote, Long> {
     Optional<PredictionVote> findByMatchIdAndUserId(Long matchId, Long userId);
+    long deleteByUserId(Long userId);
     boolean existsByMatchIdAndUserId(Long matchId, Long userId);
     long countByMatchIdAndVoteOption(Long matchId, VoteOption voteOption);
     long countByMatchId(Long matchId);

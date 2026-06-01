@@ -8,7 +8,7 @@ export default function MlbLinescoreTable({ linescore, homeShortName, awayShortN
         <thead>
           <tr>
             <th className="mlb-ls-team-col">팀</th>
-            {innings.map(inn => (
+            {innings.map((inn) => (
               <th key={inn.inningNumber} className="mlb-ls-inning-col">{inn.inningNumber}</th>
             ))}
             <th className="mlb-ls-stat-col">R</th>
@@ -19,8 +19,10 @@ export default function MlbLinescoreTable({ linescore, homeShortName, awayShortN
         <tbody>
           <tr>
             <td className="mlb-ls-team-name">{awayShortName || '원정'}</td>
-            {innings.map(inn => (
-              <td key={inn.inningNumber} className="mlb-ls-score">{inn.awayRuns}</td>
+            {innings.map((inn) => (
+              <td key={inn.inningNumber} className={Number(inn.awayRuns) > 0 ? 'mlb-ls-score mlb-ls-score--scored' : 'mlb-ls-score'}>
+                {inn.awayRuns}
+              </td>
             ))}
             <td className="mlb-ls-total">{awayRuns}</td>
             <td className="mlb-ls-total">{awayHits}</td>
@@ -28,8 +30,10 @@ export default function MlbLinescoreTable({ linescore, homeShortName, awayShortN
           </tr>
           <tr>
             <td className="mlb-ls-team-name">{homeShortName || '홈'}</td>
-            {innings.map(inn => (
-              <td key={inn.inningNumber} className="mlb-ls-score">{inn.homeRuns}</td>
+            {innings.map((inn) => (
+              <td key={inn.inningNumber} className={Number(inn.homeRuns) > 0 ? 'mlb-ls-score mlb-ls-score--scored' : 'mlb-ls-score'}>
+                {inn.homeRuns}
+              </td>
             ))}
             <td className="mlb-ls-total">{homeRuns}</td>
             <td className="mlb-ls-total">{homeHits}</td>

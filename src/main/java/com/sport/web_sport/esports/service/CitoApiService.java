@@ -9,6 +9,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,8 +34,8 @@ public class CitoApiService {
 
     /** 오늘 예정된 LCK 경기 */
     public CitoScheduleResponse fetchTodaySchedule() {
-        String url = baseUrl + "/lol/leagues/" + LEAGUE_ID + "/schedule";
-        return get(url, CitoScheduleResponse.class);
+        String today = LocalDate.now(ZoneId.of("Asia/Seoul")).toString();
+        return fetchAllScheduleByDateRange(today, today);
     }
 
     /** 기간 경기 결과 조회 - 단일 페이지 */

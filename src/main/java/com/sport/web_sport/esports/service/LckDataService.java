@@ -226,7 +226,11 @@ public class LckDataService {
             m.put("shortName", t.getShortName());
             m.put("logoUrl",   t.getLogoUrl());
 
-            List<Map<String, String>> players = playerRepository.findByTeamId(t.getId()).stream()
+            List<Player> roster = t.getShortName() == null
+                ? playerRepository.findByTeamId(t.getId())
+                : playerRepository.findByTeamSportTypeAndTeamShortNameIgnoreCase(SportType.ESPORTS, t.getShortName());
+
+            List<Map<String, String>> players = roster.stream()
                 .sorted(Comparator.comparingInt(p -> posOrder(p.getPosition())))
                 .map(p -> {
                     Map<String, String> pm = new LinkedHashMap<>();

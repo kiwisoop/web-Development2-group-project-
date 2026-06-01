@@ -13,6 +13,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findBySportType(SportType sportType);
     List<Team> findByLeagueId(Long leagueId);
     Optional<Team> findBySportTypeAndTeamName(SportType sportType, String teamName);
+    List<Team> findAllBySportTypeAndTeamName(SportType sportType, String teamName);
 
     @Query("select t from Team t join fetch t.league where t.sportType = :sportType order by t.teamName")
     List<Team> findBySportTypeWithLeague(@Param("sportType") SportType sportType);

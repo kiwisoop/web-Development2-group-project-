@@ -18,7 +18,8 @@ public class RankingController {
 
     @GetMapping("/{sportType}")
     public ApiResponse<List<RankingTeamResponse>> getRankings(
-            @PathVariable SportType sportType) {
-        return ApiResponse.ok(rankingService.getRankings(sportType));
+            @PathVariable SportType sportType,
+            @RequestParam(required = false) String season) {
+        return ApiResponse.ok(rankingService.getRankings(sportType, season));
     }
 }

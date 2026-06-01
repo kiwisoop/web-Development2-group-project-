@@ -36,7 +36,7 @@ function VoteButton({ option, team, defaultColor, count, percent, myVote, disabl
   return (
     <div className={`vote-option${isSelected ? ' vote-selected' : ''}`}>
       <div className="vote-team-header">
-        <TeamLogo logoUrl={logoUrl} teamName={teamName} size={36} />
+        <TeamLogo logoUrl={logoUrl} teamName={teamName} size={38} />
         <span className="vote-team-label" style={{ color }}>{teamName}</span>
       </div>
       <button
@@ -49,7 +49,7 @@ function VoteButton({ option, team, defaultColor, count, percent, myVote, disabl
         onClick={() => onVote(option)}
         disabled={disabled}
       >
-        {isSelected ? '✓ 선택됨' : '승리 예측'}
+        {isSelected ? '선택됨' : '승리 예측'}
       </button>
       <div className="vote-bar-wrap">
         <div className="vote-bar" style={{ width: `${percent}%`, background: color }} />
@@ -104,7 +104,7 @@ export default function PredictionPreview({ matchStatus, prediction, isLoggedIn,
           <p className="vote-notice">아직 투표 수가 적어 참고용으로만 확인해 주세요.</p>
         )}
         {!isLoggedIn && (
-          <p className="notice-text">로그인 후 예측 투표에 참여할 수 있습니다.</p>
+          <p className="notice-text">로그인하면 예측 투표에 참여할 수 있습니다.</p>
         )}
         {isLoggedIn && isFinal && (
           <p className="notice-text">경기 종료 후에는 투표할 수 없습니다.</p>

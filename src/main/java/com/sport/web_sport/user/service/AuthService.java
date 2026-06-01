@@ -1,6 +1,10 @@
 package com.sport.web_sport.user.service;
 
 import com.sport.web_sport.common.error.BusinessException;
+import com.sport.web_sport.chat.repository.ChatMessageRepository;
+import com.sport.web_sport.favorite.repository.FavoriteTeamRepository;
+import com.sport.web_sport.prediction.repository.PredictionVoteRepository;
+import com.sport.web_sport.user.dto.ChangePasswordRequest;
 import com.sport.web_sport.user.dto.LoginRequest;
 import com.sport.web_sport.user.dto.RegisterRequest;
 import com.sport.web_sport.user.entity.User;
@@ -23,6 +27,9 @@ public class AuthService {
     private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     private final UserRepository userRepository;
+    private final FavoriteTeamRepository favoriteTeamRepository;
+    private final PredictionVoteRepository predictionVoteRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Transactional
     public User register(RegisterRequest request) {
@@ -51,6 +58,37 @@ public class AuthService {
     }
 
     public void logout(HttpSession session) {
+        session.invalidate();
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request, HttpSession session) {
+        Long userId = requireLoginUserId(session);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("로그인이 필요합니다."));
+
+        if (!isPasswordValid(request.getCurrentPassword(), user)) {
+            throw new BusinessException("현재 비밀번호가 일치하지 않습니다.");
+        }
+        if (request.getCurrentPassword().equals(request.getNewPassword())) {
+            throw new BusinessException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
+        }
+
+        user.setPassword(PASSWORD_ENCODER.encode(request.getNewPassword()));
+    }
+
+    @Transactional
+    public void deleteMe(HttpSession session) {
+        Long userId = requireLoginUserId(session);
+        if (!userRepository.existsById(userId)) {
+            session.invalidate();
+            throw new BusinessException("로그인이 필요합니다.");
+        }
+
+        chatMessageRepository.deleteByUserId(userId);
+        predictionVoteRepository.deleteByUserId(userId);
+        favoriteTeamRepository.deleteByUserId(userId);
+        userRepository.deleteById(userId);
         session.invalidate();
     }
 
