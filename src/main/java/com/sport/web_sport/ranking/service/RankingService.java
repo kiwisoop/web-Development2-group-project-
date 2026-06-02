@@ -21,10 +21,21 @@ public class RankingService {
 
     @Transactional(readOnly = true)
     public List<RankingTeamResponse> getRankings(SportType sportType) {
-        String currentSeason = String.valueOf(java.time.Year.now().getValue());
-        List<Match> finalMatches = sportType == SportType.BASEBALL
-                ? matchRepository.findBySportTypeAndStatusAndLeagueNameWithTeams(sportType, MatchStatus.FINAL, "MLB", currentSeason)
-                : matchRepository.findBySportTypeAndStatusWithTeams(sportType, MatchStatus.FINAL);
+        return getRankings(sportType, String.valueOf(java.time.Year.now().getValue()));
+    }
+
+    @Transactional(readOnly = true)
+    public List<RankingTeamResponse> getRankings(SportType sportType, String season) {
+        List<Match> finalMatches;
+        if (sportType == SportType.BASEBALL) {
+            String targetSeason = isBlank(season) ? String.valueOf(java.time.Year.now().getValue()) : season;
+            finalMatches = matchRepository.findBySportTypeAndStatusAndLeagueNameWithTeams(
+                    sportType, MatchStatus.FINAL, "MLB", targetSeason);
+        } else if (isBlank(season)) {
+            finalMatches = matchRepository.findBySportTypeAndStatusWithTeams(sportType, MatchStatus.FINAL);
+        } else {
+            finalMatches = matchRepository.findBySportTypeAndStatusAndSeasonWithTeams(sportType, MatchStatus.FINAL, season);
+        }
 
         // Accumulator map: teamId → [wins, draws, losses, scoresFor, scoresAgainst, points]
         // Only teams that actually appear in qualifying matches are included
@@ -91,6 +102,9 @@ public class RankingService {
                     .rank(0)
                     .teamId(teamId)
                     .teamName(team.getTeamName())
+                    .shortName(team.getShortName())
+                    .logoUrl(team.getLogoUrl())
+                    .teamColor(team.getTeamColor())
                     .sportType(sportType)
                     .leagueName(leagueName)
                     .gamesPlayed(gamesPlayed)
@@ -111,6 +125,18 @@ public class RankingService {
             list.sort((a, b) -> {
                 if (b.getPoints() != a.getPoints()) return b.getPoints() - a.getPoints();
                 if (b.getWins() != a.getWins()) return b.getWins() - a.getWins();
+                if (b.getScoreDifference() != a.getScoreDifference()) return b.getScoreDifference() - a.getScoreDifference();
+                if (b.getScoresFor() != a.getScoresFor()) return b.getScoresFor() - a.getScoresFor();
+                return a.getTeamName().compareTo(b.getTeamName());
+            });
+        } else if (sportType == SportType.ESPORTS) {
+            // e스포츠는 경기 수가 적은 100% 팀이 최상단을 차지하지 않도록
+            // 승수와 경기 수를 승률보다 우선한다.
+            list.sort((a, b) -> {
+                if (b.getWins() != a.getWins()) return b.getWins() - a.getWins();
+                if (b.getGamesPlayed() != a.getGamesPlayed()) return b.getGamesPlayed() - a.getGamesPlayed();
+                int cmp = Double.compare(b.getWinRate(), a.getWinRate());
+                if (cmp != 0) return cmp;
                 if (b.getScoreDifference() != a.getScoreDifference()) return b.getScoreDifference() - a.getScoreDifference();
                 if (b.getScoresFor() != a.getScoresFor()) return b.getScoresFor() - a.getScoresFor();
                 return a.getTeamName().compareTo(b.getTeamName());
@@ -146,5 +172,9 @@ public class RankingService {
         if (!m.find()) return false;
         int mlbId = Integer.parseInt(m.group(1));
         return mlbId >= 108 && mlbId <= 200;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

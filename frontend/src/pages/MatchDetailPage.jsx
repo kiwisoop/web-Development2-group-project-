@@ -215,22 +215,24 @@ export default function MatchDetailPage() {
                 {match.status === 'CANCELED' && (
                   <div className="status-notice card">이 경기는 취소되었습니다.</div>
                 )}
-                <MatchActionPanel
-                  match={match}
-                  isLoggedIn={isLoggedIn}
-                  favoriteTeamIds={favoriteTeamIds}
-                  onToggleFavorite={handleToggleFavorite}
-                  loadingTeamId={loadingTeamId}
-                />
-                <PredictionPreview
-                  matchStatus={match.status}
-                  prediction={prediction}
-                  isLoggedIn={isLoggedIn}
-                  onVote={handleVote}
-                  voting={predictionVoting}
-                  homeTeam={match.homeTeam}
-                  awayTeam={match.awayTeam}
-                />
+                <div className="mlb-fanzone-grid">
+                  <MatchActionPanel
+                    match={match}
+                    isLoggedIn={isLoggedIn}
+                    favoriteTeamIds={favoriteTeamIds}
+                    onToggleFavorite={handleToggleFavorite}
+                    loadingTeamId={loadingTeamId}
+                  />
+                  <PredictionPreview
+                    matchStatus={match.status}
+                    prediction={prediction}
+                    isLoggedIn={isLoggedIn}
+                    onVote={handleVote}
+                    voting={predictionVoting}
+                    homeTeam={match.homeTeam}
+                    awayTeam={match.awayTeam}
+                  />
+                </div>
                 <div className="detail-section">
                   <h2 className="detail-section-title">경기 채팅방</h2>
                   <ChatBox

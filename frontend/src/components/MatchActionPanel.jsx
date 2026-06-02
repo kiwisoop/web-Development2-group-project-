@@ -16,7 +16,10 @@ export default function MatchActionPanel({ match, isLoggedIn, favoriteTeamIds, o
           ) : (
             <div className="fav-team-logo-fallback">{team?.shortName?.[0] || team?.teamName?.[0] || '?'}</div>
           )}
-          <span className="fav-team-name">{team?.teamName || '팀 정보 없음'}</span>
+          <div className="fav-team-copy">
+            <span className="fav-team-name">{team?.teamName || '팀 정보 없음'}</span>
+            {team?.shortName && <span className="fav-team-sub">{team.shortName}</span>}
+          </div>
         </div>
         <button
           className={`fav-heart-btn${isFav ? ' fav-heart-btn--active' : ''}`}
@@ -42,7 +45,7 @@ export default function MatchActionPanel({ match, isLoggedIn, favoriteTeamIds, o
         {renderTeamRow(match.homeTeam, homeIsFav, false)}
         {renderTeamRow(match.awayTeam, awayIsFav, true)}
         {!isLoggedIn && (
-          <p className="notice-text">로그인 후 관심 팀을 등록할 수 있습니다.</p>
+          <p className="notice-text">로그인하면 관심 팀을 등록할 수 있습니다.</p>
         )}
       </div>
     </div>

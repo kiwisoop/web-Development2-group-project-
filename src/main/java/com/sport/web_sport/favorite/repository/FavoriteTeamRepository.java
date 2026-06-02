@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface FavoriteTeamRepository extends JpaRepository<FavoriteTeam, Long> {
     List<FavoriteTeam> findByUserId(Long userId);
+    long deleteByUserId(Long userId);
     boolean existsByUserIdAndTeamId(Long userId, Long teamId);
 
     @Query("""

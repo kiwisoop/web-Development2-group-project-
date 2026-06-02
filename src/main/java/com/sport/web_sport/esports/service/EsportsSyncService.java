@@ -116,7 +116,11 @@ public class EsportsSyncService {
     }
 
     private TeamResult getOrCreateTeam(CitoScheduleResponse.TeamEntry entry, League league) {
-        return teamRepository.findBySportTypeAndTeamName(SportType.ESPORTS, entry.getName())
+        List<Team> candidates = teamRepository.findAllBySportTypeAndTeamName(SportType.ESPORTS, entry.getName());
+        return candidates.stream()
+                .filter(team -> team.getLeague() != null && team.getLeague().getId().equals(league.getId()))
+                .findFirst()
+                .or(() -> candidates.stream().findFirst())
                 .map(team -> {
                     team.setLeague(league);
                     team.setShortName(isBlank(entry.getCode()) ? team.getShortName() : entry.getCode());

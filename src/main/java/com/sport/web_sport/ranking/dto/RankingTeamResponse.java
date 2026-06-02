@@ -10,6 +10,9 @@ public class RankingTeamResponse {
     private int rank;
     private Long teamId;
     private String teamName;
+    private String shortName;
+    private String logoUrl;
+    private String teamColor;
     private SportType sportType;
     private String leagueName;
     private int gamesPlayed;

@@ -150,6 +150,19 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             select m from Match m
             join fetch m.homeTeam
             join fetch m.awayTeam
+            left join fetch m.league
+            where m.sportType = :sportType
+              and m.status = :status
+              and m.season = :season
+            """)
+    List<Match> findBySportTypeAndStatusAndSeasonWithTeams(@Param("sportType") SportType sportType,
+                                                           @Param("status") MatchStatus status,
+                                                           @Param("season") String season);
+
+    @Query("""
+            select m from Match m
+            join fetch m.homeTeam
+            join fetch m.awayTeam
             join fetch m.league l
             where m.sportType = :sportType
               and m.status = :status

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+    long deleteByUserId(Long userId);
 
     @Query("select m from ChatMessage m join fetch m.user where m.chatRoom.id = :roomId order by m.createdAt asc")
     List<ChatMessage> findTop50ByChatRoomIdWithUser(@Param("roomId") Long roomId, Pageable pageable);

@@ -66,7 +66,7 @@ export default function RecommendedTeamSection() {
       return (
         <CtaBanner
           title="추천팀을 설정하고 맞춤 경기 분석을 받아보세요."
-          description="내 팀 경기 우선 표시, 분석 완료 알림, 최근 흐름 요약을 제공합니다."
+          description="내 팀 경기 우선 표시와 최근 흐름 요약을 제공합니다."
           buttonLabel="로그인하고 추천팀 설정하기"
           onClick={() => navigate('/login')}
         />

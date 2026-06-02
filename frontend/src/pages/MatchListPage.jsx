@@ -1,233 +1,308 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getMatches } from '../api/matchApi';
-import MatchCard from '../components/MatchCard';
-import MatchSections from '../components/MatchSections';
-import LoadingState from '../components/LoadingState';
-import EmptyState from '../components/EmptyState';
-import ErrorBox from '../components/ErrorBox';
+import TeamLogo from '../components/TeamLogo';
 
-function paramsToFilters(searchParams) {
+const PAGE_SIZE = 12;
+const SPORT_FILTERS = [
+  { key: 'all', label: '전체', apiValue: null },
+  { key: 'BASEBALL', label: '야구', apiValue: 'BASEBALL' },
+  { key: 'SOCCER', label: '축구', apiValue: 'SOCCER' },
+  { key: 'ESPORTS', label: 'e스포츠', apiValue: 'ESPORTS' },
+];
+
+const STATUS_FILTERS = [
+  { key: 'all', label: '전체', apiValue: null },
+  { key: 'SCHEDULED', label: '예정', apiValue: 'SCHEDULED' },
+  { key: 'LIVE', label: '진행중', apiValue: 'LIVE' },
+  { key: 'FINAL', label: '종료', apiValue: 'FINAL' },
+];
+
+function toDateKey(value) {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) return toDateKey();
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+function moveDate(dateKey, amount) {
+  const date = new Date(`${dateKey}T00:00:00`);
+  date.setDate(date.getDate() + amount);
+  return toDateKey(date);
+}
+
+function formatDateTitle(dateKey) {
+  const date = new Date(`${dateKey}T00:00:00`);
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  });
+}
+
+function formatMatchTime(value) {
+  if (!value) return '--:--';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '--:--';
+  return date.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+function teamName(team) {
+  return team?.teamName || team?.shortName || team?.name || '팀 정보 준비 중';
+}
+
+function statusLabel(status) {
+  if (status === 'LIVE') return '진행중';
+  if (status === 'FINAL') return '종료';
+  return '예정';
+}
+
+function statusClass(status) {
+  if (status === 'LIVE') return 'live';
+  if (status === 'FINAL') return 'end';
+  return 'upc';
+}
+
+function hasScore(match) {
+  return match?.status === 'LIVE' || match?.status === 'FINAL';
+}
+
+function readPage(data) {
   return {
-    sportType: searchParams.get('sportType') || '',
-    status: searchParams.get('status') || '',
-    keyword: searchParams.get('keyword') || '',
-    year: searchParams.get('year') || '',
-    month: searchParams.get('month') || '',
-    sort: searchParams.get('sort') || 'latest',
-    page: parseInt(searchParams.get('page') || '0', 10),
-    size: parseInt(searchParams.get('size') || '20', 10),
+    content: Array.isArray(data?.content) ? data.content : [],
+    page: Number(data?.page ?? 0),
+    totalPages: Math.max(1, Number(data?.totalPages ?? 1)),
+    totalElements: Number(data?.totalElements ?? 0),
+    hasNext: Boolean(data?.hasNext),
+    hasPrevious: Boolean(data?.hasPrevious),
   };
 }
 
-function filtersToUrlParams(filters) {
-  const obj = {};
-  if (filters.sportType) obj.sportType = filters.sportType;
-  if (filters.status) obj.status = filters.status;
-  if (filters.keyword) obj.keyword = filters.keyword;
-  if (filters.year) obj.year = filters.year;
-  if (filters.month) obj.month = filters.month;
-  if (filters.sort && filters.sort !== 'latest') obj.sort = filters.sort;
-  if (filters.page > 0) obj.page = filters.page;
-  if (filters.size && filters.size !== 20) obj.size = filters.size;
-  return obj;
-}
-
-function filtersToApiParams(filters) {
-  const obj = { sort: filters.sort, page: filters.page, size: filters.size };
-  if (filters.sportType) obj.sportType = filters.sportType;
-  if (filters.status) obj.status = filters.status;
-  if (filters.keyword) obj.keyword = filters.keyword;
-  if (filters.year) obj.year = filters.year;
-  if (filters.month) obj.month = filters.month;
-  return obj;
+function setParam(next, key, value) {
+  if (!value || value === 'all') next.delete(key);
+  else next.set(key, value);
 }
 
 export default function MatchListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [form, setForm] = useState(() => paramsToFilters(searchParams));
-  const [matches, setMatches] = useState([]);
-  const [pagination, setPagination] = useState(null);
+  const [pageData, setPageData] = useState(() => readPage(null));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const selectedSport = searchParams.get('sportType') || 'BASEBALL';
+  const selectedStatus = searchParams.get('status') || 'all';
+  const selectedDate = searchParams.get('date') || toDateKey();
+  const page = Math.max(0, Number(searchParams.get('page') || 0));
+
+  const sportLabel = SPORT_FILTERS.find((item) => item.key === selectedSport)?.label || '전체';
+  const statusText = STATUS_FILTERS.find((item) => item.key === selectedStatus)?.label || '전체';
+
+  const queryParams = useMemo(() => {
+    const selectedSportOption = SPORT_FILTERS.find((item) => item.key === selectedSport);
+    const selectedStatusOption = STATUS_FILTERS.find((item) => item.key === selectedStatus);
+    return {
+      sportType: selectedSportOption?.apiValue || undefined,
+      status: selectedStatusOption?.apiValue || undefined,
+      date: selectedDate,
+      page,
+      size: PAGE_SIZE,
+      sort: selectedStatus === 'FINAL' ? 'latest' : 'oldest',
+    };
+  }, [page, selectedDate, selectedSport, selectedStatus]);
+
   useEffect(() => {
     const controller = new AbortController();
-    const filters = paramsToFilters(searchParams);
-    setForm(filters);
-
     setLoading(true);
     setError(null);
-    getMatches(filtersToApiParams(filters), controller.signal)
-      .then((res) => {
-        const data = res.data;
-        setMatches(data.content || []);
-        setPagination({
-          page: data.page,
-          size: data.size,
-          totalElements: data.totalElements,
-          totalPages: data.totalPages,
-          hasNext: data.hasNext,
-          hasPrevious: data.hasPrevious,
-        });
+
+    getMatches(queryParams, controller.signal)
+      .then((response) => {
+        setPageData(readPage(response.data));
       })
       .catch((err) => {
-        if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
-        setError('경기 목록을 불러오지 못했습니다.');
-        setMatches([]);
-        setPagination(null);
+        if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError') return;
+        setPageData(readPage(null));
+        setError('경기 일정을 가져오지 못했습니다. 잠시 후 다시 확인해 주세요.');
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
 
     return () => controller.abort();
-  }, [searchParams]);
+  }, [queryParams]);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const updateFilters = (patch) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(patch).forEach(([key, value]) => setParam(next, key, value));
+    next.delete('page');
+    setSearchParams(next, { replace: true });
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setSearchParams(filtersToUrlParams({ ...form, page: 0 }));
+  const updatePage = (nextPage) => {
+    const next = new URLSearchParams(searchParams);
+    if (nextPage <= 0) next.delete('page');
+    else next.set('page', String(nextPage));
+    setSearchParams(next, { replace: true });
   };
 
-  const handleReset = () => {
-    setForm({ sportType: '', status: '', keyword: '', year: '', month: '', sort: 'latest', page: 0, size: 20 });
-    setSearchParams({});
+  const resetToBaseballToday = () => {
+    setSearchParams({ sportType: 'BASEBALL', date: toDateKey() }, { replace: true });
   };
-
-  const handlePage = (newPage) => {
-    const current = Object.fromEntries(searchParams.entries());
-    setSearchParams({ ...current, page: newPage });
-  };
-
-  const currentPage = pagination?.page ?? 0;
-  const totalPages = pagination?.totalPages ?? 0;
 
   return (
     <div className="match-list-page">
-      <div className="page-head">
-        <h1 className="page-title">경기 목록</h1>
-        <p className="page-desc">종목, 상태, 키워드로 경기를 빠르게 찾아보세요.</p>
-      </div>
+      <header className="sl-page-head">
+        <div>
+          <h1 className="sl-page-title">경기 일정</h1>
+          <p className="sl-page-sub">
+            {formatDateTitle(selectedDate)} · {sportLabel} · {statusText}
+          </p>
+        </div>
+        <div className="sl-date-range">
+          <button type="button" onClick={() => updateFilters({ date: moveDate(selectedDate, -1) })}>
+            이전
+          </button>
+          <label>
+            <span>날짜</span>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(event) => updateFilters({ date: event.target.value })}
+            />
+          </label>
+          <button type="button" onClick={() => updateFilters({ date: toDateKey() })}>
+            오늘
+          </button>
+          <button type="button" onClick={() => updateFilters({ date: moveDate(selectedDate, 1) })}>
+            다음
+          </button>
+        </div>
+      </header>
 
-      <section className="admin-section" style={{ marginBottom: '2rem' }}>
-        <h2 className="admin-section-title">전체 경기 현황</h2>
-        <MatchSections
-          sportType={form.sportType || undefined}
-          leagueName={form.sportType === 'BASEBALL' ? 'MLB' : undefined}
-        />
+      <section className="sl-card">
+        <div className="sl-filter-row">
+          <span className="sl-filter-label">종목</span>
+          {SPORT_FILTERS.map((option) => (
+            <button
+              type="button"
+              key={option.key}
+              className={`sl-chip ${selectedSport === option.key ? 'active' : ''}`}
+              onClick={() => updateFilters({ sportType: option.key })}
+            >
+              {option.label}
+            </button>
+          ))}
+
+          <span className="sl-filter-divider" />
+          <span className="sl-filter-label">상태</span>
+          {STATUS_FILTERS.map((option) => (
+            <button
+              type="button"
+              key={option.key}
+              className={`sl-chip ${selectedStatus === option.key ? 'active' : ''}`}
+              onClick={() => updateFilters({ status: option.key })}
+            >
+              {option.label}
+            </button>
+          ))}
+
+          <span className="sl-filter-count">총 {pageData.totalElements.toLocaleString('ko-KR')}경기</span>
+        </div>
+
+        {loading ? (
+          <div className="sl-empty" style={{ padding: 60 }}>일정을 확인하고 있습니다.</div>
+        ) : error ? (
+          <div className="sl-empty" style={{ padding: 60, color: '#ff8aa3' }}>{error}</div>
+        ) : pageData.content.length === 0 ? (
+          <div className="sl-empty" style={{ padding: 60 }}>
+            <h4 style={{ fontSize: 15, color: 'var(--color-text)', marginBottom: 6 }}>
+              표시할 경기가 없습니다
+            </h4>
+            <p style={{ marginBottom: 18 }}>
+              날짜나 필터를 바꾸면 다른 경기 일정을 확인할 수 있습니다.
+            </p>
+            <button className="btn btn-primary" type="button" onClick={resetToBaseballToday}>
+              오늘 야구 일정 보기
+            </button>
+          </div>
+        ) : (
+          pageData.content.map((match) => (
+            <Link
+              key={match.externalId || `${match.sportType}-${match.id}`}
+              to={`/matches/${match.id}`}
+              className={`sl-match-row ${match.status === 'LIVE' ? 'live' : ''}`}
+            >
+              <div className="sl-match-time">
+                <b>{formatMatchTime(match.matchDate)}</b>
+                <span className={`sl-status-badge ${statusClass(match.status)}`}>
+                  {statusLabel(match.status)}
+                </span>
+              </div>
+
+              <div className="sl-mini-team">
+                <TeamLogo team={match.homeTeam} size={38} />
+                <div>
+                  <div className="name">{teamName(match.homeTeam)}</div>
+                  <div className="sub">{match.venue || match.league?.leagueName || ''}</div>
+                </div>
+              </div>
+
+              {hasScore(match) ? (
+                <div className="sl-match-score">
+                  <b>{match.homeScore ?? 0}</b>
+                  <span>:</span>
+                  <b>{match.awayScore ?? 0}</b>
+                </div>
+              ) : (
+                <div className="sl-match-score upcoming">VS</div>
+              )}
+
+              <div className="sl-mini-team away">
+                <TeamLogo team={match.awayTeam} size={38} />
+                <div>
+                  <div className="name">{teamName(match.awayTeam)}</div>
+                  <div className="sub">{match.league?.leagueName || match.sportType || ''}</div>
+                </div>
+              </div>
+
+              <div className="sl-match-action">
+                <span className="sl-detail-link">자세히 보기</span>
+              </div>
+            </Link>
+          ))
+        )}
       </section>
 
-      <form className="filter-bar card" onSubmit={handleSearch}>
-        <div className="filter-group">
-          <label>종목</label>
-          <select name="sportType" value={form.sportType} onChange={handleChange}>
-            <option value="">전체</option>
-            <option value="SOCCER">⚽ 축구</option>
-            <option value="BASEBALL">⚾ 야구</option>
-            <option value="ESPORTS">🎮 E스포츠</option>
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label>상태</label>
-          <select name="status" value={form.status} onChange={handleChange}>
-            <option value="">전체</option>
-            <option value="SCHEDULED">예정</option>
-            <option value="LIVE">진행 중</option>
-            <option value="FINAL">종료</option>
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label>키워드</label>
-          <input
-            name="keyword"
-            type="text"
-            value={form.keyword}
-            onChange={handleChange}
-            placeholder="팀명, 리그명..."
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>연도</label>
-          <input
-            name="year"
-            type="number"
-            value={form.year}
-            onChange={handleChange}
-            placeholder="2026"
-            min="1900"
-            max="2100"
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>월</label>
-          <input
-            name="month"
-            type="number"
-            value={form.month}
-            onChange={handleChange}
-            placeholder="5"
-            min="1"
-            max="12"
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>정렬</label>
-          <select name="sort" value={form.sort} onChange={handleChange}>
-            <option value="latest">최신순</option>
-            <option value="oldest">오래된순</option>
-            <option value="liveFirst">LIVE 먼저</option>
-          </select>
-        </div>
-
-        <div className="filter-actions">
-          <button type="submit" className="btn btn-primary">검색</button>
-          <button type="button" className="btn btn-outline" onClick={handleReset}>초기화</button>
-        </div>
-      </form>
-
-      {error && <ErrorBox message={error} />}
-
-      {loading ? (
-        <LoadingState />
-      ) : matches.length === 0 ? (
-        <EmptyState title="경기가 없습니다" description="다른 조건으로 검색해 보세요." />
-      ) : (
-        <>
-          <div className="match-grid">
-            {matches.map((match) => (
-              <MatchCard key={match.id} match={match} />
-            ))}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button
-                className="btn btn-outline"
-                disabled={!pagination?.hasPrevious}
-                onClick={() => handlePage(currentPage - 1)}
-              >
-                이전
-              </button>
-              <span className="page-info">{currentPage + 1} / {totalPages}</span>
-              <button
-                className="btn btn-outline"
-                disabled={!pagination?.hasNext}
-                onClick={() => handlePage(currentPage + 1)}
-              >
-                다음
-              </button>
-            </div>
-          )}
-        </>
+      {pageData.totalPages > 1 && (
+        <nav className="sl-pagination" aria-label="경기 일정 페이지">
+          <button
+            type="button"
+            className="sl-pg-btn"
+            disabled={!pageData.hasPrevious}
+            onClick={() => updatePage(page - 1)}
+          >
+            이전
+          </button>
+          <span className="sl-pg-btn active">
+            {pageData.page + 1} / {pageData.totalPages}
+          </span>
+          <button
+            type="button"
+            className="sl-pg-btn"
+            disabled={!pageData.hasNext}
+            onClick={() => updatePage(page + 1)}
+          >
+            다음
+          </button>
+        </nav>
       )}
     </div>
   );

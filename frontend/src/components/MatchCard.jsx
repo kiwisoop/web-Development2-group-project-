@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
+import TeamLogo from './TeamLogo';
 
 const SPORT_LABELS = {
   SOCCER: '축구',
@@ -9,8 +10,9 @@ const SPORT_LABELS = {
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('ko-KR', {
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -19,31 +21,16 @@ function formatDate(dateStr) {
   });
 }
 
+function teamName(team) {
+  return team?.teamName || team?.shortName || team?.name || '팀 정보 준비 중';
+}
+
 function CompactTeamRow({ team, score }) {
-  const abbr = (team?.shortName || team?.teamName || '?').slice(0, 3);
   return (
     <div className="compact-team-row">
-      {team?.logoUrl ? (
-        <img
-          className="team-logo-compact"
-          src={team.logoUrl}
-          alt={abbr}
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            e.currentTarget.nextElementSibling.style.display = 'flex';
-          }}
-        />
-      ) : null}
-      <span
-        className="team-logo-fallback"
-        style={team?.logoUrl ? { display: 'none' } : {}}
-      >
-        {abbr}
-      </span>
-      <span className="compact-team-name">
-        {team?.shortName || team?.teamName || '?'}
-      </span>
-      {score !== null && <span className="compact-score">{score}</span>}
+      <TeamLogo team={team} size={30} radius={8} />
+      <span className="compact-team-name">{team?.shortName || teamName(team)}</span>
+      {score !== null && score !== undefined && <span className="compact-score">{score}</span>}
     </div>
   );
 }
@@ -55,18 +42,21 @@ export default function MatchCard({ match, compact, detailPath }) {
   const target = detailPath || `/matches/${match.id}`;
 
   return (
-    <div
+    <article
       className={`match-card card${compact ? ' match-card-compact' : ''}`}
       onClick={() => navigate(target)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') navigate(target);
+      }}
     >
       <div className="match-card-header">
-        <span className="sport-tag">{SPORT_LABELS[match.sportType] || match.sportType}</span>
+        <span className="sport-tag">{SPORT_LABELS[match.sportType] || match.sportType || '스포츠'}</span>
         <StatusBadge status={match.status} />
       </div>
 
-      {match.league && (
-        <p className="match-league">{match.league.leagueName}</p>
-      )}
+      {match.league && <p className="match-league">{match.league.leagueName}</p>}
 
       {compact ? (
         <div className="compact-teams">
@@ -76,21 +66,23 @@ export default function MatchCard({ match, compact, detailPath }) {
       ) : (
         <div className="match-teams">
           <div className="team home-team">
-            <span className="team-name">{match.homeTeam?.teamName || '홈팀'}</span>
+            <TeamLogo team={match.homeTeam} size={38} radius={10} />
+            <span className="team-name">{teamName(match.homeTeam)}</span>
             {hasScore && <span className="score">{match.homeScore}</span>}
           </div>
           <div className="match-vs">VS</div>
           <div className="team away-team">
             {hasScore && <span className="score">{match.awayScore}</span>}
-            <span className="team-name">{match.awayTeam?.teamName || '원정팀'}</span>
+            <span className="team-name">{teamName(match.awayTeam)}</span>
+            <TeamLogo team={match.awayTeam} size={38} radius={10} />
           </div>
         </div>
       )}
 
       <div className="match-meta">
         {match.matchDate && <span className="match-date">{formatDate(match.matchDate)}</span>}
-        {match.venue && <span className="match-venue">📍 {match.venue}</span>}
+        {match.venue && <span className="match-venue">장소 {match.venue}</span>}
       </div>
-    </div>
+    </article>
   );
 }
